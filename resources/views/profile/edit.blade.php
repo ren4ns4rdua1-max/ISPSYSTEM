@@ -1,29 +1,757 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Profile') }}
-        </h2>
-    </x-slot>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile — NetManager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        *, body { font-family: 'DM Sans', sans-serif; }
+        .font-display { font-family: 'Syne', sans-serif; }
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-profile-information-form')
+        /* ── Sidebar ── */
+        #sidebar {
+            transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+            background: linear-gradient(180deg, #0c0e1a 0%, #111827 60%, #0c0e1a 100%);
+        }
+        #main-content { transition: margin-left 0.3s cubic-bezier(0.4,0,0.2,1); }
+
+        .collapsible {
+            transition: opacity 0.2s ease, max-width 0.3s ease;
+            overflow: hidden; white-space: nowrap;
+        }
+        .sidebar-collapsed .collapsible { opacity: 0; max-width: 0 !important; pointer-events: none; }
+        .sidebar-collapsed .nav-item-inner { justify-content: center; padding-left: 0.75rem; padding-right: 0.75rem; }
+
+        /* active bar */
+        .nav-active-bar {
+            position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+            width: 3px; height: 60%; border-radius: 0 4px 4px 0;
+            background: linear-gradient(180deg, #dc2626, #f87171);
+        }
+
+        /* tooltip */
+        .nav-tooltip {
+            position: absolute; left: calc(100% + 12px); top: 50%; transform: translateY(-50%);
+            background: #1f2937; color: #f9fafb; font-size: 12px; font-weight: 600;
+            padding: 4px 10px; border-radius: 8px; white-space: nowrap;
+            pointer-events: none; opacity: 0; transition: opacity 0.15s ease; z-index: 999;
+        }
+        .sidebar-collapsed .nav-wrapper:hover .nav-tooltip { opacity: 1; }
+        .nav-tooltip::before {
+            content: ''; position: absolute; right: 100%; top: 50%; transform: translateY(-50%);
+            border: 5px solid transparent; border-right-color: #1f2937;
+        }
+
+        /* ── Topbar ── */
+        .topbar {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(226,232,240,0.8);
+        }
+
+        .avatar-grad { background: linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%); }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        html { overflow-x: hidden; }
+
+        /* ── Form inputs ── */
+        .fi {
+            width: 100%;
+            padding: 0.7rem 1rem 0.7rem 2.6rem;
+            font-size: 0.875rem; color: #111827;
+            background: #f9fafb; border: 1.5px solid #e5e7eb;
+            border-radius: 12px; outline: none;
+            font-family: 'DM Sans', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        .fi:focus { background: #fff; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.1); }
+        .fi::placeholder { color: #9ca3af; }
+        .fi.err { border-color: #fca5a5; background: #fff5f5; }
+        .fi-wrap { position: relative; }
+        .fi-icon {
+            position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+            color: #d1d5db; pointer-events: none; transition: color 0.2s;
+            display: flex; align-items: center;
+        }
+        .fi-wrap:focus-within .fi-icon { color: #dc2626; }
+        .fi-eye {
+            position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+            color: #d1d5db; cursor: pointer; transition: color 0.2s;
+            display: flex; align-items: center; background: none; border: none;
+        }
+        .fi-eye:hover { color: #dc2626; }
+
+        /* ── Strength bar ── */
+        .sbar { height: 3px; border-radius: 99px; background: #e5e7eb; overflow: hidden; margin-top: 6px; }
+        .sfill { height: 100%; border-radius: 99px; transition: width .4s ease, background .4s ease; width: 0; }
+
+        /* ── Tabs ── */
+        .tab-pill {
+            flex: 1; display: flex; align-items: center; justify-content: center;
+            gap: 6px; padding: 10px 16px; border-radius: 12px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            color: #6b7280; border: none; background: none;
+            transition: all .2s ease; font-family: 'DM Sans', sans-serif;
+        }
+        .tab-pill.on { background: white; color: #dc2626; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+        .tab-pill:hover:not(.on) { background: rgba(255,255,255,0.5); color: #374151; }
+
+        /* ── Cards ── */
+        .card {
+            background: white; border-radius: 20px;
+            border: 1.5px solid #f1f5f9; overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .card-head {
+            padding: 1.25rem 1.75rem; border-bottom: 1.5px solid #f8fafc;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .card-icon {
+            width: 38px; height: 38px; border-radius: 11px;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .card-body { padding: 1.75rem; }
+
+        /* ── Buttons ── */
+        .btn-save {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 22px; font-size: 13px; font-weight: 700;
+            color: white; border: none; border-radius: 12px; cursor: pointer;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            box-shadow: 0 4px 14px rgba(220,38,38,.3);
+            transition: all .25s ease; font-family: 'DM Sans', sans-serif;
+            position: relative; overflow: hidden;
+        }
+        .btn-save::after {
+            content: ''; position: absolute; top: -50%; left: -60%;
+            width: 40%; height: 200%; background: rgba(255,255,255,.15);
+            transform: skewX(-20deg); transition: left .4s;
+        }
+        .btn-save:hover::after { left: 120%; }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(220,38,38,.4); }
+
+        .btn-cancel {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 18px; font-size: 13px; font-weight: 600;
+            color: #6b7280; border: 1.5px solid #e5e7eb; border-radius: 12px;
+            cursor: pointer; background: white; transition: all .2s; font-family: 'DM Sans', sans-serif;
+        }
+        .btn-cancel:hover { background: #f9fafb; border-color: #d1d5db; }
+
+        /* ── Alerts ── */
+        .alert-ok {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px; border-radius: 12px;
+            background: #f0fdf4; border: 1.5px solid #bbf7d0;
+            font-size: 13px; font-weight: 600; color: #166534;
+        }
+        .alert-err {
+            font-size: 11px; font-weight: 600; color: #dc2626;
+            display: flex; align-items: center; gap: 4px; margin-top: 4px;
+        }
+
+        /* ── Label ── */
+        .lbl {
+            display: block; font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .06em;
+            color: #9ca3af; margin-bottom: 6px;
+        }
+
+        /* ── Section label in sidebar ── */
+        .sec-lbl {
+            padding: 3px 10px 5px;
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .13em;
+            color: rgba(255,255,255,.22);
+            font-family: 'Syne', sans-serif;
+            transition: opacity .2s;
+        }
+        .sidebar-collapsed .sec-lbl { opacity: 0; }
+
+        @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        .fade-up { animation: fadeUp .35s ease both; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex">
+
+<!-- ══════════════════════ SIDEBAR ══════════════════════ -->
+<aside id="sidebar" style="width:260px" class="fixed left-0 top-0 h-full z-50 flex flex-col shadow-2xl">
+
+    <!-- Brand -->
+    <div class="flex items-center gap-3 px-4 min-h-[68px] border-b border-white/[.06]">
+        <div class="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg"
+             style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
+            <svg class="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                      d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
+            </svg>
+        </div>
+        <div class="collapsible" style="max-width:200px">
+            <p class="font-display font-bold text-white text-[14px] leading-tight">ADMIN</p>
+            <p class="text-red-400 text-[10px] font-medium tracking-wide">ISP Control Center</p>
+        </div>
+        <button onclick="toggleSidebar()" class="ml-auto flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center hover:bg-white/10 transition-all" style="background:rgba(255,255,255,.05)">
+            <svg id="toggle-icon" class="w-[14px] h-[14px] text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
+
+        <!-- ─ OVERVIEW ─ -->
+        <p class="sec-lbl collapsible" style="max-width:200px">Overview</p>
+
+        <div class="nav-wrapper relative">
+            <a href="{{ route('dashboard') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
                 </div>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px">Dashboard</span>
+            </a>
+            <span class="nav-tooltip">Dashboard</span>
+        </div>
+
+        <!-- ─ MANAGEMENT ─ -->
+        <p class="sec-lbl collapsible mt-4" style="max-width:200px; padding-top:14px;">Management</p>
+
+        <!-- Clients -->
+        <div class="nav-wrapper relative">
+            <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </div>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px">Clients</span>
+            </a>
+            <span class="nav-tooltip">Clients</span>
+        </div>
+
+        <!-- Subscription Rates -->
+        <div class="nav-wrapper relative">
+            <a href="{{ route('subscription-rates.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                </div>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px">Subscription Rates</span>
+            </a>
+            <span class="nav-tooltip">Subscription Rates</span>
+        </div>
+
+        <!-- Billing -->
+        <div class="nav-wrapper relative">
+            <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                </div>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px">Billing</span>
+            </a>
+            <span class="nav-tooltip">Billing</span>
+        </div>
+
+        <!-- Payments -->
+        <div class="nav-wrapper relative">
+            <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                    </svg>
+                </div>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px">Payments</span>
+            </a>
+            <span class="nav-tooltip">Payments</span>
+        </div>
+
+        <!-- Sales -->
+        <div class="nav-wrapper relative">
+            <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                </div>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px">Sales</span>
+            </a>
+            <span class="nav-tooltip">Sales</span>
+        </div>
+
+
+        <!-- ─ ADMIN ─ -->
+        <p class="sec-lbl collapsible mt-4" style="max-width:200px; padding-top:14px;">Admin</p>
+
+       
+        <!-- Reports -->
+        <div class="nav-wrapper relative">
+            <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px">Reports</span>
+            </a>
+            <span class="nav-tooltip">Reports</span>
+        </div>
+
+        <!-- Users -->
+        <div class="nav-wrapper relative">
+            <a href="{{ route('users.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </div>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px">Users</span>
+            </a>
+            <span class="nav-tooltip">Users</span>
+        </div>
+
+         <!-- Settings -->
+        <div class="nav-wrapper relative">
+            <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </div>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px">Settings</span>
+            </a>
+            <span class="nav-tooltip">Settings</span>
+        </div>
+
+        
+
+    </nav>
+
+    <!-- User footer -->
+    <div class="border-t border-white/[.06] p-3">
+        <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[.06] transition-colors">
+            <div class="w-9 h-9 rounded-xl flex-shrink-0 avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md">
+                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </div>
-
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-password-form')
-                </div>
+            <div class="collapsible min-w-0" style="max-width:140px">
+                <p class="text-white text-[12px] font-semibold truncate leading-tight">{{ Auth::user()->name }}</p>
+                <p class="text-gray-500 text-[10px] truncate">{{ Auth::user()->email }}</p>
             </div>
-
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.delete-user-form')
-                </div>
+            <div class="collapsible ml-auto flex-shrink-0" style="max-width:40px">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-red-500/20 transition-colors" style="background:rgba(255,255,255,.05)">
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                    </button>
+                </form>
             </div>
         </div>
     </div>
-</x-app-layout>
+</aside>
+
+<!-- ══════════════════════ MAIN ══════════════════════ -->
+<div id="main-content" class="flex flex-col flex-1 min-h-screen" style="margin-left:260px">
+
+    <!-- Topbar -->
+    <header class="topbar sticky top-0 z-40 flex items-center justify-between px-7 py-3.5">
+        <div class="flex items-center gap-3">
+            <a href="{{ route('dashboard') }}" class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <div>
+                <h1 class="font-display font-bold text-gray-900 text-[19px] leading-tight">My Profile</h1>
+                <p class="text-gray-400 text-[11px] mt-0.5">Manage your account settings</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md">
+                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+            </div>
+        </div>
+    </header>
+
+    <!-- Body -->
+    <main class="flex-1 p-6 max-w-4xl w-full mx-auto space-y-5">
+
+        <!-- Profile Hero Card -->
+        <div class="card fade-up">
+            <div class="p-6">
+                <div class="flex items-center gap-5">
+                    <div class="relative">
+                        <div class="w-20 h-20 rounded-2xl avatar-grad flex items-center justify-center text-white font-bold text-3xl shadow-lg font-display flex-shrink-0">
+                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-white shadow-md flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-3 mb-1">
+                            <p class="font-display font-bold text-gray-900 text-lg leading-tight">{{ Auth::user()->name }}</p>
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-lg" style="color:#059669;background:#ecfdf5;">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>Active
+                            </span>
+                        </div>
+                        <p class="text-gray-400 text-[13px]">{{ Auth::user()->email }}</p>
+                        <p class="text-gray-300 text-[11px] mt-1">Member since {{ Auth::user()->created_at->format('F Y') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex items-center gap-1 p-1.5 bg-gray-100 rounded-2xl fade-up" style="animation-delay:.05s">
+            <button onclick="showTab('info')" id="t-info" class="tab-pill on">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                Profile Info
+            </button>
+            <button onclick="showTab('pw')" id="t-pw" class="tab-pill">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                Password
+            </button>
+            <button onclick="showTab('danger')" id="t-danger" class="tab-pill">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Delete Account
+            </button>
+        </div>
+
+        <!-- ══ TAB: PROFILE INFO ══ -->
+        <div id="p-info" class="card fade-up" style="animation-delay:.1s">
+            <div class="card-head">
+                <div class="card-icon">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </div>
+                <div>
+                    <p class="font-display font-bold text-gray-800 text-[13px]">Profile Information</p>
+                    <p class="text-gray-400 text-[11px]">Update your name and email address</p>
+                </div>
+            </div>
+            <div class="card-body">
+
+                @if (session('status') === 'profile-updated')
+                    <div class="alert-ok mb-5">
+                        <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Profile updated successfully.
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('profile.update') }}">
+                    @csrf
+                    @method('patch')
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <!-- Name -->
+                        <div>
+                            <label class="lbl">Full Name</label>
+                            <div class="fi-wrap">
+                                <span class="fi-icon"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></span>
+                                <input type="text" name="name" value="{{ old('name', $user->name) }}"
+                                       required autofocus autocomplete="name" placeholder="Your full name"
+                                       class="fi {{ $errors->updateProfileInformation->has('name') ? 'err' : '' }}">
+                            </div>
+                            @error('name', 'updateProfileInformation')
+                                <p class="alert-err mt-1"><svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label class="lbl">Email Address</label>
+                            <div class="fi-wrap">
+                                <span class="fi-icon"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></span>
+                                <input type="email" name="email" value="{{ old('email', $user->email) }}"
+                                       required autocomplete="username" placeholder="your@email.com"
+                                       class="fi {{ $errors->updateProfileInformation->has('email') ? 'err' : '' }}">
+                            </div>
+                            @error('email', 'updateProfileInformation')
+                                <p class="alert-err mt-1"><svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+                        <div class="flex items-start gap-3 p-3.5 rounded-xl mt-5" style="background:#fffbeb;border:1.5px solid #fde68a;">
+                            <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <div class="flex-1">
+                                <p class="text-amber-800 text-[12px] font-semibold">Email not verified.</p>
+                                <form method="POST" action="{{ route('verification.send') }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="text-amber-700 text-[11px] underline font-medium hover:text-amber-900 transition-colors mt-0.5">Resend verification email</button>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="flex items-center justify-end gap-3 pt-5 mt-5 border-t border-gray-100">
+                        <button type="submit" class="btn-save">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ══ TAB: PASSWORD ══ -->
+        <div id="p-pw" class="card fade-up hidden" style="animation-delay:.1s">
+            <div class="card-head">
+                <div class="card-icon">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                </div>
+                <div>
+                    <p class="font-display font-bold text-gray-800 text-[13px]">Change Password</p>
+                    <p class="text-gray-400 text-[11px]">Use a strong, unique password to protect your account</p>
+                </div>
+            </div>
+            <div class="card-body">
+
+                @if (session('status') === 'password-updated')
+                    <div class="alert-ok mb-5">
+                        <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Password updated successfully.
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('password.update') }}" class="space-y-5">
+                    @csrf
+                    @method('put')
+
+                    <!-- Current Password -->
+                    <div>
+                        <label class="lbl">Current Password</label>
+                        <div class="fi-wrap">
+                            <span class="fi-icon"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></span>
+                            <input id="current_password" name="current_password" type="password" autocomplete="current-password"
+                                   placeholder="Enter current password"
+                                   class="fi {{ $errors->updatePassword->has('current_password') ? 'err' : '' }}">
+                            <button type="button" class="fi-eye" onclick="togglePw('current_password', this)">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            </button>
+                        </div>
+                        @error('current_password', 'updatePassword')
+                            <p class="alert-err mt-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <!-- New Password -->
+                        <div>
+                            <label class="lbl">New Password</label>
+                            <div class="fi-wrap">
+                                <span class="fi-icon"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></span>
+                                <input id="new_password" name="password" type="password" autocomplete="new-password"
+                                       placeholder="Min. 8 characters"
+                                       class="fi {{ $errors->updatePassword->has('password') ? 'err' : '' }}"
+                                       oninput="checkStr(this.value)">
+                                <button type="button" class="fi-eye" onclick="togglePw('new_password', this)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </button>
+                            </div>
+                            <div class="sbar"><div id="sfill" class="sfill"></div></div>
+                            <p id="slabel" class="text-[10px] font-semibold mt-1"></p>
+                            @error('password', 'updatePassword')
+                                <p class="alert-err mt-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Confirm -->
+                        <div>
+                            <label class="lbl">Confirm New Password</label>
+                            <div class="fi-wrap">
+                                <span class="fi-icon"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></span>
+                                <input id="pw_confirm" name="password_confirmation" type="password" autocomplete="new-password"
+                                       placeholder="Confirm new password" class="fi" oninput="checkMatch()">
+                                <button type="button" class="fi-eye" onclick="togglePw('pw_confirm', this)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </button>
+                            </div>
+                            <p id="mlabel" class="text-[10px] font-semibold mt-1"></p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-5 mt-2 border-t border-gray-100">
+                        <button type="submit" class="btn-save">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Update Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ══ TAB: DELETE ACCOUNT ══ -->
+        <div id="p-danger" class="card fade-up hidden" style="animation-delay:.1s;border-color:#fecaca;">
+            <div class="card-head" style="border-color:#fecaca;background:linear-gradient(90deg,#fff5f5,#fff);">
+                <div class="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </div>
+                <div>
+                    <p class="font-display font-bold text-gray-800 text-[13px]">Delete Account</p>
+                    <p class="text-gray-400 text-[11px]">Permanent and irreversible action</p>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="text-sm text-gray-500 leading-relaxed mb-6">
+                    Once your account is deleted, all of its resources and data will be permanently removed.
+                    Please download any data you wish to keep before proceeding.
+                </p>
+                <button onclick="document.getElementById('del-modal').classList.add('show')"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl transition-all hover:-translate-y-0.5"
+                        style="background:linear-gradient(135deg,#dc2626,#991b1b);box-shadow:0 4px 14px rgba(220,38,38,.3)">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    Delete My Account
+                </button>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ══════════════════════ DELETE MODAL ══════════════════════ -->
+<div id="del-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(0,0,0,.5);backdrop-filter:blur(6px);">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4" style="animation:fadeUp .25s ease;">
+        <div class="flex items-start gap-4 mb-6">
+            <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <div class="flex-1">
+                <p class="font-display font-bold text-gray-900 text-lg">Delete Account</p>
+                <p class="text-gray-500 text-sm mt-1 leading-relaxed">Enter your password to confirm. This action cannot be undone.</p>
+            </div>
+        </div>
+        <form method="POST" action="{{ route('profile.destroy') }}" class="space-y-4">
+            @csrf
+            @method('delete')
+            <div>
+                <label class="lbl">Password</label>
+                <div class="fi-wrap">
+                    <span class="fi-icon"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></span>
+                    <input name="password" type="password" placeholder="Enter your password"
+                           class="fi {{ $errors->userDeletion->has('password') ? 'err' : '' }}">
+                </div>
+                @error('password', 'userDeletion')
+                    <p class="alert-err mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="document.getElementById('del-modal').classList.add('hidden');document.getElementById('del-modal').classList.remove('flex')"
+                        class="btn-cancel flex-1 justify-center">Cancel</button>
+                <button type="submit" class="btn-save flex-1 justify-center">Delete Account</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // ── Sidebar toggle ──
+    let collapsed = false;
+    function toggleSidebar() {
+        collapsed = !collapsed;
+        const s  = document.getElementById('sidebar');
+        const m  = document.getElementById('main-content');
+        const ic = document.getElementById('toggle-icon');
+        if (collapsed) {
+            s.style.width = '72px'; m.style.marginLeft = '72px';
+            s.classList.add('sidebar-collapsed');
+            ic.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>';
+        } else {
+            s.style.width = '260px'; m.style.marginLeft = '260px';
+            s.classList.remove('sidebar-collapsed');
+            ic.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>';
+        }
+    }
+
+    // ── Tabs ──
+    const tabs = ['info', 'pw', 'danger'];
+    function showTab(name) {
+        tabs.forEach(t => {
+            document.getElementById('p-' + t).classList.add('hidden');
+            document.getElementById('t-' + t).classList.remove('on');
+        });
+        document.getElementById('p-' + name).classList.remove('hidden');
+        document.getElementById('t-' + name).classList.add('on');
+    }
+
+    // Auto-open on validation errors
+    @if ($errors->updatePassword->any()) showTab('pw'); @endif
+    @if ($errors->userDeletion->any())
+        showTab('danger');
+        const m = document.getElementById('del-modal');
+        m.classList.remove('hidden'); m.classList.add('flex');
+    @endif
+
+    // ── Password visibility ──
+    function togglePw(id, btn) {
+        const el = document.getElementById(id);
+        el.type = el.type === 'text' ? 'password' : 'text';
+        btn.style.color = el.type === 'text' ? '#dc2626' : '';
+    }
+
+    // ── Strength meter ──
+    function checkStr(v) {
+        let s = 0;
+        if (v.length >= 8) s++;
+        if (/[A-Z]/.test(v)) s++;
+        if (/[0-9]/.test(v)) s++;
+        if (/[^A-Za-z0-9]/.test(v)) s++;
+        const c = [
+            { w:'0%',  b:'',        t:'' },
+            { w:'25%', b:'#ef4444', t:'Weak' },
+            { w:'50%', b:'#f59e0b', t:'Fair' },
+            { w:'75%', b:'#3b82f6', t:'Good' },
+            { w:'100%',b:'#22c55e', t:'Strong' }
+        ][s];
+        const f = document.getElementById('sfill'), l = document.getElementById('slabel');
+        f.style.width = c.w; f.style.background = c.b;
+        l.textContent = c.t; l.style.color = c.b;
+        checkMatch();
+    }
+
+    function checkMatch() {
+        const a = document.getElementById('new_password')?.value;
+        const b = document.getElementById('pw_confirm')?.value;
+        const l = document.getElementById('mlabel');
+        if (!b) { l.textContent = ''; return; }
+        l.textContent = a === b ? '✓ Passwords match' : '✗ Passwords do not match';
+        l.style.color  = a === b ? '#22c55e' : '#ef4444';
+    }
+
+    // ── Modal close ──
+    const delModal = document.getElementById('del-modal');
+    delModal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.add('hidden');
+            this.classList.remove('flex');
+        }
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            delModal.classList.add('hidden');
+            delModal.classList.remove('flex');
+        }
+    });
+
+    // Cancel button inside modal
+    function closeModal() {
+        delModal.classList.add('hidden');
+        delModal.classList.remove('flex');
+    }
+</script>
+</body>
+</html>

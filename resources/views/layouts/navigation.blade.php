@@ -6,42 +6,43 @@
                
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden sm:flex sm:items-center">
+                    <!-- MAIN Section -->
+                    <div class="mr-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">📌 MAIN</div>
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    
+                    <!-- MANAGEMENT Section -->
+                    <div class="ml-4 mr-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">📌 MANAGEMENT</div>
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Clients') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('subscription-rates.index')" :active="request()->routeIs('subscription-rates.*')">
+                        {{ __('Subscription Rates') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Billing') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Payments') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Sales') }}
+                    </x-nav-link>
+                    
+                    <!-- SYSTEM Section -->
+                    <div class="ml-4 mr-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">📌 SYSTEM</div>
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Reports') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                        {{ __('Users') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Settings') }}
+                    </x-nav-link>
                 </div>
-
-         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Clients') }}
-            </x-responsive-nav-link>
-        </div>
-
-
-         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
-                {{ __('Users') }}
-            </x-responsive-nav-link>
-        </div>
-
-         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Subscription Rates') }}
-            </x-responsive-nav-link>
-        </div>
-
-         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('sales') }}
-            </x-responsive-nav-link>
-        </div>
-
-         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Settings') }}
-            </x-responsive-nav-link>
-        </div>
             </div>
 
             <!-- Settings Dropdown -->
@@ -92,39 +93,61 @@
 
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+        <!-- MAIN Section -->
+        <div class="pt-2 pb-1">
+            <div class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">📌 MAIN</div>
+        </div>
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
         </div>
 
-         <div class="pt-2 pb-3 space-y-1">
+        <!-- MANAGEMENT Section -->
+        <div class="pt-2 pb-1">
+            <div class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">📌 MANAGEMENT</div>
+        </div>
+        <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Clients') }}
             </x-responsive-nav-link>
         </div>
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('subscription-rates.index')" :active="request()->routeIs('subscription-rates.*')">
+                {{ __('Subscription Rates') }}
+            </x-responsive-nav-link>
+        </div>
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                {{ __('Billing') }}
+            </x-responsive-nav-link>
+        </div>
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                {{ __('Payments') }}
+            </x-responsive-nav-link>
+        </div>
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                {{ __('Sales') }}
+            </x-responsive-nav-link>
+        </div>
 
-
-         <div class="pt-2 pb-3 space-y-1">
+        <!-- SYSTEM Section -->
+        <div class="pt-2 pb-1">
+            <div class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">📌 SYSTEM</div>
+        </div>
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                {{ __('Reports') }}
+            </x-responsive-nav-link>
+        </div>
+        <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                 {{ __('Users') }}
             </x-responsive-nav-link>
         </div>
-
-
-         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Subscription Rates') }}
-            </x-responsive-nav-link>
-        </div>
-
-         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('sales') }}
-            </x-responsive-nav-link>
-        </div>
-
-         <div class="pt-2 pb-3 space-y-1">
+        <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Settings') }}
             </x-responsive-nav-link>

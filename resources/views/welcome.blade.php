@@ -130,7 +130,6 @@
             background: #0c0e1a;
         }
 
-        /* Deep layered background */
         .hero-bg {
             position: absolute;
             inset: 0;
@@ -141,7 +140,6 @@
                 linear-gradient(180deg, #0c0e1a 0%, #1a0a0a 50%, #0c0e1a 100%);
         }
 
-        /* Grid texture */
         .hero-grid {
             position: absolute;
             inset: 0;
@@ -152,7 +150,6 @@
             mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 20%, transparent 80%);
         }
 
-        /* Diagonal slash decoration */
         .hero-slash {
             position: absolute;
             bottom: -2px; left: 0; right: 0;
@@ -162,7 +159,6 @@
 
         .hero-slash svg { width: 100%; height: 100%; display: block; }
 
-        /* Floating orbs */
         .orb {
             position: absolute;
             border-radius: 50%;
@@ -204,7 +200,6 @@
             50% { transform: translate(20px, -30px) scale(1.15); }
         }
 
-        /* Animated signal rings */
         .signal-rings {
             position: absolute;
             top: 50%; left: 50%;
@@ -229,7 +224,6 @@
             100% { opacity: 0;  transform: translate(-50%,-50%) scale(1.1); }
         }
 
-        /* Hero content */
         .hero-content {
             position: relative;
             z-index: 10;
@@ -365,7 +359,6 @@
             border-color: rgba(255,255,255,.25);
         }
 
-        /* Hero stats bar */
         .hero-stats {
             display: flex;
             align-items: center;
@@ -410,7 +403,6 @@
             font-weight: 600;
         }
 
-        /* Scroll indicator */
         .scroll-indicator {
             position: absolute;
             bottom: 2.5rem;
@@ -666,6 +658,44 @@
             box-shadow: 0 12px 32px rgba(220,38,38,.45);
         }
 
+        .plan-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .view-details-btn {
+            flex: 1;
+            padding: .85rem;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: .85rem;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            background: white;
+            color: #374151;
+            transition: all .3s ease;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .view-details-btn:hover {
+            border-color: #dc2626;
+            color: #dc2626;
+            background: #fff5f5;
+        }
+
+        .plan-card.featured .view-details-btn {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 8px 24px rgba(220,38,38,.35);
+        }
+
+        .plan-card.featured .view-details-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(220,38,38,.45);
+        }
+
         /* =================== FEATURES =================== */
         .features-section {
             background: var(--navy);
@@ -835,6 +865,10 @@
             max-height: 95vh;
             display: flex;
             flex-direction: column;
+        }
+
+        .modal-box.wide {
+            max-width: 650px;
         }
 
         @keyframes modalPop {
@@ -1008,6 +1042,37 @@
             color: #dc2626;
             font-weight: 600;
             text-decoration: none;
+        }
+
+        /* Plan Details Grid */
+        .plan-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .plan-detail-item {
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .plan-detail-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .plan-detail-value {
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .plan-detail-value.price {
+            color: #dc2626;
+            font-size: 1.25rem;
         }
 
         /* =================== FOOTER =================== */
@@ -1197,12 +1262,14 @@
             .footer-top { grid-template-columns: 1fr; gap: 2.5rem; }
             .footer-bottom { flex-direction: column; text-align: center; }
             .footer-bottom-links { justify-content: center; }
+            .plan-details-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 560px) {
             .nav-links li:not(:last-child):not(:nth-last-child(2)) { display: none; }
             .hero-ctas { flex-direction: column; align-items: stretch; text-align: center; }
             .btn-primary, .btn-secondary { justify-content: center; }
+            .plan-buttons { flex-direction: column; }
         }
     </style>
 </head>
@@ -1238,36 +1305,27 @@
     <section class="hero">
         <div class="hero-bg"></div>
         <div class="hero-grid"></div>
-
-        <!-- Orbs -->
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
         <div class="orb orb-3"></div>
-
-        <!-- Signal rings -->
         <div class="signal-rings">
             <div class="ring"></div>
             <div class="ring"></div>
             <div class="ring"></div>
         </div>
-
-        <!-- Content -->
         <div class="hero-content">
             <div class="hero-eyebrow">
                 <div class="hero-eyebrow-dot"></div>
                 Fast · Reliable · Affordable
             </div>
-
             <h1 class="hero-title font-display">
                 Reliable Internet for<br>
                 <span class="line-accent">Every Connection</span>
             </h1>
-
             <p class="hero-subtitle">
                 Fiber &amp; wireless internet built for homes and businesses.
                 Blazing speeds, zero downtime, and support that actually picks up.
             </p>
-
             <div class="hero-ctas">
                 <button class="btn-primary" onclick="document.getElementById('plans').scrollIntoView({behavior:'smooth'})">
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1279,8 +1337,6 @@
                     Sign In to Portal
                 </button>
             </div>
-
-            <!-- Stats -->
             <div class="hero-stats">
                 <div class="hero-stat">
                     <div class="hero-stat-num">99<span>.9%</span></div>
@@ -1300,16 +1356,12 @@
                 </div>
             </div>
         </div>
-
-        <!-- Scroll hint -->
         <div class="scroll-indicator">
             <div class="scroll-mouse">
                 <div class="scroll-wheel"></div>
             </div>
             <span>Scroll</span>
         </div>
-
-        <!-- Bottom wave -->
         <div class="hero-slash">
             <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M0,80 C360,140 1080,20 1440,80 L1440,120 L0,120 Z" fill="#f8fafc"/>
@@ -1326,45 +1378,58 @@
         </div>
 
         <div class="plans-grid">
-            <div class="plan-card reveal" style="transition-delay:.1s">
-                <div class="plan-icon">🏠</div>
-                <h3 class="plan-name">Basic</h3>
-                <p class="plan-speed">Up to 25 Mbps · Fiber</p>
-                <div class="plan-price"><sup>₱</sup>999</div>
-                <div class="plan-divider"></div>
-                <p class="plan-description">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                    No data cap, great for solo use
-                </p>
-                <button class="subscribe-btn" onclick="handleSubscribe('Basic')">Get Basic Plan</button>
-            </div>
+            @forelse($subscriptionRates as $index => $rate)
+                @php
+                    $isFeatured = $index === 1 || ($index === 0 && $subscriptionRates->count() === 2);
+                    $delay = .1 + ($index * .1);
+                    $icons = ['🏠', '👨‍👩‍👧‍👦', '🏢', '🚀', '💼', '⚡'];
+                    $icon = $icons[$index % count($icons)];
+                @endphp
+                <div class="plan-card {{ $isFeatured ? 'featured' : '' }} reveal" style="transition-delay:{{ $delay }}s">
+                    @if($isFeatured)
+                        <div class="plan-badge">Most Popular</div>
+                    @endif
+                    <div class="plan-icon">{{ $icon }}</div>
+                    <h3 class="plan-name">{{ $rate->plan_name }}</h3>
+                    <p class="plan-speed">{{ $rate->speed }} · {{ $rate->plan_type }}</p>
+                    <div class="plan-price"><sup>₱</sup>{{ number_format($rate->monthly_fee, 0) }}</div>
+                    <div class="plan-divider"></div>
+                    <p class="plan-description">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        {{ $rate->data_limit ?? 'Unlimited data' }} · {{ $rate->billing_cycle }}
+                    </p>
+                    <div class="plan-buttons">
+                        <button class="view-details-btn" onclick="showPlanDetails('{{ $rate->plan_name }}', '{{ $rate->speed }}', '{{ $rate->plan_type }}', {{ $rate->monthly_fee }}, '{{ $rate->billing_cycle }}', '{{ $rate->data_limit ?? 'Unlimited' }}', {{ $rate->installation_fee ?? 0 }}, {{ $rate->activation_fee ?? 0 }}, {{ $rate->router_fee ?? 0 }}, '{{ $rate->lock_in_period ?? 'None' }}', {{ $rate->late_penalty ?? 0 }}, {{ $rate->reconnection_fee ?? 0 }})">View Details</button>
+                        <button class="subscribe-btn" onclick="handleSubscribe('{{ $rate->plan_name }}')">Apply Now</button>
+                    </div>
+                </div>
+            @empty
+                <div class="plan-card reveal" style="transition-delay:.1s">
+                    <div class="plan-icon">🏠</div>
+                    <h3 class="plan-name">Basic</h3>
+                    <p class="plan-speed">Up to 25 Mbps · Fiber</p>
+                    <div class="plan-price"><sup>₱</sup>999</div>
+                    <div class="plan-divider"></div>
+                    <p class="plan-description">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        No data cap, great for solo use
+                    </p>
+                    <button class="subscribe-btn" onclick="handleSubscribe('Basic')">Get Basic Plan</button>
+                </div>
 
-            <div class="plan-card featured reveal" style="transition-delay:.2s">
-                <div class="plan-badge">Most Popular</div>
-                <div class="plan-icon">👨‍👩‍👧‍👦</div>
-                <h3 class="plan-name">Standard</h3>
-                <p class="plan-speed">Up to 50 Mbps · Fiber</p>
-                <div class="plan-price"><sup>₱</sup>1499</div>
-                <div class="plan-divider"></div>
-                <p class="plan-description">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                    Ideal for families with multiple devices
-                </p>
-                <button class="subscribe-btn" onclick="handleSubscribe('Standard')">Get Standard Plan</button>
-            </div>
-
-            <div class="plan-card reveal" style="transition-delay:.3s">
-                <div class="plan-icon">🏢</div>
-                <h3 class="plan-name">Premium</h3>
-                <p class="plan-speed">Up to 100 Mbps · Fiber</p>
-                <div class="plan-price"><sup>₱</sup>2499</div>
-                <div class="plan-divider"></div>
-                <p class="plan-description">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                    Best for businesses and power users
-                </p>
-                <button class="subscribe-btn" onclick="handleSubscribe('Premium')">Get Premium Plan</button>
-            </div>
+                <div class="plan-card featured reveal" style="transition-delay:.2s">
+                    <div class="plan-badge">Most Popular</div>
+                    <div class="plan-icon">👨‍👩‍👧‍👦</div>
+                    <h3 class="plan-name">Standard</h3>
+                    <p class="plan-speed">Up to 50 Mbps · Fiber</p>
+                    <div class="plan-price"><sup>₱</sup>1499</div>
+                    <div class="plan-divider"></div>
+                    <p class="plan-description">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        Ideal for families with multiple devices
+                    </p>
+                    <button class="subscribe-btn" onclick="handleSubscribe('Standard')">Get Standard Plan</button>
+            @endforelse
         </div>
     </section>
 
@@ -1473,6 +1538,27 @@
             </div>
             <div class="modal-foot">
                 Need help? <a href="#contact" onclick="closeModal()">Contact support</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================== PLAN DETAILS MODAL =================== -->
+    <div id="planDetailsModal" class="modal">
+        <div class="modal-box wide">
+            <div class="modal-head">
+                <div class="modal-head-grid"></div>
+                <div class="modal-head-glow"></div>
+                <button class="modal-close" onclick="closePlanDetailsModal()">&times;</button>
+                <div class="modal-head-content">
+                    <h3 id="detailPlanName">Plan Details</h3>
+                    <p>Complete plan information</p>
+                </div>
+            </div>
+            <div class="modal-body" id="planDetailsContent">
+                <!-- Content populated by JavaScript -->
+            </div>
+            <div class="modal-foot">
+                <button class="modal-submit" onclick="closePlanDetailsModal(); handleSubscribe('');">Apply Now</button>
             </div>
         </div>
     </div>
@@ -1588,6 +1674,76 @@
         function handleSubscribe(plan) {
             openModal('register');
         }
+
+        // Plan Details Modal
+        function showPlanDetails(planName, speed, planType, monthlyFee, billingCycle, dataLimit, installationFee, activationFee, routerFee, lockInPeriod, latePenalty, reconnectionFee) {
+            const content = `
+                <div class="plan-details-grid">
+                    <div class="plan-detail-item">
+                        <div class="plan-detail-label">Plan Name</div>
+                        <div class="plan-detail-value">${planName}</div>
+                    </div>
+                    <div class="plan-detail-item">
+                        <div class="plan-detail-label">Speed</div>
+                        <div class="plan-detail-value">${speed}</div>
+                    </div>
+                    <div class="plan-detail-item">
+                        <div class="plan-detail-label">Plan Type</div>
+                        <div class="plan-detail-value">${planType}</div>
+                    </div>
+                    <div class="plan-detail-item">
+                        <div class="plan-detail-label">Monthly Fee</div>
+                        <div class="plan-detail-value price">₱${parseFloat(monthlyFee).toLocaleString()}</div>
+                    </div>
+                    <div class="plan-detail-item">
+                        <div class="plan-detail-label">Billing Cycle</div>
+                        <div class="plan-detail-value">${billingCycle}</div>
+                    </div>
+                    <div class="plan-detail-item">
+                        <div class="plan-detail-label">Data Limit</div>
+                        <div class="plan-detail-value">${dataLimit}</div>
+                    </div>
+                    <div class="plan-detail-item">
+                        <div class="plan-detail-label">Installation Fee</div>
+                        <div class="plan-detail-value">₱${parseFloat(installationFee).toLocaleString()}</div>
+                    </div>
+                    <div class="plan-detail-item">
+                        <div class="plan-detail-label">Activation Fee</div>
+                        <div class="plan-detail-value">₱${parseFloat(activationFee).toLocaleString()}</div>
+                    </div>
+                    <div class="plan-detail-item">
+                        <div class="plan-detail-label">Router Fee</div>
+                        <div class="plan-detail-value">₱${parseFloat(routerFee).toLocaleString()}</div>
+                    </div>
+                    <div class="plan-detail-item">
+                        <div class="plan-detail-label">Lock-in Period</div>
+                        <div class="plan-detail-value">${lockInPeriod}</div>
+                    </div>
+                    <div class="plan-detail-item">
+                        <div class="plan-detail-label">Late Penalty</div>
+                        <div class="plan-detail-value">₱${parseFloat(latePenalty).toLocaleString()}</div>
+                    </div>
+                    <div class="plan-detail-item">
+                        <div class="plan-detail-label">Reconnection Fee</div>
+                        <div class="plan-detail-value">₱${parseFloat(reconnectionFee).toLocaleString()}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('detailPlanName').textContent = planName + ' - Plan Details';
+            document.getElementById('planDetailsContent').innerHTML = content;
+            document.getElementById('planDetailsModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePlanDetailsModal() {
+            document.getElementById('planDetailsModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('planDetailsModal').addEventListener('click', function(e) {
+            if (e.target === this) closePlanDetailsModal();
+        });
 
         // Contact
         function handleContact(e) {

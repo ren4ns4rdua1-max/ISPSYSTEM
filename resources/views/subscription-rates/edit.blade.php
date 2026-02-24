@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit User — NetManager</title>
+    <title>Edit Subscription Plan — NetManager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -51,7 +51,7 @@
 
         html { overflow-x: hidden; }
 
-        /* Form inputs */
+        /* Form input styles */
         .form-input {
             width: 100%;
             padding: 0.65rem 0.9rem;
@@ -70,13 +70,8 @@
         }
         .form-input::placeholder { color: #9ca3af; }
         .form-input.error { border-color: #fca5a5; background: #fff5f5; }
-        .form-input:disabled {
-            background: #f3f4f6;
-            color: #6b7280;
-            cursor: not-allowed;
-        }
 
-        /* Input icon wrapper */
+        /* Input group icons */
         .input-wrapper { position: relative; }
         .input-icon {
             position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
@@ -85,17 +80,17 @@
         }
         .input-wrapper:focus-within .input-icon { color: #dc2626; }
         .input-wrapper .form-input { padding-left: 2.5rem; }
+        .input-wrapper-select { position: relative; }
+        .input-wrapper-select .input-icon { transform: translateY(-50%); top: 50%; }
+        .input-wrapper-select:focus-within .input-icon { color: #dc2626; }
+        .input-wrapper-select .form-input { padding-left: 2.5rem; appearance: none; -webkit-appearance: none; }
 
-        /* Password toggle */
-        .toggle-pw {
-            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-            color: #9ca3af; cursor: pointer; transition: color 0.2s;
+        /* Checkbox */
+        .checkbox-wrapper input:checked + div {
+            background: #dc2626;
+            border-color: #dc2626;
         }
-        .toggle-pw:hover { color: #dc2626; }
-
-        /* Strength bar */
-        .strength-bar { height: 4px; border-radius: 100px; background: #e5e7eb; overflow: hidden; }
-        .strength-fill { height: 100%; border-radius: 100px; transition: width 0.4s ease, background 0.4s ease; width: 0%; }
+        .checkbox-wrapper input:checked + div svg { display: block; }
 
         /* Card entrance */
         @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
@@ -112,10 +107,6 @@
             transition: left 0.4s ease;
         }
         .btn-submit:hover::after { left: 120%; }
-
-        /* Password section toggle */
-        #pw-section { transition: max-height 0.4s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
-        #pw-section.open { max-height: 500px; opacity: 1; }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen flex">
@@ -311,19 +302,19 @@
     <!-- TOP BAR -->
     <header class="topbar sticky top-0 z-40 flex items-center justify-between px-7 py-3.5">
         <div class="flex items-center gap-3">
-            <a href="{{ route('users.index') }}"
+            <a href="{{ route('subscription-rates.index') }}"
                class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors">
                 <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
             </a>
             <div>
-                <h1 class="font-display font-bold text-gray-900 text-[20px] leading-tight">Edit User</h1>
+                <h1 class="font-display font-bold text-gray-900 text-[20px] leading-tight">Edit Plan</h1>
                 <p class="text-gray-400 text-[12px] flex items-center gap-1.5 mt-0.5">
                     <svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
-                    Editing account for {{ $user->name }}
+                    Update subscription plan details
                 </p>
             </div>
         </div>
@@ -347,38 +338,17 @@
             <nav class="flex items-center gap-2 text-[12px] text-gray-400">
                 <a href="{{ route('dashboard') }}" class="hover:text-red-500 transition-colors font-medium">Dashboard</a>
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                <a href="{{ route('users.index') }}" class="hover:text-red-500 transition-colors font-medium">Users</a>
+                <a href="{{ route('subscription-rates.index') }}" class="hover:text-red-500 transition-colors font-medium">Subscription Rates</a>
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                <span class="text-gray-600 font-semibold">Edit #{{ $user->id }}</span>
+                <span class="text-gray-600 font-semibold">Edit</span>
             </nav>
         </div>
 
-        <div class="form-card w-full max-w-3xl space-y-4">
+        <!-- Form Card -->
+        <div class="form-card w-full max-w-3xl">
 
-            <!-- User Meta Card -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-4 flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl avatar-grad flex items-center justify-center text-white font-bold text-2xl shadow-md flex-shrink-0"
-                     id="avatar-preview" style="font-family:'Syne',sans-serif;">
-                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-display font-bold text-gray-900 text-base leading-tight" id="name-preview">{{ $user->name }}</p>
-                    <p class="text-gray-400 text-[12px]">{{ $user->email }}</p>
-                    <p class="text-gray-300 text-[10px] mt-0.5">Member since {{ $user->created_at->format('F d, Y') }} · {{ $user->created_at->diffForHumans() }}</p>
-                </div>
-                <div class="flex-shrink-0 text-right hidden sm:block">
-                    <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg" style="color:#059669;background:#ecfdf5;">
-                        <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
-                        Active Account
-                    </span>
-                    <p class="text-gray-400 text-[10px] mt-1">ID #{{ $user->id }}</p>
-                </div>
-            </div>
-
-            <!-- Form Card -->
+            <!-- Card Header -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-
-                <!-- Card Header -->
                 <div class="px-7 py-5 border-b border-gray-100 flex items-center gap-4"
                      style="background:linear-gradient(90deg,#fff5f5,#fff);">
                     <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
@@ -388,165 +358,282 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="font-display font-bold text-gray-900 text-base">Update Account Details</h2>
-                        <p class="text-gray-400 text-[12px]">Leave password fields blank to keep the current password</p>
+                        <h2 class="font-display font-bold text-gray-900 text-base">Edit Plan Information</h2>
+                        <p class="text-gray-400 text-[12px]">Update the subscription plan details below</p>
                     </div>
                 </div>
 
                 <!-- Form -->
-                <form method="POST" action="{{ route('users.update', $user->id) }}" class="p-7 space-y-6">
+                <form method="POST" action="{{ route('subscription-rates.update', $subscriptionRate->id) }}" class="p-7 space-y-6">
                     @csrf
-                    @method('PATCH')
+                    @method('PUT')
 
-                    <!-- Basic Info -->
-                    <div>
-                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">Basic Information</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-                            <!-- Name -->
-                            <div class="space-y-1.5">
-                                <label for="name" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                    Full Name
-                                </label>
-                                <div class="input-wrapper">
-                                    <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                    </svg>
-                                    <input id="name" name="name" type="text"
-                                           value="{{ old('name', $user->name) }}"
-                                           required autofocus autocomplete="name"
-                                           placeholder="Full name"
-                                           class="form-input {{ $errors->has('name') ? 'error' : '' }}"
-                                           oninput="updatePreview(this.value)"/>
-                                </div>
-                                @error('name')
-                                    <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
-                                        <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        {{ $message }}
-                                    </p>
-                                @enderror
+                        <!-- Plan Name -->
+                        <div class="space-y-1.5">
+                            <label for="plan_name" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Plan Name
+                            </label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <input id="plan_name" name="plan_name" type="text"
+                                       value="{{ old('plan_name', $subscriptionRate->plan_name) }}"
+                                       autofocus
+                                       class="form-input {{ $errors->has('plan_name') ? 'error' : '' }}"/>
                             </div>
-
-                            <!-- Email -->
-                            <div class="space-y-1.5">
-                                <label for="email" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                    Email Address
-                                </label>
-                                <div class="input-wrapper">
-                                    <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                    </svg>
-                                    <input id="email" name="email" type="email"
-                                           value="{{ old('email', $user->email) }}"
-                                           required autocomplete="username"
-                                           placeholder="Email address"
-                                           class="form-input {{ $errors->has('email') ? 'error' : '' }}"/>
-                                </div>
-                                @error('email')
-                                    <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
-                                        <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        {{ $message }}
-                                    </p>
-                                @enderror
-                            </div>
+                            @error('plan_name')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
+                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ $message }}
+                                </p>
+                            @enderror
                         </div>
+
+                        <!-- Plan Type -->
+                        <div class="space-y-1.5">
+                            <label for="plan_type" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Plan Type
+                            </label>
+                            <div class="input-wrapper input-wrapper-select">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                                </svg>
+                                <select id="plan_type" name="plan_type"
+                                        class="form-input {{ $errors->has('plan_type') ? 'error' : '' }}">
+                                    <option value="">Select Plan Type</option>
+                                    @foreach($planTypes as $type)
+                                        <option value="{{ $type }}" {{ old('plan_type', $subscriptionRate->plan_type) == $type ? 'selected' : '' }}>{{ $type }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @error('plan_type')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
+                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ $message }}
+                                </p>
+                            @enderror
+                        </div>
+
+                        <!-- Speed -->
+                        <div class="space-y-1.5">
+                            <label for="speed" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Speed
+                            </label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                                <input id="speed" name="speed" type="text"
+                                       value="{{ old('speed', $subscriptionRate->speed) }}"
+                                       class="form-input {{ $errors->has('speed') ? 'error' : '' }}"/>
+                            </div>
+                            @error('speed')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
+                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ $message }}
+                                </p>
+                            @enderror
+                        </div>
+
+                        <!-- Data Limit -->
+                        <div class="space-y-1.5">
+                            <label for="data_limit" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Data Limit
+                            </label>
+                            <div class="input-wrapper input-wrapper-select">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
+                                </svg>
+                                <select id="data_limit" name="data_limit"
+                                        class="form-input {{ $errors->has('data_limit') ? 'error' : '' }}">
+                                    <option value="">Select Data Limit</option>
+                                    @foreach($dataLimits as $limit)
+                                        <option value="{{ $limit }}" {{ old('data_limit', $subscriptionRate->data_limit) == $limit ? 'selected' : '' }}>{{ $limit }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @error('data_limit')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Monthly Fee -->
+                        <div class="space-y-1.5">
+                            <label for="monthly_fee" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Monthly Fee (₱)
+                            </label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <input id="monthly_fee" name="monthly_fee" type="number"
+                                       value="{{ old('monthly_fee', $subscriptionRate->monthly_fee) }}"
+                                       min="0" step="0.01"
+                                       class="form-input {{ $errors->has('monthly_fee') ? 'error' : '' }}"/>
+                            </div>
+                            @error('monthly_fee')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Billing Cycle -->
+                        <div class="space-y-1.5">
+                            <label for="billing_cycle" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Billing Cycle
+                            </label>
+                            <div class="input-wrapper input-wrapper-select">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <select id="billing_cycle" name="billing_cycle"
+                                        class="form-input {{ $errors->has('billing_cycle') ? 'error' : '' }}">
+                                    <option value="">Select Billing Cycle</option>
+                                    @foreach($billingCycles as $cycle)
+                                        <option value="{{ $cycle }}" {{ old('billing_cycle', $subscriptionRate->billing_cycle) == $cycle ? 'selected' : '' }}>{{ $cycle }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @error('billing_cycle')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Installation Fee -->
+                        <div class="space-y-1.5">
+                            <label for="installation_fee" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Installation Fee (₱)
+                            </label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <input id="installation_fee" name="installation_fee" type="number"
+                                       value="{{ old('installation_fee', $subscriptionRate->installation_fee) }}"
+                                       min="0" step="0.01"
+                                       class="form-input {{ $errors->has('installation_fee') ? 'error' : '' }}"/>
+                            </div>
+                            @error('installation_fee')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Activation Fee -->
+                        <div class="space-y-1.5">
+                            <label for="activation_fee" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Activation Fee (₱)
+                            </label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <input id="activation_fee" name="activation_fee" type="number"
+                                       value="{{ old('activation_fee', $subscriptionRate->activation_fee) }}"
+                                       min="0" step="0.01"
+                                       class="form-input {{ $errors->has('activation_fee') ? 'error' : '' }}"/>
+                            </div>
+                            @error('activation_fee')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Router Fee -->
+                        <div class="space-y-1.5">
+                            <label for="router_fee" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Router Fee (₱)
+                            </label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                                </svg>
+                                <input id="router_fee" name="router_fee" type="number"
+                                       value="{{ old('router_fee', $subscriptionRate->router_fee) }}"
+                                       min="0" step="0.01"
+                                       class="form-input {{ $errors->has('router_fee') ? 'error' : '' }}"/>
+                            </div>
+                            @error('router_fee')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Lock In Period -->
+                        <div class="space-y-1.5">
+                            <label for="lock_in_period" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Lock-in Period (months)
+                            </label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                                <input id="lock_in_period" name="lock_in_period" type="number"
+                                       value="{{ old('lock_in_period', $subscriptionRate->lock_in_period) }}"
+                                       min="0"
+                                       class="form-input {{ $errors->has('lock_in_period') ? 'error' : '' }}"/>
+                            </div>
+                            @error('lock_in_period')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Late Penalty -->
+                        <div class="space-y-1.5">
+                            <label for="late_penalty" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Late Penalty (₱)
+                            </label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <input id="late_penalty" name="late_penalty" type="number"
+                                       value="{{ old('late_penalty', $subscriptionRate->late_penalty) }}"
+                                       min="0" step="0.01"
+                                       class="form-input {{ $errors->has('late_penalty') ? 'error' : '' }}"/>
+                            </div>
+                            @error('late_penalty')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Reconnection Fee -->
+                        <div class="space-y-1.5">
+                            <label for="reconnection_fee" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Reconnection Fee (₱)
+                            </label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                <input id="reconnection_fee" name="reconnection_fee" type="number"
+                                       value="{{ old('reconnection_fee', $subscriptionRate->reconnection_fee) }}"
+                                       min="0" step="0.01"
+                                       class="form-input {{ $errors->has('reconnection_fee') ? 'error' : '' }}"/>
+                            </div>
+                            @error('reconnection_fee')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Is Active -->
+                        <div class="md:col-span-2">
+                            <label class="checkbox-wrapper flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" name="is_active" value="1" {{ old('is_active', $subscriptionRate->is_active) ? 'checked' : '' }}
+                                    class="sr-only" onchange="document.getElementById('active-toggle').classList.toggle('bg-green-500', this.checked); document.getElementById('active-toggle').classList.toggle('bg-gray-200', !this.checked); document.getElementById('active-toggle').querySelector('svg').style.display = this.checked ? 'block' : 'none';"/>
+                                <div id="active-toggle" class="w-10 h-6 rounded-full transition-colors {{ old('is_active', $subscriptionRate->is_active) ? 'bg-green-500' : 'bg-gray-200' }}">
+                                    <svg class="w-4 h-4 text-white m-1" style="display: {{ old('is_active', $subscriptionRate->is_active) ? 'block' : 'none' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-700">Active</span>
+                            </label>
+                        </div>
+
                     </div>
 
-                    <!-- Password Toggle Trigger -->
-                    <div class="border-t border-gray-100 pt-5">
-                        <button type="button" onclick="togglePasswordSection()"
-                                class="w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 border-dashed transition-all hover:border-red-300 hover:bg-red-50/50 group"
-                                style="border-color:#e5e7eb;" id="pw-toggle-btn">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-red-100 flex items-center justify-center transition-colors">
-                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                    </svg>
-                                </div>
-                                <div class="text-left">
-                                    <p class="text-sm font-semibold text-gray-700 group-hover:text-red-700 transition-colors">Change Password</p>
-                                    <p class="text-[11px] text-gray-400">Click to set a new password (optional)</p>
-                                </div>
-                            </div>
-                            <svg id="pw-chevron" class="w-4 h-4 text-gray-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </button>
-
-                        <!-- Password Fields — Hidden by default -->
-                        <div id="pw-section">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-4">
-
-                                <!-- New Password -->
-                                <div class="space-y-1.5">
-                                    <label for="password" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                        New Password
-                                    </label>
-                                    <div class="input-wrapper">
-                                        <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                        </svg>
-                                        <input id="password" name="password" type="password"
-                                               autocomplete="new-password"
-                                               placeholder="Min. 8 characters"
-                                               class="form-input {{ $errors->has('password') ? 'error' : '' }}"
-                                               oninput="checkStrength(this.value)"/>
-                                        <button type="button" class="toggle-pw" onclick="togglePassword('password', this)">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="strength-bar mt-2">
-                                        <div id="strength-fill" class="strength-fill"></div>
-                                    </div>
-                                    <p id="strength-label" class="text-[10px] font-semibold text-gray-400 mt-1"></p>
-                                    @error('password')
-                                        <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
-                                            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                            {{ $message }}
-                                        </p>
-                                    @enderror
-                                </div>
-
-                                <!-- Confirm Password -->
-                                <div class="space-y-1.5">
-                                    <label for="password_confirmation" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                        Confirm New Password
-                                    </label>
-                                    <div class="input-wrapper">
-                                        <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                                        </svg>
-                                        <input id="password_confirmation" name="password_confirmation" type="password"
-                                               autocomplete="new-password"
-                                               placeholder="Re-enter new password"
-                                               class="form-input {{ $errors->has('password_confirmation') ? 'error' : '' }}"
-                                               oninput="checkMatch()"/>
-                                        <button type="button" class="toggle-pw" onclick="togglePassword('password_confirmation', this)">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <p id="match-label" class="text-[10px] font-semibold mt-1"></p>
-                                    @error('password_confirmation')
-                                        <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
-                                            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                            {{ $message }}
-                                        </p>
-                                    @enderror
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Actions -->
+                    <!-- Divider -->
                     <div class="border-t border-gray-100 pt-5 flex items-center justify-between gap-3 flex-wrap">
-                        <a href="{{ route('users.index') }}"
+                        <a href="{{ route('subscription-rates.index') }}"
                            class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -558,39 +645,11 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            Save Changes
+                            Update Plan
                         </button>
                     </div>
 
                 </form>
-            </div>
-
-            <!-- Info tip -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-4">
-                <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-xs font-bold text-gray-700 mb-1">Edit Notes</p>
-                        <ul class="space-y-1">
-                            <li class="flex items-center gap-1.5 text-[11px] text-gray-500">
-                                <svg class="w-3 h-3 text-amber-400 flex-shrink-0" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3"/></svg>
-                                Name and email changes take effect immediately
-                            </li>
-                            <li class="flex items-center gap-1.5 text-[11px] text-gray-500">
-                                <svg class="w-3 h-3 text-amber-400 flex-shrink-0" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3"/></svg>
-                                Leave password fields empty to keep the existing password
-                            </li>
-                            <li class="flex items-center gap-1.5 text-[11px] text-gray-500">
-                                <svg class="w-3 h-3 text-amber-400 flex-shrink-0" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3"/></svg>
-                                If changing password, both fields must match and be at least 8 characters
-                            </li>
-                        </ul>
-                    </div>
-                </div>
             </div>
 
         </div>
@@ -615,92 +674,6 @@
             main.style.marginLeft = '260px';
             sidebar.classList.remove('sidebar-collapsed');
             icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>';
-        }
-    }
-
-    // Live name preview in user meta card
-    function updatePreview(name) {
-        const avatar = document.getElementById('avatar-preview');
-        const nameEl = document.getElementById('name-preview');
-        avatar.textContent = name.trim() ? name.trim().charAt(0).toUpperCase() : '?';
-        nameEl.textContent = name.trim() || 'User Name';
-    }
-
-    // Password section accordion
-    let pwOpen = false;
-    function togglePasswordSection() {
-        pwOpen = !pwOpen;
-        const section = document.getElementById('pw-section');
-        const chevron = document.getElementById('pw-chevron');
-        const btn = document.getElementById('pw-toggle-btn');
-        if (pwOpen) {
-            section.classList.add('open');
-            chevron.style.transform = 'rotate(180deg)';
-            btn.style.borderColor = '#dc2626';
-            btn.style.background = 'rgba(220,38,38,.04)';
-        } else {
-            section.classList.remove('open');
-            chevron.style.transform = 'rotate(0deg)';
-            btn.style.borderColor = '';
-            btn.style.background = '';
-            // Clear fields when closing
-            document.getElementById('password').value = '';
-            document.getElementById('password_confirmation').value = '';
-            document.getElementById('strength-fill').style.width = '0%';
-            document.getElementById('strength-label').textContent = '';
-            document.getElementById('match-label').textContent = '';
-        }
-    }
-
-    // Auto-open password section if there are password errors
-    @if($errors->has('password') || $errors->has('password_confirmation'))
-        togglePasswordSection();
-    @endif
-
-    // Password show/hide
-    function togglePassword(id, btn) {
-        const input = document.getElementById(id);
-        const isText = input.type === 'text';
-        input.type = isText ? 'password' : 'text';
-        btn.style.color = isText ? '' : '#dc2626';
-    }
-
-    // Password strength
-    function checkStrength(val) {
-        const fill = document.getElementById('strength-fill');
-        const label = document.getElementById('strength-label');
-        let score = 0;
-        if (val.length >= 8) score++;
-        if (/[A-Z]/.test(val)) score++;
-        if (/[0-9]/.test(val)) score++;
-        if (/[^A-Za-z0-9]/.test(val)) score++;
-        const configs = [
-            { w: '0%',   color: '',        text: '' },
-            { w: '25%',  color: '#ef4444', text: 'Weak' },
-            { w: '50%',  color: '#f59e0b', text: 'Fair' },
-            { w: '75%',  color: '#3b82f6', text: 'Good' },
-            { w: '100%', color: '#22c55e', text: 'Strong' },
-        ];
-        const c = configs[score];
-        fill.style.width = c.w;
-        fill.style.background = c.color;
-        label.textContent = c.text;
-        label.style.color = c.color;
-        checkMatch();
-    }
-
-    // Password match check
-    function checkMatch() {
-        const pw = document.getElementById('password').value;
-        const cf = document.getElementById('password_confirmation').value;
-        const label = document.getElementById('match-label');
-        if (!cf) { label.textContent = ''; return; }
-        if (pw === cf) {
-            label.textContent = '✓ Passwords match';
-            label.style.color = '#22c55e';
-        } else {
-            label.textContent = '✗ Passwords do not match';
-            label.style.color = '#ef4444';
         }
     }
 </script>

@@ -2,10 +2,16 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SubscriptionRateController;
+use App\Models\SubscriptionRate;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    $subscriptionRates = SubscriptionRate::where('is_active', true)
+        ->orderBy('monthly_fee', 'asc')
+        ->get();
+    
+    return view('welcome', compact('subscriptionRates'));
 });
 
 Route::get('/dashboard', function () {
@@ -19,6 +25,9 @@ Route::middleware('auth')->group(function () {
     
     // User Management Routes
     Route::resource('users', UserController::class);
+    
+    // Subscription Rates Routes
+    Route::resource('subscription-rates', SubscriptionRateController::class);
 });
 
 require __DIR__.'/auth.php';

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Users — NetManager</title>
+    <title>Subscription Rates — NetManager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -123,12 +123,10 @@
         </div>
 
        
-       
 
         <p class="collapsible px-2 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-[.14em] text-gray-600 font-display" style="max-width:200px;">Management</p>
 
-
-         <!-- Clients -->
+ <!-- Clients -->
         <div class="nav-wrapper relative">
             <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -141,16 +139,18 @@
             <span class="nav-tooltip">Clients</span>
         </div>
 
-        
-<!-- Subscription Rates -->
+
+        <!-- Subscription Rates — ACTIVE -->
         <div class="nav-wrapper relative">
-            <a href="{{ route('subscription-rates.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+            <a href="{{ route('subscription-rates.index') }}" class="nav-item-inner relative flex items-center gap-3 px-3 py-2.5 rounded-xl"
+               style="background:linear-gradient(135deg,rgba(220,38,38,.18),rgba(185,28,28,.12));border:1px solid rgba(220,38,38,.28);">
+                <div class="nav-active-bar"></div>
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-[17px] h-[17px] text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
                 </div>
-                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Subscription Rates</span>
+                <span class="collapsible text-sm font-semibold text-red-200" style="max-width:160px;">Subscription Rates</span>
             </a>
             <span class="nav-tooltip">Subscription Rates</span>
         </div>
@@ -195,13 +195,11 @@
             <span class="nav-tooltip">Sales</span>
         </div>
 
-
+       
         <p class="collapsible px-2 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-[.14em] text-gray-600 font-display" style="max-width:200px;">System</p>
 
-       
 
-        
-        <div class="nav-wrapper relative">
+         <div class="nav-wrapper relative">
             <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
                     <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -213,24 +211,22 @@
             <span class="nav-tooltip">Reports</span>
         </div>
 
-         <!-- Users — ACTIVE -->
+
+        <!-- Users -->
         <div class="nav-wrapper relative">
-            <a href="{{ route('users.index') }}" class="nav-item-inner relative flex items-center gap-3 px-3 py-2.5 rounded-xl"
-               style="background:linear-gradient(135deg,rgba(220,38,38,.18),rgba(185,28,28,.12));border:1px solid rgba(220,38,38,.28);">
-                <div class="nav-active-bar"></div>
+            <a href="{{ route('users.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-[17px] h-[17px] text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                 </div>
-                <span class="collapsible text-sm font-semibold text-red-200" style="max-width:120px;">Users</span>
-                <span class="collapsible ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full"
-                      style="max-width:50px;background:rgba(220,38,38,.2);color:#fca5a5;">{{ $users->total() }}</span>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:120px;">Users</span>
             </a>
             <span class="nav-tooltip">Users</span>
         </div>
 
-         <div class="nav-wrapper relative">
+        
+        <div class="nav-wrapper relative">
             <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
                     <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,17 +273,17 @@
     <!-- TOP BAR -->
     <header class="topbar sticky top-0 z-40 flex items-center justify-between px-7 py-3.5">
         <div>
-            <h1 class="font-display font-bold text-gray-900 text-[20px] leading-tight">User Management</h1>
+            <h1 class="font-display font-bold text-gray-900 text-[20px] leading-tight">Subscription Rates</h1>
             <p class="text-gray-400 text-[12px] flex items-center gap-1.5 mt-0.5">
                 <svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                 </svg>
-                {{ $users->total() }} registered {{ Str::plural('user', $users->total()) }}
+                {{ $subscriptionRates->total() }} {{ Str::plural('plan', $subscriptionRates->total()) }} available
             </p>
         </div>
         <div class="flex items-center gap-3">
             <div class="relative hidden md:block">
-                <input type="text" id="search-input" placeholder="Search users..."
+                <input type="text" id="search-input" placeholder="Search plans..."
                        class="search-input w-56 text-sm bg-gray-100 rounded-xl pl-9 pr-4 py-2 text-gray-700 placeholder-gray-400 border-0 focus:outline-none focus:bg-white transition-all"/>
                 <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -328,92 +324,106 @@
             <div class="flex items-center gap-3 flex-wrap">
                 <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-sm border border-gray-100">
                     <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                    <span class="text-xs font-semibold text-gray-600">Total: <span class="text-gray-900">{{ $users->total() }}</span></span>
+                    <span class="text-xs font-semibold text-gray-600">Total: <span class="text-gray-900">{{ $subscriptionRates->total() }}</span></span>
                 </div>
                 <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-sm border border-gray-100">
                     <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <span class="text-xs font-semibold text-gray-600">Page: <span class="text-gray-900">{{ $users->currentPage() }} / {{ $users->lastPage() }}</span></span>
+                    <span class="text-xs font-semibold text-gray-600">Page: <span class="text-gray-900">{{ $subscriptionRates->currentPage() }} / {{ $subscriptionRates->lastPage() }}</span></span>
                 </div>
             </div>
-            <!-- Add User Button -->
-            <a href="{{ route('users.create') }}"
+            <!-- Add Plan Button -->
+            <a href="{{ route('subscription-rates.create') }}"
                class="inline-flex items-center gap-2 px-5 py-2.5 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
                style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                 </svg>
-                Add New User
+                Add New Plan
             </a>
         </div>
 
         <!-- Main Table Card -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
-            @if($users->isEmpty())
+            @if($subscriptionRates->isEmpty())
                 <!-- Empty State -->
                 <div class="flex flex-col items-center justify-center py-20 px-6 text-center">
                     <div class="w-20 h-20 rounded-2xl bg-red-50 flex items-center justify-center mb-5">
                         <svg class="w-10 h-10 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
                     </div>
-                    <p class="font-display font-bold text-gray-800 text-lg mb-2">No Users Found</p>
-                    <p class="text-gray-400 text-sm mb-6 max-w-xs">Your user list is empty. Start by creating the first account.</p>
-                    <a href="{{ route('users.create') }}"
+                    <p class="font-display font-bold text-gray-800 text-lg mb-2">No Subscription Plans Found</p>
+                    <p class="text-gray-400 text-sm mb-6 max-w-xs">Your plan list is empty. Start by creating the first pricing plan.</p>
+                    <a href="{{ route('subscription-rates.create') }}"
                        class="inline-flex items-center gap-2 px-6 py-3 text-white font-semibold text-sm rounded-xl transition-all hover:shadow-lg"
                        style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                        Create First User
+                        Create First Plan
                     </a>
                 </div>
             @else
 
                 <!-- Desktop Table -->
                 <div class="hidden md:block overflow-x-auto">
-                    <table class="w-full" id="users-table">
+                    <table class="w-full" id="rates-table">
                         <thead>
                             <tr style="background:linear-gradient(90deg,#fef2f2,#fff5f5);">
                                 <th class="px-6 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">#</th>
-                                <th class="px-6 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">User</th>
-                                <th class="px-6 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Email</th>
-                                <th class="px-6 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Joined</th>
+                                <th class="px-6 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Plan Name</th>
+                                <th class="px-6 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Type</th>
+                                <th class="px-6 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Speed</th>
+                                <th class="px-6 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Monthly Fee</th>
+                                <th class="px-6 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Billing</th>
+                                <th class="px-6 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
                                 <th class="px-6 py-4 text-right text-[11px] font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
-                            @foreach ($users as $index => $user)
+                            @foreach ($subscriptionRates as $index => $rate)
                                 <tr class="trow" style="animation-delay: {{ $index * 40 }}ms;">
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="text-[11px] font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-lg">#{{ (($users->currentPage() - 1) * $users->perPage()) + $index + 1 }}</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-9 h-9 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
-                                                {{ strtoupper(substr($user->name, 0, 1)) }}
-                                            </div>
-                                            <div>
-                                                <p class="text-sm font-semibold text-gray-900">{{ $user->name }}</p>
-                                                <p class="text-[10px] text-gray-400">Active account</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center gap-2">
-                                            <svg class="w-3.5 h-3.5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                            </svg>
-                                            <span class="text-sm text-gray-600">{{ $user->email }}</span>
-                                        </div>
+                                        <span class="text-[11px] font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-lg">#{{ (($subscriptionRates->currentPage() - 1) * $subscriptionRates->perPage()) + $index + 1 }}</span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div>
-                                            <p class="text-sm font-semibold text-gray-700">{{ $user->created_at->format('M d, Y') }}</p>
-                                            <p class="text-[10px] text-gray-400">{{ $user->created_at->diffForHumans() }}</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ $rate->plan_name }}</p>
+                                            <p class="text-[10px] text-gray-400">{{ $rate->data_limit ?? 'N/A' }}</p>
                                         </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-100 text-blue-700">
+                                            {{ $rate->plan_type }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="text-sm font-medium text-gray-700">{{ $rate->speed }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="text-sm font-bold text-gray-900">₱{{ number_format($rate->monthly_fee, 2) }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="text-sm text-gray-600">{{ $rate->billing_cycle }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($rate->is_active)
+                                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Active</span>
+                                        @else
+                                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">Inactive</span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right">
                                         <div class="flex items-center justify-end gap-2">
-                                            <a href="{{ route('users.edit', $user->id) }}"
+                                            <a href="{{ route('subscription-rates.show', $rate->id) }}"
+                                               class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-semibold rounded-lg transition-all hover:shadow-sm"
+                                               style="color:#059669;background:#ecfdf5;border:1px solid #d1fae5;">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                                View
+                                            </a>
+                                            <a href="{{ route('subscription-rates.edit', $rate->id) }}"
                                                class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-semibold rounded-lg transition-all hover:shadow-sm"
                                                style="color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -421,7 +431,7 @@
                                                 </svg>
                                                 Edit
                                             </a>
-                                            <button onclick="confirmDelete({{ $user->id }}, '{{ addslashes($user->name) }}')"
+                                            <button onclick="confirmDelete({{ $rate->id }}, '{{ addslashes($rate->plan_name) }}')"
                                                     class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-semibold rounded-lg transition-all hover:shadow-sm"
                                                     style="color:#374151;background:#f3f4f6;border:1px solid #e5e7eb;">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -439,52 +449,40 @@
 
                 <!-- Mobile Card View -->
                 <div class="md:hidden divide-y divide-gray-50">
-                    @foreach ($users as $index => $user)
+                    @foreach ($subscriptionRates as $index => $rate)
                         <div class="p-5 trow" style="animation-delay: {{ $index * 40 }}ms;">
                             <div class="flex items-start justify-between mb-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-11 h-11 rounded-xl avatar-grad flex items-center justify-center text-white font-bold shadow-sm">
-                                        {{ strtoupper(substr($user->name, 0, 1)) }}
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-gray-900">{{ $user->name }}</p>
-                                        <p class="text-[11px] text-gray-500">{{ $user->email }}</p>
-                                    </div>
-                                </div>
-                                <span class="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-lg">#{{ (($users->currentPage() - 1) * $users->perPage()) + $index + 1 }}</span>
-                            </div>
-                            <div class="flex items-center justify-between pt-3 border-t border-gray-50">
                                 <div>
-                                    <p class="text-[11px] font-semibold text-gray-600">{{ $user->created_at->format('M d, Y') }}</p>
-                                    <p class="text-[10px] text-gray-400">{{ $user->created_at->diffForHumans() }}</p>
+                                    <p class="text-sm font-semibold text-gray-900">{{ $rate->plan_name }}</p>
+                                    <p class="text-[11px] text-gray-500">{{ $rate->speed }} • {{ $rate->plan_type }}</p>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <a href="{{ route('users.edit', $user->id) }}"
-                                       class="inline-flex items-center gap-1 px-3 py-1.5 text-[11px] font-semibold rounded-lg"
-                                       style="color:#b91c1c;background:#fee2e2;">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                        Edit
-                                    </a>
-                                    <button onclick="confirmDelete({{ $user->id }}, '{{ addslashes($user->name) }}')"
-                                            class="inline-flex items-center gap-1 px-3 py-1.5 text-[11px] font-semibold rounded-lg"
-                                            style="color:#374151;background:#f3f4f6;">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                        Delete
-                                    </button>
-                                </div>
+                                <span class="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-lg">#{{ (($subscriptionRates->currentPage() - 1) * $subscriptionRates->perPage()) + $index + 1 }}</span>
+                            </div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-bold text-gray-900">₱{{ number_format($rate->monthly_fee, 2) }}/mo</span>
+                                @if($rate->is_active)
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Active</span>
+                                @else
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">Inactive</span>
+                                @endif
+                            </div>
+                            <div class="flex items-center gap-2 pt-3 border-t border-gray-50">
+                                <a href="{{ route('subscription-rates.show', $rate->id) }}" class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-[11px] font-semibold rounded-lg" style="color:#059669;background:#ecfdf5;">View</a>
+                                <a href="{{ route('subscription-rates.edit', $rate->id) }}" class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-[11px] font-semibold rounded-lg" style="color:#b91c1c;background:#fee2e2;">Edit</a>
+                                <button onclick="confirmDelete({{ $rate->id }}, '{{ addslashes($rate->plan_name) }}')" class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-[11px] font-semibold rounded-lg" style="color:#374151;background:#f3f4f6;">Delete</button>
                             </div>
                         </div>
                     @endforeach
                 </div>
 
                 <!-- Pagination -->
-                @if ($users->hasPages())
+                @if ($subscriptionRates->hasPages())
                     <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between flex-wrap gap-3">
                         <p class="text-[12px] text-gray-500">
-                            Showing <span class="font-semibold text-gray-800">{{ $users->firstItem() }}</span>–<span class="font-semibold text-gray-800">{{ $users->lastItem() }}</span>
-                            of <span class="font-semibold text-gray-800">{{ $users->total() }}</span> users
+                            Showing <span class="font-semibold text-gray-800">{{ $subscriptionRates->firstItem() }}</span>–<span class="font-semibold text-gray-800">{{ $subscriptionRates->lastItem() }}</span>
+                            of <span class="font-semibold text-gray-800">{{ $subscriptionRates->total() }}</span> plans
                         </p>
-                        {{ $users->links() }}
+                        {{ $subscriptionRates->links() }}
                     </div>
                 @endif
 
@@ -504,8 +502,8 @@
                 </svg>
             </div>
             <div>
-                <h3 class="font-display font-bold text-gray-900 text-lg">Delete User</h3>
-                <p class="text-gray-500 text-sm mt-1">Are you sure you want to delete <span id="delete-user-name" class="font-semibold text-gray-800"></span>? This action cannot be undone.</p>
+                <h3 class="font-display font-bold text-gray-900 text-lg">Delete Plan</h3>
+                <p class="text-gray-500 text-sm mt-1">Are you sure you want to delete <span id="delete-rate-name" class="font-semibold text-gray-800"></span>? This action cannot be undone.</p>
             </div>
         </div>
         <div class="flex items-center gap-3">
@@ -548,9 +546,9 @@
     }
 
     // Delete modal
-    function confirmDelete(userId, userName) {
-        document.getElementById('delete-user-name').textContent = userName;
-        document.getElementById('delete-form').action = '/users/' + userId;
+    function confirmDelete(rateId, rateName) {
+        document.getElementById('delete-rate-name').textContent = rateName;
+        document.getElementById('delete-form').action = '/subscription-rates/' + rateId;
         document.getElementById('delete-modal').classList.add('show');
     }
     function closeModal() {
@@ -566,7 +564,7 @@
     // Live search filter
     document.getElementById('search-input')?.addEventListener('input', function() {
         const q = this.value.toLowerCase();
-        document.querySelectorAll('#users-table tbody tr, .md\\:hidden > div').forEach(row => {
+        document.querySelectorAll('#rates-table tbody tr, .md\\:hidden > div').forEach(row => {
             const text = row.textContent.toLowerCase();
             row.style.display = text.includes(q) ? '' : 'none';
         });

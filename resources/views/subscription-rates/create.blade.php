@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create User — NetManager</title>
+    <title>Create Subscription Plan — NetManager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -11,12 +11,19 @@
         *, body { font-family: 'DM Sans', sans-serif; }
         .font-display { font-family: 'Syne', sans-serif; }
 
-        #sidebar { transition: width 0.3s cubic-bezier(0.4,0,0.2,1); background: linear-gradient(180deg, #0c0e1a 0%, #111827 60%, #0c0e1a 100%); }
+        #sidebar {
+            transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+            background: linear-gradient(180deg, #0c0e1a 0%, #111827 60%, #0c0e1a 100%);
+        }
         #main-content { transition: margin-left 0.3s cubic-bezier(0.4,0,0.2,1); }
 
-        .collapsible { transition: opacity 0.2s ease, max-width 0.3s ease; overflow: hidden; white-space: nowrap; }
+        .collapsible {
+            transition: opacity 0.2s ease, max-width 0.3s ease;
+            overflow: hidden; white-space: nowrap;
+        }
         .sidebar-collapsed .collapsible { opacity: 0; max-width: 0 !important; pointer-events: none; }
         .sidebar-collapsed .nav-item-inner { justify-content: center; padding-left: 0.75rem; padding-right: 0.75rem; }
+        .sidebar-collapsed .sec-lbl { opacity: 0; }
 
         .nav-active-bar {
             position: absolute; left: 0; top: 50%; transform: translateY(-50%);
@@ -27,7 +34,6 @@
         .topbar {
             background: rgba(255,255,255,0.88);
             backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
             border-bottom: 1px solid rgba(226,232,240,0.8);
         }
 
@@ -44,6 +50,16 @@
         }
 
         .avatar-grad { background: linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%); }
+
+        /* Section label */
+        .sec-lbl {
+            padding: 3px 8px 5px;
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .13em;
+            color: rgba(255,255,255,.22);
+            font-family: 'Syne', sans-serif;
+            transition: opacity .2s;
+        }
 
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -62,6 +78,7 @@
             border-radius: 12px;
             outline: none;
             transition: all 0.2s ease;
+            font-family: 'DM Sans', sans-serif;
         }
         .form-input:focus {
             background: #fff;
@@ -71,7 +88,6 @@
         .form-input::placeholder { color: #9ca3af; }
         .form-input.error { border-color: #fca5a5; background: #fff5f5; }
 
-        /* Input group icons */
         .input-wrapper { position: relative; }
         .input-icon {
             position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
@@ -80,23 +96,14 @@
         }
         .input-wrapper:focus-within .input-icon { color: #dc2626; }
         .input-wrapper .form-input { padding-left: 2.5rem; }
+        .input-wrapper-select { position: relative; }
+        .input-wrapper-select .input-icon { transform: translateY(-50%); top: 50%; }
+        .input-wrapper-select:focus-within .input-icon { color: #dc2626; }
+        .input-wrapper-select .form-input { padding-left: 2.5rem; appearance: none; -webkit-appearance: none; }
 
-        /* Password toggle */
-        .toggle-pw {
-            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-            color: #9ca3af; cursor: pointer; transition: color 0.2s;
-        }
-        .toggle-pw:hover { color: #dc2626; }
-
-        /* Strength bar */
-        .strength-bar { height: 4px; border-radius: 100px; background: #e5e7eb; overflow: hidden; transition: all 0.3s; }
-        .strength-fill { height: 100%; border-radius: 100px; transition: width 0.4s ease, background 0.4s ease; width: 0%; }
-
-        /* Card entrance */
         @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
         .form-card { animation: slideUp 0.4s ease both; }
 
-        /* Submit button shine */
         .btn-submit {
             background: linear-gradient(135deg, #dc2626, #b91c1c);
             position: relative; overflow: hidden;
@@ -111,7 +118,7 @@
 </head>
 <body class="bg-slate-100 min-h-screen flex">
 
-<!-- ===================== SIDEBAR ===================== -->
+<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
 <aside id="sidebar" style="width:260px;" class="fixed left-0 top-0 h-full z-50 flex flex-col shadow-2xl">
 
     <!-- Brand -->
@@ -124,7 +131,7 @@
             </svg>
         </div>
         <div class="collapsible" style="max-width:200px;">
-            <p class="font-display font-bold text-white text-[14px] leading-tight tracking-tight">NetManager</p>
+            <p class="font-display font-bold text-white text-[14px] leading-tight">ADMIN</p>
             <p class="text-red-400 text-[10px] font-medium tracking-wide">ISP Control Center</p>
         </div>
         <button onclick="toggleSidebar()" id="toggle-btn"
@@ -139,8 +146,10 @@
     <!-- Nav -->
     <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
 
-        <p class="collapsible px-2 pt-1 pb-2 text-[10px] font-semibold uppercase tracking-[.14em] text-gray-600 font-display" style="max-width:200px;">Main</p>
+        <!-- ── OVERVIEW ── -->
+        <p class="sec-lbl collapsible" style="max-width:200px;">Overview</p>
 
+        <!-- Dashboard -->
         <div class="nav-wrapper relative">
             <a href="{{ route('dashboard') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -153,16 +162,15 @@
             <span class="nav-tooltip">Dashboard</span>
         </div>
 
-        
-        
+        <!-- ── MANAGEMENT ── -->
+        <p class="sec-lbl collapsible mt-4" style="max-width:200px; padding-top:14px;">Management</p>
 
-        <p class="collapsible px-2 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-[.14em] text-gray-600 font-display" style="max-width:200px;">Management</p>
-
-       <div class="nav-wrapper relative">
+        <!-- Clients -->
+        <div class="nav-wrapper relative">
             <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
                     <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                 </div>
                 <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Clients</span>
@@ -170,22 +178,22 @@
             <span class="nav-tooltip">Clients</span>
         </div>
 
-
-
-<!-- Subscription Rates -->
+        <!-- Subscription Rates — ACTIVE -->
         <div class="nav-wrapper relative">
-            <a href="{{ route('subscription-rates.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+            <a href="{{ route('subscription-rates.index') }}" class="nav-item-inner relative flex items-center gap-3 px-3 py-2.5 rounded-xl"
+               style="background:linear-gradient(135deg,rgba(220,38,38,.18),rgba(185,28,28,.12));border:1px solid rgba(220,38,38,.28);">
+                <div class="nav-active-bar"></div>
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-[17px] h-[17px] text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
                 </div>
-                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Subscription Rates</span>
+                <span class="collapsible text-sm font-semibold text-red-200" style="max-width:160px;">Subscription Rates</span>
             </a>
             <span class="nav-tooltip">Subscription Rates</span>
         </div>
 
-         <!-- Billing -->
+        <!-- Billing -->
         <div class="nav-wrapper relative">
             <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -211,6 +219,7 @@
             <span class="nav-tooltip">Payments</span>
         </div>
 
+        <!-- Sales -->
         <div class="nav-wrapper relative">
             <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -218,20 +227,20 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                     </svg>
                 </div>
-                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:120px;">Sales</span>
-                <span class="collapsible ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full"
-                      style="max-width:50px;background:rgba(16,185,129,.15);color:#6ee7b7;">New</span>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Sales</span>
             </a>
             <span class="nav-tooltip">Sales</span>
         </div>
 
+        
+
+        <!-- ── ADMIN ── -->
+        <p class="sec-lbl collapsible mt-4" style="max-width:200px; padding-top:14px;">Admin</p>
+
        
 
-        <p class="collapsible px-2 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-[.14em] text-gray-600 font-display" style="max-width:200px;">System</p>
-
-       
-
-         <div class="nav-wrapper relative">
+        <!-- Reports -->
+        <div class="nav-wrapper relative">
             <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
                     <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -243,24 +252,22 @@
             <span class="nav-tooltip">Reports</span>
         </div>
 
-        <!-- Users — ACTIVE (create is under users) -->
+        <!-- Users -->
         <div class="nav-wrapper relative">
-            <a href="{{ route('users.index') }}" class="nav-item-inner relative flex items-center gap-3 px-3 py-2.5 rounded-xl"
-               style="background:linear-gradient(135deg,rgba(220,38,38,.18),rgba(185,28,28,.12));border:1px solid rgba(220,38,38,.28);">
-                <div class="nav-active-bar"></div>
+            <a href="{{ route('users.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-[17px] h-[17px] text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                 </div>
-                <span class="collapsible text-sm font-semibold text-red-200" style="max-width:120px;">Users</span>
-                <span class="collapsible ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full"
-                      style="max-width:50px;background:rgba(220,38,38,.2);color:#fca5a5;">{{ \App\Models\User::count() }}</span>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Users</span>
             </a>
             <span class="nav-tooltip">Users</span>
         </div>
 
-         <div class="nav-wrapper relative">
+
+         <!-- Settings -->
+        <div class="nav-wrapper relative">
             <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
                     <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -272,7 +279,6 @@
             </a>
             <span class="nav-tooltip">Settings</span>
         </div>
-
     </nav>
 
     <!-- User Footer -->
@@ -301,25 +307,25 @@
     </div>
 </aside>
 
-<!-- ===================== MAIN CONTENT ===================== -->
+<!-- ═══════════════════ MAIN CONTENT ═══════════════════ -->
 <div id="main-content" class="flex flex-col flex-1 min-h-screen" style="margin-left:260px;">
 
     <!-- TOP BAR -->
     <header class="topbar sticky top-0 z-40 flex items-center justify-between px-7 py-3.5">
         <div class="flex items-center gap-3">
-            <a href="{{ route('users.index') }}"
+            <a href="{{ route('subscription-rates.index') }}"
                class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors">
                 <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
             </a>
             <div>
-                <h1 class="font-display font-bold text-gray-900 text-[20px] leading-tight">Create New User</h1>
+                <h1 class="font-display font-bold text-gray-900 text-[20px] leading-tight">Create New Plan</h1>
                 <p class="text-gray-400 text-[12px] flex items-center gap-1.5 mt-0.5">
                     <svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
-                    Fill in the details to register a new user
+                    Fill in the details to create a new subscription plan
                 </p>
             </div>
         </div>
@@ -343,7 +349,7 @@
             <nav class="flex items-center gap-2 text-[12px] text-gray-400">
                 <a href="{{ route('dashboard') }}" class="hover:text-red-500 transition-colors font-medium">Dashboard</a>
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                <a href="{{ route('users.index') }}" class="hover:text-red-500 transition-colors font-medium">Users</a>
+                <a href="{{ route('subscription-rates.index') }}" class="hover:text-red-500 transition-colors font-medium">Subscription Rates</a>
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 <span class="text-gray-600 font-semibold">Create</span>
             </nav>
@@ -351,54 +357,41 @@
 
         <!-- Form Card -->
         <div class="form-card w-full max-w-3xl">
-
-            <!-- Card Header -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+                <!-- Card Header -->
                 <div class="px-7 py-5 border-b border-gray-100 flex items-center gap-4"
                      style="background:linear-gradient(90deg,#fff5f5,#fff);">
                     <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
                          style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
                     </div>
                     <div>
-                        <h2 class="font-display font-bold text-gray-900 text-base">Account Information</h2>
-                        <p class="text-gray-400 text-[12px]">All fields are required to create a new account</p>
-                    </div>
-                    <!-- Avatar preview -->
-                    <div class="ml-auto">
-                        <div id="avatar-preview"
-                             class="w-12 h-12 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-xl shadow-md transition-all"
-                             style="font-family:'Syne',sans-serif;">
-                            ?
-                        </div>
+                        <h2 class="font-display font-bold text-gray-900 text-base">Plan Information</h2>
+                        <p class="text-gray-400 text-[12px]">All fields are required to create a new subscription plan</p>
                     </div>
                 </div>
 
                 <!-- Form -->
-                <form method="POST" action="{{ route('users.store') }}" class="p-7 space-y-6">
+                <form method="POST" action="{{ route('subscription-rates.store') }}" class="p-7 space-y-6">
                     @csrf
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-                        <!-- Name -->
+                        <!-- Plan Name -->
                         <div class="space-y-1.5">
-                            <label for="name" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                Full Name
-                            </label>
+                            <label for="plan_name" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Plan Name</label>
                             <div class="input-wrapper">
                                 <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
-                                <input id="name" name="name" type="text"
-                                       value="{{ old('name') }}"
-                                       placeholder="e.g. Juan dela Cruz"
-                                       autofocus autocomplete="name"
-                                       class="form-input {{ $errors->has('name') ? 'error' : '' }}"
-                                       oninput="updateAvatar(this.value)"/>
+                                <input id="plan_name" name="plan_name" type="text"
+                                       value="{{ old('plan_name') }}" placeholder="e.g. Basic 10Mbps" autofocus
+                                       class="form-input {{ $errors->has('plan_name') ? 'error' : '' }}"/>
                             </div>
-                            @error('name')
+                            @error('plan_name')
                                 <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
                                     <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     {{ $message }}
@@ -406,22 +399,21 @@
                             @enderror
                         </div>
 
-                        <!-- Email -->
+                        <!-- Plan Type -->
                         <div class="space-y-1.5">
-                            <label for="email" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                Email Address
-                            </label>
-                            <div class="input-wrapper">
+                            <label for="plan_type" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Plan Type</label>
+                            <div class="input-wrapper input-wrapper-select">
                                 <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
                                 </svg>
-                                <input id="email" name="email" type="email"
-                                       value="{{ old('email') }}"
-                                       placeholder="e.g. juan@example.com"
-                                       autocomplete="username"
-                                       class="form-input {{ $errors->has('email') ? 'error' : '' }}"/>
+                                <select id="plan_type" name="plan_type" class="form-input {{ $errors->has('plan_type') ? 'error' : '' }}">
+                                    <option value="">Select Plan Type</option>
+                                    @foreach($planTypes as $type)
+                                        <option value="{{ $type }}" {{ old('plan_type') == $type ? 'selected' : '' }}>{{ $type }}</option>
+                                    @endforeach
+                                </select>
                             </div>
-                            @error('email')
+                            @error('plan_type')
                                 <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
                                     <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     {{ $message }}
@@ -429,75 +421,198 @@
                             @enderror
                         </div>
 
-                        <!-- Password -->
+                        <!-- Speed -->
                         <div class="space-y-1.5">
-                            <label for="password" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                Password
-                            </label>
+                            <label for="speed" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Speed</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                                <input id="speed" name="speed" type="text"
+                                       value="{{ old('speed') }}" placeholder="e.g. 10 Mbps"
+                                       class="form-input {{ $errors->has('speed') ? 'error' : '' }}"/>
+                            </div>
+                            @error('speed')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
+                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ $message }}
+                                </p>
+                            @enderror
+                        </div>
+
+                        <!-- Data Limit -->
+                        <div class="space-y-1.5">
+                            <label for="data_limit" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Data Limit</label>
+                            <div class="input-wrapper input-wrapper-select">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
+                                </svg>
+                                <select id="data_limit" name="data_limit" class="form-input {{ $errors->has('data_limit') ? 'error' : '' }}">
+                                    <option value="">Select Data Limit</option>
+                                    @foreach($dataLimits as $limit)
+                                        <option value="{{ $limit }}" {{ old('data_limit') == $limit ? 'selected' : '' }}>{{ $limit }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @error('data_limit')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
+                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ $message }}
+                                </p>
+                            @enderror
+                        </div>
+
+                        <!-- Monthly Fee -->
+                        <div class="space-y-1.5">
+                            <label for="monthly_fee" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Monthly Fee (₱)</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <input id="monthly_fee" name="monthly_fee" type="number"
+                                       value="{{ old('monthly_fee') }}" placeholder="0.00" min="0" step="0.01"
+                                       class="form-input {{ $errors->has('monthly_fee') ? 'error' : '' }}"/>
+                            </div>
+                            @error('monthly_fee')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
+                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ $message }}
+                                </p>
+                            @enderror
+                        </div>
+
+                        <!-- Billing Cycle -->
+                        <div class="space-y-1.5">
+                            <label for="billing_cycle" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Billing Cycle</label>
+                            <div class="input-wrapper input-wrapper-select">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <select id="billing_cycle" name="billing_cycle" class="form-input {{ $errors->has('billing_cycle') ? 'error' : '' }}">
+                                    <option value="">Select Billing Cycle</option>
+                                    @foreach($billingCycles as $cycle)
+                                        <option value="{{ $cycle }}" {{ old('billing_cycle') == $cycle ? 'selected' : '' }}>{{ $cycle }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @error('billing_cycle')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
+                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ $message }}
+                                </p>
+                            @enderror
+                        </div>
+
+                        <!-- Installation Fee -->
+                        <div class="space-y-1.5">
+                            <label for="installation_fee" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Installation Fee (₱)</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <input id="installation_fee" name="installation_fee" type="number"
+                                       value="{{ old('installation_fee', 0) }}" placeholder="0.00" min="0" step="0.01"
+                                       class="form-input {{ $errors->has('installation_fee') ? 'error' : '' }}"/>
+                            </div>
+                            @error('installation_fee')<p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">{{ $message }}</p>@enderror
+                        </div>
+
+                        <!-- Activation Fee -->
+                        <div class="space-y-1.5">
+                            <label for="activation_fee" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Activation Fee (₱)</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <input id="activation_fee" name="activation_fee" type="number"
+                                       value="{{ old('activation_fee', 0) }}" placeholder="0.00" min="0" step="0.01"
+                                       class="form-input {{ $errors->has('activation_fee') ? 'error' : '' }}"/>
+                            </div>
+                            @error('activation_fee')<p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">{{ $message }}</p>@enderror
+                        </div>
+
+                        <!-- Router Fee -->
+                        <div class="space-y-1.5">
+                            <label for="router_fee" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Router Fee (₱)</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                                </svg>
+                                <input id="router_fee" name="router_fee" type="number"
+                                       value="{{ old('router_fee', 0) }}" placeholder="0.00" min="0" step="0.01"
+                                       class="form-input {{ $errors->has('router_fee') ? 'error' : '' }}"/>
+                            </div>
+                            @error('router_fee')<p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">{{ $message }}</p>@enderror
+                        </div>
+
+                        <!-- Lock-in Period -->
+                        <div class="space-y-1.5">
+                            <label for="lock_in_period" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Lock-in Period (months)</label>
                             <div class="input-wrapper">
                                 <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                 </svg>
-                                <input id="password" name="password" type="password"
-                                       placeholder="Min. 8 characters"
-                                       autocomplete="new-password"
-                                       class="form-input {{ $errors->has('password') ? 'error' : '' }}"
-                                       oninput="checkStrength(this.value)"/>
-                                <button type="button" class="toggle-pw" onclick="togglePassword('password', this)">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                    </svg>
-                                </button>
+                                <input id="lock_in_period" name="lock_in_period" type="number"
+                                       value="{{ old('lock_in_period') }}" placeholder="0" min="0"
+                                       class="form-input {{ $errors->has('lock_in_period') ? 'error' : '' }}"/>
                             </div>
-                            <!-- Strength bar -->
-                            <div class="strength-bar mt-2">
-                                <div id="strength-fill" class="strength-fill"></div>
-                            </div>
-                            <p id="strength-label" class="text-[10px] font-semibold text-gray-400 mt-1"></p>
-                            @error('password')
-                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
-                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    {{ $message }}
-                                </p>
-                            @enderror
+                            @error('lock_in_period')<p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">{{ $message }}</p>@enderror
                         </div>
 
-                        <!-- Confirm Password -->
+                        <!-- Late Penalty -->
                         <div class="space-y-1.5">
-                            <label for="password_confirmation" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                Confirm Password
-                            </label>
+                            <label for="late_penalty" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Late Penalty (₱)</label>
                             <div class="input-wrapper">
                                 <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                <input id="password_confirmation" name="password_confirmation" type="password"
-                                       placeholder="Re-enter your password"
-                                       autocomplete="new-password"
-                                       class="form-input {{ $errors->has('password_confirmation') ? 'error' : '' }}"
-                                       oninput="checkMatch()"/>
-                                <button type="button" class="toggle-pw" onclick="togglePassword('password_confirmation', this)">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                    </svg>
-                                </button>
+                                <input id="late_penalty" name="late_penalty" type="number"
+                                       value="{{ old('late_penalty', 0) }}" placeholder="0.00" min="0" step="0.01"
+                                       class="form-input {{ $errors->has('late_penalty') ? 'error' : '' }}"/>
                             </div>
-                            <p id="match-label" class="text-[10px] font-semibold mt-1"></p>
-                            @error('password_confirmation')
-                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
-                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    {{ $message }}
-                                </p>
-                            @enderror
+                            @error('late_penalty')<p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">{{ $message }}</p>@enderror
+                        </div>
+
+                        <!-- Reconnection Fee -->
+                        <div class="space-y-1.5">
+                            <label for="reconnection_fee" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Reconnection Fee (₱)</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                <input id="reconnection_fee" name="reconnection_fee" type="number"
+                                       value="{{ old('reconnection_fee', 0) }}" placeholder="0.00" min="0" step="0.01"
+                                       class="form-input {{ $errors->has('reconnection_fee') ? 'error' : '' }}"/>
+                            </div>
+                            @error('reconnection_fee')<p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">{{ $message }}</p>@enderror
+                        </div>
+
+                        <!-- Is Active toggle -->
+                        <div class="md:col-span-2">
+                            <label class="flex items-center gap-3 cursor-pointer select-none w-fit">
+                                <input type="checkbox" name="is_active" value="1"
+                                       {{ old('is_active', true) ? 'checked' : '' }}
+                                       class="sr-only"
+                                       onchange="
+                                           const t=document.getElementById('active-toggle');
+                                           t.style.background=this.checked?'#22c55e':'#d1d5db';
+                                           document.getElementById('active-dot').style.transform=this.checked?'translateX(20px)':'translateX(2px)';
+                                           document.getElementById('active-lbl').textContent=this.checked?'Active':'Inactive';
+                                       "/>
+                                <div id="active-toggle" class="w-11 h-6 rounded-full relative transition-colors duration-200"
+                                     style="background:{{ old('is_active', true) ? '#22c55e' : '#d1d5db' }}">
+                                    <div id="active-dot" class="absolute top-[3px] w-[18px] h-[18px] bg-white rounded-full shadow transition-transform duration-200"
+                                         style="transform:translateX({{ old('is_active', true) ? '20px' : '2px' }})"></div>
+                                </div>
+                                <span id="active-lbl" class="text-sm font-semibold text-gray-700">{{ old('is_active', true) ? 'Active' : 'Inactive' }}</span>
+                            </label>
                         </div>
 
                     </div>
 
-                    <!-- Divider -->
+                    <!-- Actions -->
                     <div class="border-t border-gray-100 pt-5 flex items-center justify-between gap-3 flex-wrap">
-                        <a href="{{ route('users.index') }}"
+                        <a href="{{ route('subscription-rates.index') }}"
                            class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -509,53 +624,23 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                             </svg>
-                            Create User
+                            Create Plan
                         </button>
                     </div>
 
                 </form>
             </div>
-
-            <!-- Tips Card -->
-            <div class="mt-4 bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-4">
-                <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-xs font-bold text-gray-700 mb-1">Password Requirements</p>
-                        <ul class="space-y-1">
-                            <li class="flex items-center gap-1.5 text-[11px] text-gray-500">
-                                <svg class="w-3 h-3 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3"/></svg>
-                                At least 8 characters long
-                            </li>
-                            <li class="flex items-center gap-1.5 text-[11px] text-gray-500">
-                                <svg class="w-3 h-3 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3"/></svg>
-                                Mix of uppercase, lowercase, numbers & symbols recommended
-                            </li>
-                            <li class="flex items-center gap-1.5 text-[11px] text-gray-500">
-                                <svg class="w-3 h-3 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3"/></svg>
-                                Password and confirmation must match exactly
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </main>
 </div>
 
 <script>
-    // Sidebar toggle
     let collapsed = false;
     function toggleSidebar() {
         collapsed = !collapsed;
         const sidebar = document.getElementById('sidebar');
-        const main = document.getElementById('main-content');
-        const icon = document.getElementById('toggle-icon');
+        const main    = document.getElementById('main-content');
+        const icon    = document.getElementById('toggle-icon');
         if (collapsed) {
             sidebar.style.width = '72px';
             main.style.marginLeft = '72px';
@@ -566,61 +651,6 @@
             main.style.marginLeft = '260px';
             sidebar.classList.remove('sidebar-collapsed');
             icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>';
-        }
-    }
-
-    // Live avatar preview from name
-    function updateAvatar(name) {
-        const el = document.getElementById('avatar-preview');
-        el.textContent = name.trim() ? name.trim().charAt(0).toUpperCase() : '?';
-    }
-
-    // Password show/hide toggle
-    function togglePassword(id, btn) {
-        const input = document.getElementById(id);
-        const isText = input.type === 'text';
-        input.type = isText ? 'password' : 'text';
-        btn.style.color = isText ? '' : '#dc2626';
-    }
-
-    // Password strength
-    function checkStrength(val) {
-        const fill = document.getElementById('strength-fill');
-        const label = document.getElementById('strength-label');
-        let score = 0;
-        if (val.length >= 8) score++;
-        if (/[A-Z]/.test(val)) score++;
-        if (/[0-9]/.test(val)) score++;
-        if (/[^A-Za-z0-9]/.test(val)) score++;
-
-        const configs = [
-            { w: '0%',   color: '',         text: '' },
-            { w: '25%',  color: '#ef4444',  text: 'Weak' },
-            { w: '50%',  color: '#f59e0b',  text: 'Fair' },
-            { w: '75%',  color: '#3b82f6',  text: 'Good' },
-            { w: '100%', color: '#22c55e',  text: 'Strong' },
-        ];
-        const c = configs[score];
-        fill.style.width = c.w;
-        fill.style.background = c.color;
-        label.textContent = c.text;
-        label.style.color = c.color;
-
-        checkMatch();
-    }
-
-    // Password match
-    function checkMatch() {
-        const pw = document.getElementById('password').value;
-        const cf = document.getElementById('password_confirmation').value;
-        const label = document.getElementById('match-label');
-        if (!cf) { label.textContent = ''; return; }
-        if (pw === cf) {
-            label.textContent = '✓ Passwords match';
-            label.style.color = '#22c55e';
-        } else {
-            label.textContent = '✗ Passwords do not match';
-            label.style.color = '#ef4444';
         }
     }
 </script>
