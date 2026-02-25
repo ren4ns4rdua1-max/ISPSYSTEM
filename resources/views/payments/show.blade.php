@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Subscription Plan — NetManager</title>
+    <title>Payment Details — NetManager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -50,9 +50,6 @@
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
 
         html { overflow-x: hidden; }
-
-        @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-        .detail-card { animation: slideUp 0.4s ease both; }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen flex">
@@ -237,250 +234,160 @@
         </div>
 
     </nav>
-
-
-    <!-- User Footer -->
     <div class="border-t border-white/[.06] p-3">
         <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[.06] transition-colors">
-            <div class="w-9 h-9 rounded-xl flex-shrink-0 avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md">
-                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-            </div>
+            <div class="w-9 h-9 rounded-xl flex-shrink-0 avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
             <div class="collapsible min-w-0" style="max-width:140px;">
                 <p class="text-white text-[12px] font-semibold truncate leading-tight">{{ Auth::user()->name }}</p>
                 <p class="text-gray-500 text-[10px] truncate">{{ Auth::user()->email }}</p>
             </div>
             <div class="collapsible ml-auto flex-shrink-0" style="max-width:40px;">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" title="Logout"
-                            class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-red-500/20"
-                            style="background:rgba(255,255,255,.05);">
-                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                        </svg>
-                    </button>
-                </form>
+                <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit" title="Logout" class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-red-500/20" style="background:rgba(255,255,255,.05);"><svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></button></form>
             </div>
         </div>
     </div>
 </aside>
 
-<!-- ===================== MAIN CONTENT ===================== -->
 <div id="main-content" class="flex flex-col flex-1 min-h-screen" style="margin-left:260px;">
-
-    <!-- TOP BAR -->
     <header class="topbar sticky top-0 z-40 flex items-center justify-between px-7 py-3.5">
-        <div class="flex items-center gap-3">
-            <a href="{{ route('subscription-rates.index') }}"
-               class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        <div>
+            <h1 class="font-display font-bold text-gray-900 text-[20px] leading-tight">Payment Details</h1>
+            <p class="text-gray-400 text-[12px] flex items-center gap-1.5 mt-0.5">
+                <svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                 </svg>
-            </a>
-            <div>
-                <h1 class="font-display font-bold text-gray-900 text-[20px] leading-tight">Plan Details</h1>
-                <p class="text-gray-400 text-[12px] flex items-center gap-1.5 mt-0.5">
-                    <svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                    </svg>
-                    View subscription plan information
-                </p>
-            </div>
+                View payment details
+            </p>
         </div>
         <div class="flex items-center gap-3">
-            <button class="relative w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-colors">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            <a href="{{ route('payments.index') }}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-            </button>
-            <a href="{{ route('profile.edit') }}" class="w-9 h-9 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md">
-                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                Back
             </a>
         </div>
     </header>
 
-    <!-- PAGE BODY -->
-    <main class="flex-1 p-6 flex flex-col items-center justify-start">
+    <main class="flex-1 p-6">
+        @if(session('success'))
+            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                {{ session('success') }}
+            </div>
+        @endif
 
-        <!-- Breadcrumb -->
-        <div class="w-full max-w-3xl mb-5">
-            <nav class="flex items-center gap-2 text-[12px] text-gray-400">
-                <a href="{{ route('dashboard') }}" class="hover:text-red-500 transition-colors font-medium">Dashboard</a>
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                <a href="{{ route('subscription-rates.index') }}" class="hover:text-red-500 transition-colors font-medium">Subscription Rates</a>
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                <span class="text-gray-600 font-semibold">{{ $subscriptionRate->plan_name }}</span>
-            </nav>
-        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Receipt Card -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="bg-gradient-to-r from-red-500 to-red-600 p-6 text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-red-100 text-sm">Receipt Number</p>
+                                <p class="font-display font-bold text-2xl">{{ $payment->receipt_number }}</p>
+                            </div>
+                            <div class="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <p class="text-gray-500 text-sm mb-1">Client</p>
+                                <p class="font-semibold text-gray-800">{{ $payment->client->name }}</p>
+                                <p class="text-gray-600 text-sm">{{ $payment->client->email }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm mb-1">Invoice</p>
+                                @if($payment->billing)
+                                    <a href="{{ route('billings.show', $payment->billing->id) }}" class="font-semibold text-red-600 hover:underline">
+                                        {{ $payment->billing->invoice_number }}
+                                    </a>
+                                @else
+                                    <p class="text-gray-400">-</p>
+                                @endif
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm mb-1">Payment Method</p>
+                                <span class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium bg-blue-100 text-blue-700">
+                                    {{ $payment->payment_method_label }}
+                                </span>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm mb-1">Payment Date</p>
+                                <p class="font-semibold text-gray-800">{{ \Carbon\Carbon::parse($payment->payment_date)->format('F d, Y') }}</p>
+                            </div>
+                            @if($payment->payment_reference)
+                            <div>
+                                <p class="text-gray-500 text-sm mb-1">Payment Reference</p>
+                                <p class="font-semibold text-gray-800">{{ $payment->payment_reference }}</p>
+                            </div>
+                            @endif
+                            @if($payment->notes)
+                            <div class="col-span-2">
+                                <p class="text-gray-500 text-sm mb-1">Notes</p>
+                                <p class="text-gray-600">{{ $payment->notes }}</p>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-gray-100 p-6 bg-gray-50">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-600">Amount Paid</span>
+                            <span class="font-display font-bold text-xl text-gray-800">₱{{ number_format($payment->amount, 2) }}</span>
+                        </div>
+                        @if($payment->change_amount > 0)
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-600">Change</span>
+                            <span class="font-semibold text-gray-800">₱{{ number_format($payment->change_amount, 2) }}</span>
+                        </div>
+                        @endif
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-200">
+                            <span class="font-semibold text-gray-800">Total Received</span>
+                            <span class="font-display font-bold text-2xl text-green-600">₱{{ number_format($payment->total_paid, 2) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        <!-- Detail Cards -->
-        <div class="w-full max-w-3xl space-y-5">
-
-            <!-- Header Card -->
-            <div class="detail-card bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-xl flex items-center justify-center"
-                             style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                            </svg>
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="font-display font-bold text-gray-800 mb-4">Recorded By</h3>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center text-white font-semibold">
+                            {{ $payment->user ? substr($payment->user->name, 0, 1) : '?' }}
                         </div>
                         <div>
-                            <h2 class="font-display font-bold text-gray-900 text-xl">{{ $subscriptionRate->plan_name }}</h2>
-                            <p class="text-gray-400 text-sm">{{ $subscriptionRate->speed }} • {{ $subscriptionRate->plan_type }}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        @if($subscriptionRate->is_active)
-                            <span class="px-4 py-1.5 rounded-full text-sm font-semibold bg-green-100 text-green-700">
-                                ✓ Active
-                            </span>
-                        @else
-                            <span class="px-4 py-1.5 rounded-full text-sm font-semibold bg-gray-100 text-gray-500">
-                                ✕ Inactive
-                            </span>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pricing & Plan Info -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <!-- Plan Information -->
-                <div class="detail-card bg-white rounded-2xl shadow-sm border border-gray-100 p-6" style="animation-delay: 0.1s;">
-                    <h3 class="font-display font-bold text-gray-900 text-base mb-4 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        Plan Information
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                            <span class="text-gray-500 text-sm">Plan Name</span>
-                            <span class="font-semibold text-gray-800">{{ $subscriptionRate->plan_name }}</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                            <span class="text-gray-500 text-sm">Plan Type</span>
-                            <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-100 text-blue-700">
-                                {{ $subscriptionRate->plan_type }}
-                            </span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                            <span class="text-gray-500 text-sm">Speed</span>
-                            <span class="font-semibold text-gray-800">{{ $subscriptionRate->speed }}</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                            <span class="text-gray-500 text-sm">Data Limit</span>
-                            <span class="font-semibold text-gray-800">{{ $subscriptionRate->data_limit ?? 'N/A' }}</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2">
-                            <span class="text-gray-500 text-sm">Billing Cycle</span>
-                            <span class="font-semibold text-gray-800">{{ $subscriptionRate->billing_cycle }}</span>
+                            <p class="font-medium text-gray-800">{{ $payment->user ? $payment->user->name : 'Unknown' }}</p>
+                            <p class="text-gray-500 text-sm">{{ $payment->created_at->format('M d, Y h:i A') }}</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Pricing Information -->
-                <div class="detail-card bg-white rounded-2xl shadow-sm border border-gray-100 p-6" style="animation-delay: 0.2s;">
-                    <h3 class="font-display font-bold text-gray-900 text-base mb-4 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        Pricing Information
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                            <span class="text-gray-500 text-sm">Monthly Fee</span>
-                            <span class="font-bold text-xl text-green-600">₱{{ number_format($subscriptionRate->monthly_fee, 2) }}</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                            <span class="text-gray-500 text-sm">Installation Fee</span>
-                            <span class="font-semibold text-gray-800">₱{{ number_format($subscriptionRate->installation_fee, 2) }}</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                            <span class="text-gray-500 text-sm">Activation Fee</span>
-                            <span class="font-semibold text-gray-800">₱{{ number_format($subscriptionRate->activation_fee, 2) }}</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                            <span class="text-gray-500 text-sm">Router Fee</span>
-                            <span class="font-semibold text-gray-800">₱{{ number_format($subscriptionRate->router_fee, 2) }}</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2">
-                            <span class="text-gray-500 text-sm">Lock-in Period</span>
-                            <span class="font-semibold text-gray-800">{{ $subscriptionRate->lock_in_period ? $subscriptionRate->lock_in_period . ' months' : 'None' }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Additional Fees -->
-                <div class="detail-card bg-white rounded-2xl shadow-sm border border-gray-100 p-6" style="animation-delay: 0.3s;">
-                    <h3 class="font-display font-bold text-gray-900 text-base mb-4 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                        Additional Fees
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                            <span class="text-gray-500 text-sm">Late Penalty</span>
-                            <span class="font-semibold text-gray-800">₱{{ number_format($subscriptionRate->late_penalty, 2) }}</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2">
-                            <span class="text-gray-500 text-sm">Reconnection Fee</span>
-                            <span class="font-semibold text-gray-800">₱{{ number_format($subscriptionRate->reconnection_fee, 2) }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Timestamps -->
-                <div class="detail-card bg-white rounded-2xl shadow-sm border border-gray-100 p-6" style="animation-delay: 0.4s;">
-                    <h3 class="font-display font-bold text-gray-900 text-base mb-4 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        Record Information
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                            <span class="text-gray-500 text-sm">Created At</span>
-                            <span class="font-semibold text-gray-800">{{ $subscriptionRate->created_at->format('M d, Y g:i A') }}</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2">
-                            <span class="text-gray-500 text-sm">Updated At</span>
-                            <span class="font-semibold text-gray-800">{{ $subscriptionRate->updated_at->format('M d, Y g:i A') }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="detail-card bg-white rounded-2xl shadow-sm border border-gray-100 p-6" style="animation-delay: 0.5s;">
-                <div class="flex items-center justify-between">
-                    <form action="{{ route('subscription-rates.destroy', $subscriptionRate->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this plan?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                            </svg>
-                            Delete Plan
-                        </button>
-                    </form>
-                    <div class="flex items-center gap-3">
-                        <a href="{{ route('subscription-rates.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all">
-                            Back to List
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="font-display font-bold text-gray-800 mb-4">Actions</h3>
+                    <div class="space-y-2">
+                        <a href="{{ route('payments.edit', $payment->id) }}" class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-white rounded-xl text-sm font-medium transition-all" style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            Edit Payment
                         </a>
-                        <a href="{{ route('subscription-rates.edit', $subscriptionRate->id) }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl shadow-md hover:shadow-lg transition-all" style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                            </svg>
-                            Edit Plan
-                        </a>
+                        <form action="{{ route('payments.destroy', $payment->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this payment?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-red-600 border border-red-200 rounded-xl text-sm font-medium hover:bg-red-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                Delete Payment
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
 </div>

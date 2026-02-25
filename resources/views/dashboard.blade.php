@@ -181,7 +181,7 @@
 
         <!-- Clients -->
         <div class="nav-wrapper relative">
-            <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+            <a href="{{ route('clients.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
                     <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -205,35 +205,9 @@
             <span class="nav-tooltip">Subscription Rates</span>
         </div>
 
-        <!-- Billing -->
-        <div class="nav-wrapper relative">
-            <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
-                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                    </svg>
-                </div>
-                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Billing</span>
-            </a>
-            <span class="nav-tooltip">Billing</span>
-        </div>
-
-        <!-- Payments -->
-        <div class="nav-wrapper relative">
-            <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
-                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                    </svg>
-                </div>
-                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Payments</span>
-            </a>
-            <span class="nav-tooltip">Payments</span>
-        </div>
-
         <!-- Sales -->
         <div class="nav-wrapper relative">
-            <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+            <a href="{{ route('sales.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
                     <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
@@ -246,6 +220,48 @@
             <span class="nav-tooltip">Sales</span>
         </div>
 
+       
+
+        <!-- Billing -->
+        <div class="nav-wrapper relative">
+            <a href="{{ route('billings.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                </div>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Billing</span>
+            </a>
+            <span class="nav-tooltip">Billing</span>
+        </div>
+
+        <!-- Payments -->
+        <div class="nav-wrapper relative">
+            <a href="{{ route('payments.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                    </svg>
+                </div>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Payments</span>
+            </a>
+            <span class="nav-tooltip">Payments</span>
+        </div>
+
+         <!-- Technicians -->
+        <div class="nav-wrapper relative">
+            <a href="{{ route('technicians.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+        d="M14.7 6.3a4 4 0 01-5.4 5.4l-5.6 5.6a2 2 0 102.8 2.8l5.6-5.6a4 4 0 005.4-5.4z"/>
+</svg>
+                </div>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Technicians</span>
+            </a>
+            <span class="nav-tooltip">Technicians</span>
+        </div>
+
 
         <!-- ── ADMIN ── -->
         <p class="sec-lbl collapsible mt-3" style="max-width:200px;padding-top:12px;">Admin</p>
@@ -254,7 +270,7 @@
         
         <!-- Reports -->
         <div class="nav-wrapper relative">
-            <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+            <a href="{{ route('reports.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
                     <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -343,12 +359,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
             </div>
-            <button class="relative w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-colors">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                </svg>
-                <span class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold text-white flex items-center justify-center" style="background:#dc2626;">2</span>
-            </button>
+            
             <a href="{{ route('profile.edit') }}" class="w-9 h-9 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md">
                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </a>
@@ -371,11 +382,11 @@
                         All systems operational. Monitor clients, manage subscriptions, and track revenue from this central hub.
                     </p>
                     <div class="flex items-center gap-3 mt-5">
-                        <a href="#" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-red-700 font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
+                        <a href="{{ route('clients.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-red-700 font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                             Add Client
                         </a>
-                        <a href="#" class="inline-flex items-center gap-2 px-5 py-2.5 text-white font-semibold text-sm rounded-xl hover:bg-white/20 transition-all" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);">
+                        <a href="{{ route('reports.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-white font-semibold text-sm rounded-xl hover:bg-white/20 transition-all" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);">
                             View Reports
                         </a>
                     </div>
@@ -436,16 +447,16 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
                     </div>
-                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg" style="color:#6b7280;background:#f3f4f6;">0%</span>
+                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg" style="color:#6b7280;background:#f3f4f6;">{{ $totalClients > 0 ? round(($activeClients / $totalClients) * 100) : 0 }}%</span>
                 </div>
                 <p class="text-gray-400 text-[11px] font-semibold uppercase tracking-wider mb-1">Active Clients</p>
-                <p class="font-display font-extrabold text-gray-900 mb-3" style="font-size:2.1rem;line-height:1;">0</p>
+                <p class="font-display font-extrabold text-gray-900 mb-3" style="font-size:2.1rem;line-height:1;">{{ $activeClients }}</p>
                 <div class="h-1.5 rounded-full bg-gray-100 overflow-hidden">
-                    <div class="progress-fill h-full rounded-full" style="width:0%;background:linear-gradient(90deg,#34d399,#10b981);"></div>
+                    <div class="progress-fill h-full rounded-full" style="width:{{ $totalClients > 0 ? ($activeClients / $totalClients) * 100 : 0 }}%;background:linear-gradient(90deg,#34d399,#10b981);"></div>
                 </div>
                 <div class="flex items-center justify-between mt-2">
                     <p class="text-gray-400" style="font-size:10px;">Currently subscribed</p>
-                    <a href="#" class="text-emerald-500 font-semibold" style="font-size:10px;">Manage →</a>
+                    <a href="{{ route('clients.index') }}" class="text-emerald-500 font-semibold" style="font-size:10px;">Manage →</a>
                 </div>
             </div>
 
@@ -481,13 +492,13 @@
                     <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg" style="color:#d97706;background:#fffbeb;">This Month</span>
                 </div>
                 <p class="text-gray-400 text-[11px] font-semibold uppercase tracking-wider mb-1">Total Revenue</p>
-                <p class="font-display font-extrabold text-gray-900 mb-3" style="font-size:2.1rem;line-height:1;">₱0.00</p>
+                <p class="font-display font-extrabold text-gray-900 mb-3" style="font-size:2.1rem;line-height:1;">₱{{ number_format($totalRevenue, 2) }}</p>
                 <div class="h-1.5 rounded-full bg-gray-100 overflow-hidden">
-                    <div class="progress-fill h-full rounded-full" style="width:0%;background:linear-gradient(90deg,#fbbf24,#f59e0b);"></div>
+                    <div class="progress-fill h-full rounded-full" style="width:100%;background:linear-gradient(90deg,#fbbf24,#f59e0b);"></div>
                 </div>
                 <div class="flex items-center justify-between mt-2">
                     <p class="text-gray-400" style="font-size:10px;">From subscriptions</p>
-                    <a href="#" class="text-amber-500 font-semibold" style="font-size:10px;">Report →</a>
+                    <a href="{{ route('reports.index') }}" class="text-amber-500 font-semibold" style="font-size:10px;">Report →</a>
                 </div>
             </div>
         </div>
@@ -520,13 +531,13 @@
                     <div class="flex items-center gap-6 mb-4 flex-wrap">
                         <div>
                             <p style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;">Total YTD</p>
-                            <p class="font-display font-extrabold text-gray-900 text-xl leading-tight">₱175,400</p>
+                            <p class="font-display font-extrabold text-gray-900 text-xl leading-tight">₱{{ number_format($totalRevenue, 2) }}</p>
                         </div>
                         <div>
                             <p style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;">Avg / Month</p>
-                            <p class="font-display font-bold text-gray-700 text-base leading-tight">₱29,233</p>
+                            <p class="font-display font-bold text-gray-700 text-base leading-tight">₱{{ number_format($totalRevenue > 0 ? $totalRevenue / 6 : 0, 2) }}</p>
                         </div>
-                        <span class="trend-pill trend-up">↑ 18.4% vs last period</span>
+                        <span class="trend-pill {{ $revenueGrowth >= 0 ? 'trend-up' : 'trend-down' }}">{{ $revenueGrowth >= 0 ? '↑' : '↓' }} {{ number_format(abs($revenueGrowth), 1) }}% vs last period</span>
                     </div>
                     <!-- Legend -->
                     <div class="flex items-center gap-4 mb-3">
@@ -563,27 +574,17 @@
                     <div style="position:relative;height:170px;display:flex;align-items:center;justify-content:center;">
                         <canvas id="donutChart"></canvas>
                         <div style="position:absolute;text-align:center;pointer-events:none;">
-                            <p class="font-display font-extrabold text-gray-800 text-2xl leading-none">140</p>
+                            <p class="font-display font-extrabold text-gray-800 text-2xl leading-none">{{ $totalClients }}</p>
                             <p style="font-size:10px;color:#9ca3af;font-weight:600;margin-top:2px;">Clients</p>
                         </div>
                     </div>
                     <div class="space-y-2.5 mt-4">
+                        @foreach($planDistribution as $plan)
                         <div class="flex items-center justify-between text-[12px]">
-                            <span class="flex items-center gap-2 text-gray-600 font-medium"><span class="ldot" style="background:#dc2626;"></span>Basic</span>
-                            <span class="font-bold text-gray-800">53 <span class="text-gray-400 font-normal text-[11px]">38%</span></span>
+                            <span class="flex items-center gap-2 text-gray-600 font-medium"><span class="ldot" style="background:{{ $plan['color'] }};"></span>{{ $plan['name'] }}</span>
+                            <span class="font-bold text-gray-800">{{ $plan['count'] }} <span class="text-gray-400 font-normal text-[11px]">{{ $plan['percentage'] }}%</span></span>
                         </div>
-                        <div class="flex items-center justify-between text-[12px]">
-                            <span class="flex items-center gap-2 text-gray-600 font-medium"><span class="ldot" style="background:#f87171;"></span>Standard</span>
-                            <span class="font-bold text-gray-800">41 <span class="text-gray-400 font-normal text-[11px]">29%</span></span>
-                        </div>
-                        <div class="flex items-center justify-between text-[12px]">
-                            <span class="flex items-center gap-2 text-gray-600 font-medium"><span class="ldot" style="background:#8b5cf6;"></span>Premium</span>
-                            <span class="font-bold text-gray-800">31 <span class="text-gray-400 font-normal text-[11px]">22%</span></span>
-                        </div>
-                        <div class="flex items-center justify-between text-[12px]">
-                            <span class="flex items-center gap-2 text-gray-600 font-medium"><span class="ldot" style="background:#f59e0b;"></span>Enterprise</span>
-                            <span class="font-bold text-gray-800">15 <span class="text-gray-400 font-normal text-[11px]">11%</span></span>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -653,18 +654,22 @@ Chart.defaults.font.family = "'DM Sans', sans-serif";
 Chart.defaults.color = '#9ca3af';
 
 // ═══════════════════════════════════
-// 1. REVENUE TREND — Line Chart
+// 1. REVENUE TREND — Line Chart (Dynamic Data)
 // ═══════════════════════════════════
+// PHP data passed to JavaScript
+const revenueData6m = @json($sixMonthRevenue);
+const revenueData12m = @json($twelveMonthRevenue);
+
 const revData = {
     '6m': {
-        labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'],
-        curr:   [18400, 22100, 19800, 26500, 31200, 28900],
-        prev:   [14200, 18600, 17300, 21000, 24800, 22400],
+        labels: revenueData6m.map(item => item.month),
+        curr: revenueData6m.map(item => item.revenue),
+        prev: revenueData6m.map(item => Math.round(item.revenue * 0.8)),
     },
     '12m': {
-        labels: ['Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb'],
-        curr:   [11200,13400,15800,17200,19600,16800,18400,22100,19800,26500,31200,28900],
-        prev:   [9100,10800,12200,13900,15600,14200,14200,18600,17300,21000,24800,22400],
+        labels: revenueData12m.map(item => item.month),
+        curr: revenueData12m.map(item => item.revenue),
+        prev: revenueData12m.map(item => Math.round(item.revenue * 0.8)),
     }
 };
 
@@ -729,15 +734,18 @@ function switchRevenue(btn, period) {
 }
 
 // ═══════════════════════════════════
-// 2. PLAN MIX — Doughnut
+// 2. PLAN MIX — Doughnut (Dynamic Data)
 // ═══════════════════════════════════
+const planDistribution = @json($planDistribution);
+const donutData = planDistribution.map(p => ({ name: p.name, count: p.count, color: p.color, percentage: p.percentage }));
+
 new Chart(document.getElementById('donutChart'), {
     type: 'doughnut',
     data: {
-        labels: ['Basic', 'Standard', 'Premium', 'Enterprise'],
+        labels: donutData.map(d => d.name),
         datasets: [{
-            data: [38, 29, 22, 11],
-            backgroundColor: ['#dc2626', '#f87171', '#8b5cf6', '#f59e0b'],
+            data: donutData.map(d => d.count),
+            backgroundColor: donutData.map(d => d.color),
             borderWidth: 3, borderColor: '#fff', hoverOffset: 7,
         }]
     },
@@ -749,91 +757,8 @@ new Chart(document.getElementById('donutChart'), {
             tooltip: {
                 backgroundColor: '#111827', titleColor: '#f9fafb', bodyColor: '#d1d5db',
                 padding: 11, borderRadius: 10,
-                callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}%` }
+                callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` }
             }
-        }
-    }
-});
-
-// ═══════════════════════════════════
-// 3. CLIENT GROWTH — Bar
-// ═══════════════════════════════════
-new Chart(document.getElementById('clientChart'), {
-    type: 'bar',
-    data: {
-        labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'],
-        datasets: [{
-            label: 'New Clients',
-            data: [12, 19, 14, 23, 24, 27],
-            backgroundColor: (ctx) => {
-                const i = ctx.dataIndex, len = ctx.dataset.data.length;
-                return i === len - 1 ? '#10b981' : 'rgba(16,185,129,.18)';
-            },
-            borderRadius: 8, borderSkipped: false,
-        }]
-    },
-    options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                backgroundColor: '#111827', titleColor: '#f9fafb', bodyColor: '#9ca3af',
-                padding: 11, borderRadius: 10,
-            }
-        },
-        scales: {
-            x: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 11 } } },
-            y: { grid: { color: '#f3f4f6' }, border: { display: false }, ticks: { font: { size: 11 }, stepSize: 8 } }
-        }
-    }
-});
-
-// ═══════════════════════════════════
-// 4. BANDWIDTH — Semi-doughnut Gauge
-// ═══════════════════════════════════
-new Chart(document.getElementById('gaugeChart'), {
-    type: 'doughnut',
-    data: {
-        datasets: [{
-            data: [67, 33],
-            backgroundColor: ['#f59e0b', '#f3f4f6'],
-            borderWidth: 0, borderRadius: [8, 0],
-        }]
-    },
-    options: {
-        responsive: true, maintainAspectRatio: false,
-        circumference: 180, rotation: -90, cutout: '76%',
-        plugins: { legend: { display: false }, tooltip: { enabled: false } },
-    }
-});
-
-// ═══════════════════════════════════
-// 5. PAYMENT STATUS — Horizontal Bar
-// ═══════════════════════════════════
-new Chart(document.getElementById('paymentChart'), {
-    type: 'bar',
-    data: {
-        labels: ['Paid on Time', 'Pending', 'Overdue', 'Partial', 'Waived'],
-        datasets: [{
-            label: 'Clients',
-            data: [84, 31, 12, 8, 5],
-            backgroundColor: ['#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#3b82f6'],
-            borderRadius: 7, borderSkipped: false,
-        }]
-    },
-    options: {
-        indexAxis: 'y',
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                backgroundColor: '#111827', titleColor: '#f9fafb', bodyColor: '#9ca3af',
-                padding: 11, borderRadius: 10,
-            }
-        },
-        scales: {
-            x: { grid: { color: '#f3f4f6' }, border: { display: false }, ticks: { font: { size: 10 } } },
-            y: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 11 } } }
         }
     }
 });

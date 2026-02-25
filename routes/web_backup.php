@@ -9,7 +9,6 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\TechnicianController;
 use App\Http\Controllers\ReportsController;
-use App\Http\Controllers\DashboardController;
 use App\Models\SubscriptionRate;
 use Illuminate\Support\Facades\Route;
 
@@ -21,9 +20,9 @@ Route::get('/', function () {
     return view('welcome', compact('subscriptionRates'));
 });
 
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -61,10 +60,6 @@ Route::middleware('auth')->group(function () {
     Route::post('technicians/jobs/{job}/start', [TechnicianController::class, 'startJob'])->name('technicians.start-job');
     Route::post('technicians/jobs/{job}/complete', [TechnicianController::class, 'completeJob'])->name('technicians.complete-job');
     Route::post('technicians/jobs/{job}/cancel', [TechnicianController::class, 'cancelJob'])->name('technicians.cancel-job');
-    
-    // Reports Routes
-    Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
-    Route::get('/reports/export', [ReportsController::class, 'export'])->name('reports.export');
 });
 
 require __DIR__.'/auth.php';
