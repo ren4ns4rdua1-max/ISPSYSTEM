@@ -6,6 +6,7 @@
     <title>ISP Dashboard — ADMIN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
@@ -126,6 +127,47 @@
         .fu3 { animation: fadeUp .38s .14s ease both; }
         .fu4 { animation: fadeUp .38s .21s ease both; }
         .fu5 { animation: fadeUp .38s .28s ease both; }
+        
+        /* Submenu styles */
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: 2rem;
+        }
+        .submenu.open {
+            max-height: 300px;
+        }
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #9ca3af;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .submenu-item:hover {
+            color: #fca5a5;
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(3px);
+        }
+        .submenu-item.active {
+            color: #f87171;
+            background: rgba(220, 38, 38, 0.1);
+        }
+        .nav-item-has-sub {
+            cursor: pointer;
+        }
+        .chevron-icon {
+            transition: transform 0.3s ease;
+        }
+        .chevron-icon.rotated {
+            transform: rotate(90deg);
+        }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen flex">
@@ -143,8 +185,8 @@
             </svg>
         </div>
         <div class="collapsible" style="max-width:200px;">
-            <p class="font-display font-bold text-white text-[14px] leading-tight tracking-tight">ADMIN</p>
-            <p class="text-red-400 text-[10px] font-medium tracking-wide">ISP Control Center</p>
+            <p class="font-display font-bold text-white text-[14px] leading-tight tracking-tight">ISP Admin</p>
+            <p class="text-red-400 text-[10px] font-medium tracking-wide">Control Center</p>
         </div>
         <button onclick="toggleSidebar()" id="toggle-btn"
                 class="ml-auto flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:bg-white/10"
@@ -161,7 +203,7 @@
         <!-- ── OVERVIEW ── -->
         <p class="sec-lbl collapsible" style="max-width:200px;">Overview</p>
 
-        <!-- Dashboard — active -->
+        <!-- Dashboard -->
         <div class="nav-wrapper relative">
             <a href="{{ route('dashboard') }}" class="nav-item-inner relative flex items-center gap-3 px-3 py-2.5 rounded-xl"
                style="background:linear-gradient(135deg,rgba(220,38,38,.18),rgba(185,28,28,.12));border:1px solid rgba(220,38,38,.28);">
@@ -192,7 +234,7 @@
             <span class="nav-tooltip">Clients</span>
         </div>
 
-        <!-- Subscription Rates -->
+       
         <div class="nav-wrapper relative">
             <a href="{{ route('subscription-rates.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -200,12 +242,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
                 </div>
-                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Subscription Rates</span>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Subscription Plans</span>
             </a>
-            <span class="nav-tooltip">Subscription Rates</span>
+            <span class="nav-tooltip">Subscription Plans</span>
         </div>
 
-        <!-- Sales -->
         <div class="nav-wrapper relative">
             <a href="{{ route('sales.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -220,9 +261,6 @@
             <span class="nav-tooltip">Sales</span>
         </div>
 
-       
-
-        <!-- Billing -->
         <div class="nav-wrapper relative">
             <a href="{{ route('billings.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -235,7 +273,6 @@
             <span class="nav-tooltip">Billing</span>
         </div>
 
-        <!-- Payments -->
         <div class="nav-wrapper relative">
             <a href="{{ route('payments.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -248,27 +285,22 @@
             <span class="nav-tooltip">Payments</span>
         </div>
 
-         <!-- Technicians -->
         <div class="nav-wrapper relative">
             <a href="{{ route('technicians.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
                     <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-        d="M14.7 6.3a4 4 0 01-5.4 5.4l-5.6 5.6a2 2 0 102.8 2.8l5.6-5.6a4 4 0 005.4-5.4z"/>
-</svg>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M14.7 6.3a4 4 0 01-5.4 5.4l-5.6 5.6a2 2 0 102.8 2.8l5.6-5.6a4 4 0 005.4-5.4z"/>
+                    </svg>
                 </div>
                 <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Technicians</span>
             </a>
             <span class="nav-tooltip">Technicians</span>
         </div>
 
+        <!-- Reports & Analytics Section -->
+        <p class="sec-lbl collapsible mt-3" style="max-width:200px;padding-top:12px;">Reports </p>
 
-        <!-- ── ADMIN ── -->
-        <p class="sec-lbl collapsible mt-3" style="max-width:200px;padding-top:12px;">Admin</p>
-
-
-        
-        <!-- Reports -->
         <div class="nav-wrapper relative">
             <a href="{{ route('reports.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -281,7 +313,11 @@
             <span class="nav-tooltip">Reports</span>
         </div>
 
-        <!-- Users -->
+       
+
+        <!-- Administration Section -->
+        <p class="sec-lbl collapsible mt-3" style="max-width:200px;padding-top:12px;">Administration</p>
+
         <div class="nav-wrapper relative">
             <a href="{{ route('users.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -289,26 +325,51 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                 </div>
-                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Users</span>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">User Management</span>
             </a>
-            <span class="nav-tooltip">Users</span>
+            <span class="nav-tooltip">User Management</span>
         </div>
 
-        
-        <!-- Settings -->
-        <div class="nav-wrapper relative">
-            <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+        <!-- Settings with Submenu -->
+        <div class="nav-wrapper relative" x-data="{ open: false }">
+            <div @click="open = !open" class="nav-item-inner nav-item-has-sub flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all cursor-pointer">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
                     <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                 </div>
-                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Settings</span>
-            </a>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:140px;">Settings</span>
+                <svg class="chevron-icon w-3.5 h-3.5 text-gray-500 ml-auto" :class="{'rotated': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </div>
             <span class="nav-tooltip">Settings</span>
+            
+            <div class="submenu" :class="{'open': open}">
+                <a href="#" class="submenu-item flex items-center gap-2 px-3 py-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span>General Settings</span>
+                </a>
+                <a href="#" class="submenu-item flex items-center gap-2 px-3 py-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+                    </svg>
+                    <span>Template Customization</span>
+                </a>
+                <a href="#" class="submenu-item flex items-center gap-2 px-3 py-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    <span>Backup & Restore</span>
+                </a>
+            </div>
         </div>
 
+       
     </nav>
 
     <!-- User Footer -->

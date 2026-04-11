@@ -45,17 +45,16 @@ class SalesController extends Controller
             ->latest()
             ->paginate(10);
 
-        // Calculate summary stats
-        $stats = [
-            'total_sales' => Client::count(),
-            'active_clients' => Client::where('status', 'active')->count(),
-            'new_this_month' => Client::whereMonth('start_date', now()->month)
-                ->whereYear('start_date', now()->year)->count(),
-            'pending_billings' => Billing::whereIn('status', ['pending', 'overdue'])->count(),
-            'total_revenue' => Billing::where('status', 'paid')->sum('total_amount'),
-        ];
+// Calculate summary stats for dashboard cards
+        $totalSales = Client::whereHas('billings')->count();
+        $activeSales = Client::whereHas('billings')->where('status', 'active')->count();
+        $monthlySales = Client::whereHas('billings')
+            ->whereMonth('start_date', now()->month)
+            ->whereYear('start_date', now()->year)
+            ->count();
+        $totalRevenue = Billing::where('status', 'paid')->sum('total_amount');
 
-        return view('sales.index', compact('clients', 'search', 'status', 'dateFrom', 'dateTo', 'stats'));
+        return view('sales.index', compact('clients', 'search', 'status', 'dateFrom', 'dateTo', 'totalSales', 'activeSales', 'monthlySales', 'totalRevenue'));
     }
 
     /**

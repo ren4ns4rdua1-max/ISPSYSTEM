@@ -22,14 +22,42 @@
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
         html { scroll-behavior: smooth; overflow-x: hidden; }
-
         body {
             font-family: 'DM Sans', sans-serif;
             background: var(--off-white);
             color: #0f172a;
             line-height: 1.6;
+            cursor: none;
+        }
+
+        /* =================== CUSTOM CURSOR =================== */
+        .cursor-dot {
+            position: fixed;
+            width: 8px; height: 8px;
+            background: #dc2626;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease, background 0.2s;
+        }
+
+        .cursor-ring {
+            position: fixed;
+            width: 36px; height: 36px;
+            border: 1.5px solid rgba(220,38,38,.6);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease, height 0.3s ease, border-color 0.3s, transform 0.12s ease;
+        }
+
+        .cursor-ring.hover {
+            width: 56px; height: 56px;
+            border-color: rgba(220,38,38,.9);
+            background: rgba(220,38,38,.05);
         }
 
         .font-display { font-family: 'Syne', sans-serif; }
@@ -77,6 +105,12 @@
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 12px rgba(220,38,38,.4);
             flex-shrink: 0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .nav-logo:hover .nav-logo-icon {
+            transform: rotate(10deg) scale(1.1);
+            box-shadow: 0 6px 20px rgba(220,38,38,.7);
         }
 
         .nav-logo-icon svg { width: 18px; height: 18px; color: white; }
@@ -95,8 +129,19 @@
             font-weight: 500;
             transition: color .25s;
             letter-spacing: .02em;
+            position: relative;
         }
 
+        .nav-links a:not(.nav-login-btn)::after {
+            content: '';
+            position: absolute;
+            bottom: -3px; left: 0;
+            width: 0; height: 1.5px;
+            background: #dc2626;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:not(.nav-login-btn):hover::after { width: 100%; }
         .nav-links a:hover { color: white; }
 
         .nav-login-btn {
@@ -116,6 +161,14 @@
         .nav-login-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(220,38,38,.5) !important;
+        }
+
+        /* =================== PARTICLE CANVAS =================== */
+        #particle-canvas {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
         }
 
         /* =================== HERO =================== */
@@ -148,6 +201,12 @@
                 linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
             background-size: 48px 48px;
             mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 20%, transparent 80%);
+            animation: gridShift 20s linear infinite;
+        }
+
+        @keyframes gridShift {
+            0% { background-position: 0 0; }
+            100% { background-position: 48px 48px; }
         }
 
         .hero-slash {
@@ -257,8 +316,8 @@
         }
 
         @keyframes pulse {
-            0%,100% { opacity: 1; transform: scale(1); }
-            50% { opacity: .6; transform: scale(1.4); }
+            0%,100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+            50% { opacity: .6; transform: scale(1.4); box-shadow: 0 0 0 6px rgba(239,68,68,0); }
         }
 
         .hero-title {
@@ -275,9 +334,16 @@
         .hero-title .line-accent {
             display: block;
             background: linear-gradient(90deg, #f87171 0%, #dc2626 40%, #fca5a5 100%);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            animation: gradientShift 4s linear infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
         }
 
         .hero-subtitle {
@@ -312,7 +378,7 @@
             font-size: .95rem;
             text-decoration: none;
             border: none;
-            cursor: pointer;
+            cursor: none;
             box-shadow: 0 8px 28px rgba(220,38,38,.45), 0 0 0 1px rgba(220,38,38,.3);
             transition: all .3s ease;
             position: relative;
@@ -348,7 +414,7 @@
             font-size: .95rem;
             text-decoration: none;
             border: 1px solid rgba(255,255,255,.15);
-            cursor: pointer;
+            cursor: none;
             transition: all .3s ease;
         }
 
@@ -359,6 +425,7 @@
             border-color: rgba(255,255,255,.25);
         }
 
+        /* =================== COUNTER ANIMATION =================== */
         .hero-stats {
             display: flex;
             align-items: center;
@@ -372,6 +439,11 @@
             padding: 1.4rem 2.5rem;
             text-align: center;
             position: relative;
+            cursor: default;
+        }
+
+        .hero-stat:hover .hero-stat-num {
+            transform: scale(1.08);
         }
 
         .hero-stat + .hero-stat::before {
@@ -389,11 +461,10 @@
             color: white;
             line-height: 1;
             margin-bottom: .3rem;
+            transition: transform 0.3s ease;
         }
 
-        .hero-stat-num span {
-            color: #ef4444;
-        }
+        .hero-stat-num span { color: #ef4444; }
 
         .hero-stat-label {
             font-size: .75rem;
@@ -415,7 +486,10 @@
             z-index: 10;
             animation: heroFadeUp 1s .8s ease both;
             opacity: .5;
+            transition: opacity 0.3s;
         }
+
+        .scroll-indicator:hover { opacity: 1; }
 
         .scroll-indicator span {
             font-size: .7rem;
@@ -455,6 +529,42 @@
             padding: 7rem 2rem;
             background: var(--off-white);
             position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated background blobs */
+        .plans-section::before, .plans-section::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+            opacity: 0.06;
+        }
+
+        .plans-section::before {
+            width: 500px; height: 500px;
+            background: #dc2626;
+            top: -100px; left: -150px;
+            animation: blobMove1 18s ease-in-out infinite;
+        }
+
+        .plans-section::after {
+            width: 400px; height: 400px;
+            background: #dc2626;
+            bottom: -100px; right: -100px;
+            animation: blobMove2 14s ease-in-out infinite;
+        }
+
+        @keyframes blobMove1 {
+            0%,100% { transform: translate(0,0) scale(1); }
+            33% { transform: translate(80px, 60px) scale(1.1); }
+            66% { transform: translate(20px, -40px) scale(.9); }
+        }
+
+        @keyframes blobMove2 {
+            0%,100% { transform: translate(0,0) scale(1); }
+            50% { transform: translate(-60px, -80px) scale(1.15); }
         }
 
         .section-header {
@@ -505,8 +615,23 @@
             border: 1.5px solid var(--border);
             position: relative;
             overflow: hidden;
-            transition: all .35s cubic-bezier(0.175,0.885,0.32,1.275);
+            transition: all .45s cubic-bezier(0.175,0.885,0.32,1.275);
+            cursor: none;
         }
+
+        /* Shine sweep on hover */
+        .plan-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 60%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+            transform: skewX(-15deg);
+            transition: left 0.6s ease;
+            pointer-events: none;
+        }
+
+        .plan-card:hover::after { left: 160%; }
 
         .plan-card::before {
             content: '';
@@ -518,8 +643,8 @@
         }
 
         .plan-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 24px 60px rgba(0,0,0,.1);
+            transform: translateY(-12px);
+            box-shadow: 0 28px 70px rgba(0,0,0,.12);
             border-color: #fecaca;
         }
 
@@ -536,11 +661,13 @@
 
         .plan-card.featured::before {
             background: linear-gradient(90deg, #dc2626, #ef4444, #dc2626);
+            background-size: 200% auto;
+            animation: gradientShift 3s linear infinite;
         }
 
         .plan-card.featured:hover {
-            transform: translateY(-14px) scale(1.02);
-            box-shadow: 0 30px 70px rgba(220,38,38,.25);
+            transform: translateY(-16px) scale(1.02);
+            box-shadow: 0 36px 80px rgba(220,38,38,.28);
         }
 
         .plan-badge {
@@ -554,6 +681,12 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: .08em;
+            animation: badgePop 0.5s cubic-bezier(0.175,0.885,0.32,1.275) both;
+        }
+
+        @keyframes badgePop {
+            from { transform: scale(0) rotate(-15deg); opacity: 0; }
+            to { transform: scale(1) rotate(0deg); opacity: 1; }
         }
 
         .plan-icon {
@@ -563,15 +696,14 @@
             display: flex; align-items: center; justify-content: center;
             margin-bottom: 1.5rem;
             font-size: 1.4rem;
-            transition: all .3s;
+            transition: all .4s cubic-bezier(0.175,0.885,0.32,1.275);
         }
 
-        .plan-card.featured .plan-icon {
-            background: #fee2e2;
-        }
+        .plan-card.featured .plan-icon { background: #fee2e2; }
 
         .plan-card:hover .plan-icon {
-            transform: scale(1.1) rotate(-5deg);
+            transform: scale(1.15) rotate(-8deg);
+            box-shadow: 0 8px 24px rgba(220,38,38,.2);
         }
 
         .plan-name {
@@ -596,7 +728,10 @@
             color: #0f172a;
             line-height: 1;
             margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
         }
+
+        .plan-card:hover .plan-price { transform: scale(1.05); }
 
         .plan-price sup {
             font-size: 1.2rem;
@@ -625,6 +760,10 @@
 
         .plan-description svg { color: #22c55e; flex-shrink: 0; }
 
+        .subscribe-btn, .view-details-btn {
+            cursor: none;
+        }
+
         .subscribe-btn {
             display: block;
             width: 100%;
@@ -632,13 +771,27 @@
             border-radius: 14px;
             font-weight: 700;
             font-size: .9rem;
-            cursor: pointer;
             border: 2px solid var(--border);
             background: white;
             color: #374151;
             transition: all .3s ease;
             font-family: 'DM Sans', sans-serif;
+            position: relative;
+            overflow: hidden;
         }
+
+        .subscribe-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 0; height: 0;
+            background: rgba(220,38,38,.08);
+            border-radius: 50%;
+            transform: translate(-50%,-50%);
+            transition: width 0.5s ease, height 0.5s ease;
+        }
+
+        .subscribe-btn:hover::before { width: 300px; height: 300px; }
 
         .subscribe-btn:hover {
             border-color: #dc2626;
@@ -670,18 +823,20 @@
             border-radius: 14px;
             font-weight: 600;
             font-size: .85rem;
-            cursor: pointer;
             border: 2px solid var(--border);
             background: white;
             color: #374151;
             transition: all .3s ease;
             font-family: 'DM Sans', sans-serif;
+            position: relative;
+            overflow: hidden;
         }
 
         .view-details-btn:hover {
             border-color: #dc2626;
             color: #dc2626;
             background: #fff5f5;
+            transform: translateY(-2px);
         }
 
         .plan-card.featured .view-details-btn {
@@ -712,6 +867,7 @@
                 linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
             background-size: 40px 40px;
+            animation: gridShift 25s linear infinite;
         }
 
         .features-section .section-title { color: white; }
@@ -732,14 +888,30 @@
             border: 1px solid rgba(255,255,255,.08);
             border-radius: 24px;
             padding: 2.5rem;
-            transition: all .35s ease;
+            transition: all .4s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: none;
         }
+
+        /* Glow corner on hover */
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: -80px; right: -80px;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(220,38,38,.3), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .feature-card:hover::before { opacity: 1; }
 
         .feature-card:hover {
             background: rgba(255,255,255,.07);
             border-color: rgba(220,38,38,.3);
-            transform: translateY(-8px);
-            box-shadow: 0 24px 50px rgba(220,38,38,.1);
+            transform: translateY(-10px);
+            box-shadow: 0 28px 60px rgba(220,38,38,.12);
         }
 
         .feature-icon-wrap {
@@ -750,12 +922,13 @@
             display: flex; align-items: center; justify-content: center;
             margin-bottom: 1.5rem;
             font-size: 1.6rem;
-            transition: all .3s;
+            transition: all .4s cubic-bezier(0.175,0.885,0.32,1.275);
         }
 
         .feature-card:hover .feature-icon-wrap {
-            background: rgba(220,38,38,.2);
-            transform: scale(1.1) rotate(-6deg);
+            background: rgba(220,38,38,.22);
+            transform: scale(1.15) rotate(-8deg);
+            box-shadow: 0 8px 24px rgba(220,38,38,.3);
         }
 
         .feature-title {
@@ -778,18 +951,11 @@
             padding: 7rem 2rem;
         }
 
-        .contact-wrap {
-            max-width: 600px;
-            margin: 0 auto;
-        }
+        .contact-wrap { max-width: 600px; margin: 0 auto; }
 
-        .contact-form {
-            margin-top: 2.5rem;
-        }
+        .contact-form { margin-top: 2.5rem; }
 
-        .form-field {
-            margin-bottom: 1.25rem;
-        }
+        .form-field { margin-bottom: 1.25rem; }
 
         .form-field input,
         .form-field textarea {
@@ -801,8 +967,9 @@
             font-family: 'DM Sans', sans-serif;
             color: #0f172a;
             background: #f9fafb;
-            transition: all .25s;
+            transition: all .3s;
             outline: none;
+            cursor: none;
         }
 
         .form-field input:focus,
@@ -810,15 +977,13 @@
             border-color: #dc2626;
             background: white;
             box-shadow: 0 0 0 3px rgba(220,38,38,.1);
+            transform: translateY(-1px);
         }
 
         .form-field input::placeholder,
         .form-field textarea::placeholder { color: #94a3b8; }
 
-        .form-field textarea {
-            resize: vertical;
-            min-height: 140px;
-        }
+        .form-field textarea { resize: vertical; min-height: 140px; }
 
         .contact-submit {
             width: 100%;
@@ -830,10 +995,24 @@
             font-size: 1rem;
             font-weight: 700;
             font-family: 'DM Sans', sans-serif;
-            cursor: pointer;
+            cursor: none;
             transition: all .3s;
             box-shadow: 0 8px 24px rgba(220,38,38,.3);
+            position: relative;
+            overflow: hidden;
         }
+
+        .contact-submit::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -60%;
+            width: 40%; height: 200%;
+            background: rgba(255,255,255,.18);
+            transform: skewX(-20deg);
+            transition: left .5s ease;
+        }
+
+        .contact-submit:hover::after { left: 120%; }
 
         .contact-submit:hover {
             transform: translateY(-2px);
@@ -867,9 +1046,7 @@
             flex-direction: column;
         }
 
-        .modal-box.wide {
-            max-width: 650px;
-        }
+        .modal-box.wide { max-width: 650px; }
 
         @keyframes modalPop {
             from { opacity: 0; transform: scale(.88) translateY(-30px); }
@@ -891,6 +1068,7 @@
                 linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
             background-size: 28px 28px;
+            animation: gridShift 15s linear infinite;
         }
 
         .modal-head-glow {
@@ -911,16 +1089,16 @@
             border: none;
             color: white;
             font-size: 1.3rem;
-            cursor: pointer;
+            cursor: none;
             display: flex; align-items: center; justify-content: center;
-            transition: all .25s;
+            transition: all .3s;
             z-index: 2;
             line-height: 1;
         }
 
         .modal-close:hover {
-            background: rgba(255,255,255,.25);
-            transform: rotate(90deg);
+            background: rgba(255,255,255,.28);
+            transform: rotate(90deg) scale(1.1);
         }
 
         .modal-head-content { position: relative; z-index: 1; }
@@ -933,10 +1111,7 @@
             margin-bottom: .3rem;
         }
 
-        .modal-head p {
-            color: rgba(255,255,255,.6);
-            font-size: .9rem;
-        }
+        .modal-head p { color: rgba(255,255,255,.6); font-size: .9rem; }
 
         .modal-body {
             padding: 1.8rem 2rem;
@@ -962,8 +1137,8 @@
             font-size: .88rem;
             font-weight: 600;
             color: var(--muted);
-            cursor: pointer;
-            transition: all .25s;
+            cursor: none;
+            transition: all .3s;
             font-family: 'DM Sans', sans-serif;
         }
 
@@ -976,9 +1151,7 @@
         .modal-form { display: none; }
         .modal-form.active { display: block; }
 
-        .modal-field {
-            margin-bottom: 1rem;
-        }
+        .modal-field { margin-bottom: 1rem; }
 
         .modal-field label {
             display: block;
@@ -1001,6 +1174,7 @@
             background: #f9fafb;
             transition: all .25s;
             outline: none;
+            cursor: none;
         }
 
         .modal-field input:focus {
@@ -1019,11 +1193,25 @@
             font-size: .95rem;
             font-weight: 700;
             font-family: 'DM Sans', sans-serif;
-            cursor: pointer;
+            cursor: none;
             transition: all .3s;
             margin-top: .5rem;
             box-shadow: 0 6px 20px rgba(220,38,38,.3);
+            position: relative;
+            overflow: hidden;
         }
+
+        .modal-submit::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -60%;
+            width: 40%; height: 200%;
+            background: rgba(255,255,255,.18);
+            transform: skewX(-20deg);
+            transition: left .5s ease;
+        }
+
+        .modal-submit:hover::after { left: 120%; }
 
         .modal-submit:hover {
             transform: translateY(-2px);
@@ -1038,11 +1226,7 @@
             flex-shrink: 0;
         }
 
-        .modal-foot a {
-            color: #dc2626;
-            font-weight: 600;
-            text-decoration: none;
-        }
+        .modal-foot a { color: #dc2626; font-weight: 600; text-decoration: none; }
 
         /* Plan Details Grid */
         .plan-details-grid {
@@ -1055,6 +1239,12 @@
             padding: 1rem;
             background: #f8fafc;
             border-radius: 12px;
+            transition: all 0.25s;
+        }
+
+        .plan-detail-item:hover {
+            background: #fff5f5;
+            transform: translateY(-2px);
         }
 
         .plan-detail-label {
@@ -1065,14 +1255,36 @@
             font-weight: 600;
         }
 
-        .plan-detail-value {
-            font-weight: 700;
-            color: #0f172a;
+        .plan-detail-value { font-weight: 700; color: #0f172a; }
+        .plan-detail-value.price { color: #dc2626; font-size: 1.25rem; }
+
+        /* =================== TOAST =================== */
+        .toast {
+            position: fixed;
+            bottom: 2rem; right: 2rem;
+            background: #1a1a2e;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 14px;
+            font-size: .88rem;
+            font-weight: 500;
+            box-shadow: 0 12px 40px rgba(0,0,0,.4);
+            border: 1px solid rgba(255,255,255,.1);
+            z-index: 9000;
+            transform: translateX(200%);
+            transition: transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+            display: flex; align-items: center; gap: .75rem;
+            pointer-events: none;
         }
 
-        .plan-detail-value.price {
-            color: #dc2626;
-            font-size: 1.25rem;
+        .toast.show { transform: translateX(0); }
+
+        .toast-icon {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: #22c55e;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .85rem;
         }
 
         /* =================== FOOTER =================== */
@@ -1092,6 +1304,7 @@
                 linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
             background-size: 32px 32px;
+            animation: gridShift 30s linear infinite;
         }
 
         .footer-inner {
@@ -1124,21 +1337,16 @@
             border-radius: 9px;
             background: linear-gradient(135deg, #dc2626, #b91c1c);
             display: flex; align-items: center; justify-content: center;
+            transition: transform 0.3s ease;
         }
+
+        .footer-brand-name:hover .footer-brand-icon { transform: rotate(15deg) scale(1.1); }
 
         .footer-brand-icon svg { width: 16px; height: 16px; color: white; }
 
-        .footer-desc {
-            color: rgba(255,255,255,.45);
-            font-size: .88rem;
-            line-height: 1.8;
-            margin-bottom: 1.5rem;
-        }
+        .footer-desc { color: rgba(255,255,255,.45); font-size: .88rem; line-height: 1.8; margin-bottom: 1.5rem; }
 
-        .footer-socials {
-            display: flex;
-            gap: .6rem;
-        }
+        .footer-socials { display: flex; gap: .6rem; }
 
         .social-btn {
             width: 38px; height: 38px;
@@ -1148,13 +1356,14 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 1rem;
             text-decoration: none;
-            transition: all .25s;
+            transition: all .3s;
+            cursor: none;
         }
 
         .social-btn:hover {
             background: rgba(220,38,38,.2);
             border-color: rgba(220,38,38,.3);
-            transform: translateY(-3px);
+            transform: translateY(-4px) rotate(-5deg);
         }
 
         .footer-col h4 {
@@ -1174,20 +1383,15 @@
             color: rgba(255,255,255,.4);
             text-decoration: none;
             font-size: .88rem;
-            transition: all .25s;
+            transition: all .3s;
             display: inline-flex;
             align-items: center;
             gap: .4rem;
         }
 
-        .footer-links a:hover { color: rgba(255,255,255,.8); padding-left: .35rem; }
+        .footer-links a:hover { color: rgba(255,255,255,.85); padding-left: .4rem; }
 
-        .footer-contact-item {
-            display: flex;
-            align-items: flex-start;
-            gap: .8rem;
-            margin-bottom: .9rem;
-        }
+        .footer-contact-item { display: flex; align-items: flex-start; gap: .8rem; margin-bottom: .9rem; }
 
         .footer-contact-icon {
             width: 32px; height: 32px;
@@ -1197,19 +1401,17 @@
             display: flex; align-items: center; justify-content: center;
             font-size: .85rem;
             flex-shrink: 0;
+            transition: all 0.3s;
         }
 
-        .footer-contact-text {
-            font-size: .85rem;
-            color: rgba(255,255,255,.45);
-            line-height: 1.6;
+        .footer-contact-item:hover .footer-contact-icon {
+            background: rgba(220,38,38,.2);
+            transform: scale(1.1);
         }
 
-        .footer-divider {
-            height: 1px;
-            background: rgba(255,255,255,.07);
-            margin-bottom: 2rem;
-        }
+        .footer-contact-text { font-size: .85rem; color: rgba(255,255,255,.45); line-height: 1.6; }
+
+        .footer-divider { height: 1px; background: rgba(255,255,255,.07); margin-bottom: 2rem; }
 
         .footer-bottom {
             display: flex;
@@ -1219,16 +1421,9 @@
             gap: 1rem;
         }
 
-        .footer-copy {
-            font-size: .82rem;
-            color: rgba(255,255,255,.3);
-        }
+        .footer-copy { font-size: .82rem; color: rgba(255,255,255,.3); }
 
-        .footer-bottom-links {
-            display: flex;
-            gap: 1.5rem;
-            list-style: none;
-        }
+        .footer-bottom-links { display: flex; gap: 1.5rem; list-style: none; }
 
         .footer-bottom-links a {
             font-size: .82rem;
@@ -1242,7 +1437,7 @@
         /* =================== SCROLL REVEAL =================== */
         .reveal {
             opacity: 0;
-            transform: translateY(24px);
+            transform: translateY(32px);
             transition: opacity .7s ease, transform .7s ease;
         }
 
@@ -1250,6 +1445,18 @@
             opacity: 1;
             transform: none;
         }
+
+        /* Stagger children inside revealed parents */
+        .reveal-stagger > * {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .reveal-stagger.visible > *:nth-child(1) { opacity:1; transform:none; transition-delay: 0.05s; }
+        .reveal-stagger.visible > *:nth-child(2) { opacity:1; transform:none; transition-delay: 0.15s; }
+        .reveal-stagger.visible > *:nth-child(3) { opacity:1; transform:none; transition-delay: 0.25s; }
+        .reveal-stagger.visible > *:nth-child(4) { opacity:1; transform:none; transition-delay: 0.35s; }
 
         /* =================== RESPONSIVE =================== */
         @media (max-width: 768px) {
@@ -1263,6 +1470,10 @@
             .footer-bottom { flex-direction: column; text-align: center; }
             .footer-bottom-links { justify-content: center; }
             .plan-details-grid { grid-template-columns: 1fr; }
+            body { cursor: auto; }
+            .cursor-dot, .cursor-ring { display: none; }
+            * { cursor: auto !important; }
+            button { cursor: pointer !important; }
         }
 
         @media (max-width: 560px) {
@@ -1274,6 +1485,16 @@
     </style>
 </head>
 <body>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot" id="cursorDot"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">✓</div>
+        <span id="toastMessage">Message sent!</span>
+    </div>
 
     <!-- =================== NAV =================== -->
     <nav id="main-nav">
@@ -1305,6 +1526,7 @@
     <section class="hero">
         <div class="hero-bg"></div>
         <div class="hero-grid"></div>
+        <canvas id="particle-canvas"></canvas>
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
         <div class="orb orb-3"></div>
@@ -1320,7 +1542,7 @@
             </div>
             <h1 class="hero-title font-display">
                 Reliable Internet for<br>
-                <span class="line-accent">Every Connection</span>
+                <span class="line-accent" id="scrambleText">Every Connection</span>
             </h1>
             <p class="hero-subtitle">
                 Fiber &amp; wireless internet built for homes and businesses.
@@ -1339,19 +1561,19 @@
             </div>
             <div class="hero-stats">
                 <div class="hero-stat">
-                    <div class="hero-stat-num">99<span>.9%</span></div>
+                    <div class="hero-stat-num"><span class="count" data-target="99">0</span><span>.9%</span></div>
                     <div class="hero-stat-label">Uptime SLA</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-num">100<span>Mbps</span></div>
+                    <div class="hero-stat-num"><span class="count" data-target="100">0</span><span>Mbps</span></div>
                     <div class="hero-stat-label">Max Speed</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-num">24<span>/7</span></div>
+                    <div class="hero-stat-num"><span class="count" data-target="24">0</span><span>/7</span></div>
                     <div class="hero-stat-label">Support</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-num">₱<span>999</span></div>
+                    <div class="hero-stat-num">₱<span class="count" data-target="999">0</span></div>
                     <div class="hero-stat-label">Starts At</div>
                 </div>
             </div>
@@ -1400,7 +1622,6 @@
                     </p>
                     <div class="plan-buttons">
                         <button class="view-details-btn" onclick="showPlanDetails('{{ $rate->plan_name }}', '{{ $rate->speed }}', '{{ $rate->plan_type }}', {{ $rate->monthly_fee }}, '{{ $rate->billing_cycle }}', '{{ $rate->data_limit ?? 'Unlimited' }}', {{ $rate->installation_fee ?? 0 }}, {{ $rate->activation_fee ?? 0 }}, {{ $rate->router_fee ?? 0 }}, '{{ $rate->lock_in_period ?? 'None' }}', {{ $rate->late_penalty ?? 0 }}, {{ $rate->reconnection_fee ?? 0 }})">View Details</button>
-                        <button class="subscribe-btn" onclick="handleSubscribe('{{ $rate->plan_name }}')">Apply Now</button>
                     </div>
                 </div>
             @empty
@@ -1414,7 +1635,10 @@
                         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                         No data cap, great for solo use
                     </p>
-                    <button class="subscribe-btn" onclick="handleSubscribe('Basic')">Get Basic Plan</button>
+                    <div class="plan-buttons">
+                        <button class="view-details-btn" onclick="showPlanDetails('Basic','25 Mbps','Fiber',999,'Monthly','Unlimited',0,0,0,'None',0,0)">View Details</button>
+                        <button class="subscribe-btn" onclick="handleSubscribe('Basic')">Get Basic Plan</button>
+                    </div>
                 </div>
 
                 <div class="plan-card featured reveal" style="transition-delay:.2s">
@@ -1428,7 +1652,27 @@
                         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                         Ideal for families with multiple devices
                     </p>
-                    <button class="subscribe-btn" onclick="handleSubscribe('Standard')">Get Standard Plan</button>
+                    <div class="plan-buttons">
+                        <button class="view-details-btn" onclick="showPlanDetails('Standard','50 Mbps','Fiber',1499,'Monthly','Unlimited',0,0,0,'None',0,0)">View Details</button>
+                        <button class="subscribe-btn" onclick="handleSubscribe('Standard')">Get Standard Plan</button>
+                    </div>
+                </div>
+
+                <div class="plan-card reveal" style="transition-delay:.3s">
+                    <div class="plan-icon">🏢</div>
+                    <h3 class="plan-name">Premium</h3>
+                    <p class="plan-speed">Up to 100 Mbps · Fiber</p>
+                    <div class="plan-price"><sup>₱</sup>2499</div>
+                    <div class="plan-divider"></div>
+                    <p class="plan-description">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        Best for power users and businesses
+                    </p>
+                    <div class="plan-buttons">
+                        <button class="view-details-btn" onclick="showPlanDetails('Premium','100 Mbps','Fiber',2499,'Monthly','Unlimited',0,0,0,'None',0,0)">View Details</button>
+                        <button class="subscribe-btn" onclick="handleSubscribe('Premium')">Get Premium Plan</button>
+                    </div>
+                </div>
             @endforelse
         </div>
     </section>
@@ -1441,18 +1685,18 @@
             <p class="section-subtitle">We're not just another ISP. Here's what sets us apart.</p>
         </div>
 
-        <div class="features-grid">
-            <div class="feature-card reveal" style="transition-delay:.1s">
+        <div class="features-grid reveal-stagger">
+            <div class="feature-card">
                 <div class="feature-icon-wrap">⚡</div>
                 <h3 class="feature-title">Blazing Speeds</h3>
                 <p class="feature-desc">Low latency, high throughput. Stream 4K, game online, and video call — all at the same time without a hitch.</p>
             </div>
-            <div class="feature-card reveal" style="transition-delay:.2s">
+            <div class="feature-card">
                 <div class="feature-icon-wrap">📡</div>
                 <h3 class="feature-title">Wide Coverage</h3>
                 <p class="feature-desc">Our fiber network spans homes and businesses across the entire region. Reliable connectivity wherever you are.</p>
             </div>
-            <div class="feature-card reveal" style="transition-delay:.3s">
+            <div class="feature-card">
                 <div class="feature-icon-wrap">🔧</div>
                 <h3 class="feature-title">24/7 Support</h3>
                 <p class="feature-desc">Real humans answer your calls. Technical assistance available around the clock, every day of the year.</p>
@@ -1554,9 +1798,7 @@
                     <p>Complete plan information</p>
                 </div>
             </div>
-            <div class="modal-body" id="planDetailsContent">
-                <!-- Content populated by JavaScript -->
-            </div>
+            <div class="modal-body" id="planDetailsContent"></div>
             <div class="modal-foot">
                 <button class="modal-submit" onclick="closePlanDetailsModal(); handleSubscribe('');">Apply Now</button>
             </div>
@@ -1628,12 +1870,148 @@
     </footer>
 
     <script>
-        // Sticky nav
+        /* ===================== CURSOR ===================== */
+        const dot  = document.getElementById('cursorDot');
+        const ring = document.getElementById('cursorRing');
+        let mx = 0, my = 0, rx = 0, ry = 0;
+
+        document.addEventListener('mousemove', e => {
+            mx = e.clientX; my = e.clientY;
+            dot.style.left  = mx + 'px';
+            dot.style.top   = my + 'px';
+        });
+
+        function animateCursor() {
+            rx += (mx - rx) * 0.13;
+            ry += (my - ry) * 0.13;
+            ring.style.left = rx + 'px';
+            ring.style.top  = ry + 'px';
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        document.querySelectorAll('a, button, input, textarea, .plan-card, .feature-card, .social-btn').forEach(el => {
+            el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+            el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+        });
+
+        /* ===================== PARTICLE CANVAS ===================== */
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let W, H;
+
+        function resizeCanvas() {
+            W = canvas.width  = canvas.offsetWidth;
+            H = canvas.height = canvas.offsetHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() { this.reset(true); }
+            reset(fresh) {
+                this.x = Math.random() * W;
+                this.y = fresh ? Math.random() * H : H + 10;
+                this.size   = Math.random() * 1.5 + 0.3;
+                this.speedY = -(Math.random() * 0.4 + 0.1);
+                this.speedX = (Math.random() - 0.5) * 0.2;
+                this.alpha  = Math.random() * 0.5 + 0.1;
+                this.fadeIn = 0;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.fadeIn = Math.min(this.fadeIn + 0.02, 1);
+                if (this.y < -10) this.reset(false);
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha * this.fadeIn;
+                ctx.fillStyle = `rgba(239, 68, 68, 1)`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for (let i = 0; i < 90; i++) particles.push(new Particle());
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, W, H);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        /* ===================== TEXT SCRAMBLE ===================== */
+        const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*';
+        const scrambleEl = document.getElementById('scrambleText');
+        const originalText = scrambleEl.textContent;
+        let scrambleInterval = null;
+        let scramblePlaying = false;
+
+        function playScramble(el, original) {
+            if (scramblePlaying) return;
+            scramblePlaying = true;
+            let iteration = 0;
+            clearInterval(scrambleInterval);
+            scrambleInterval = setInterval(() => {
+                el.textContent = original.split('').map((char, idx) => {
+                    if (char === ' ') return ' ';
+                    if (idx < iteration) return original[idx];
+                    return CHARS[Math.floor(Math.random() * CHARS.length)];
+                }).join('');
+                if (iteration >= original.length) {
+                    clearInterval(scrambleInterval);
+                    el.textContent = original;
+                    scramblePlaying = false;
+                }
+                iteration += 0.5;
+            }, 40);
+        }
+
+        // Auto-play on load
+        setTimeout(() => playScramble(scrambleEl, originalText), 1200);
+        // Replay on hover
+        scrambleEl.addEventListener('mouseenter', () => playScramble(scrambleEl, originalText));
+
+        /* ===================== COUNTER ANIMATION ===================== */
+        function animateCount(el) {
+            const target = parseInt(el.dataset.target);
+            const duration = 1600;
+            const start = performance.now();
+
+            function step(now) {
+                const progress = Math.min((now - start) / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 4);
+                el.textContent = Math.floor(ease * target);
+                if (progress < 1) requestAnimationFrame(step);
+                else el.textContent = target;
+            }
+            requestAnimationFrame(step);
+        }
+
+        const counters = document.querySelectorAll('.count');
+        const counterObserver = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    animateCount(e.target);
+                    counterObserver.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        counters.forEach(c => counterObserver.observe(c));
+
+        /* ===================== STICKY NAV ===================== */
         window.addEventListener('scroll', () => {
             document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 40);
         });
 
-        // Scroll reveal
+        /* ===================== SCROLL REVEAL ===================== */
         const revealObserver = new IntersectionObserver((entries) => {
             entries.forEach(e => {
                 if (e.isIntersecting) {
@@ -1641,11 +2019,63 @@
                     revealObserver.unobserve(e.target);
                 }
             });
-        }, { threshold: .12, rootMargin: '0px 0px -60px 0px' });
+        }, { threshold: .1, rootMargin: '0px 0px -60px 0px' });
 
-        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+        document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => revealObserver.observe(el));
 
-        // Modal
+        /* ===================== RIPPLE EFFECT ===================== */
+        function createRipple(e, el) {
+            const rect = el.getBoundingClientRect();
+            const ripple = document.createElement('span');
+            const size = Math.max(rect.width, rect.height) * 2;
+            ripple.style.cssText = `
+                position:absolute; border-radius:50%; pointer-events:none;
+                width:${size}px; height:${size}px;
+                left:${e.clientX - rect.left - size/2}px;
+                top:${e.clientY - rect.top - size/2}px;
+                background:rgba(255,255,255,.15);
+                transform:scale(0); animation:rippleAnim 0.6s ease-out forwards;
+            `;
+            el.style.position = 'relative';
+            el.style.overflow = 'hidden';
+            el.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 700);
+        }
+
+        const style = document.createElement('style');
+        style.textContent = `@keyframes rippleAnim { to { transform:scale(1); opacity:0; } }`;
+        document.head.appendChild(style);
+
+        document.querySelectorAll('.btn-primary, .subscribe-btn, .modal-submit, .contact-submit').forEach(btn => {
+            btn.addEventListener('click', e => createRipple(e, btn));
+        });
+
+        /* ===================== MAGNETIC BUTTONS ===================== */
+        document.querySelectorAll('.btn-primary, .btn-secondary, .nav-login-btn').forEach(btn => {
+            btn.addEventListener('mousemove', function(e) {
+                const rect = this.getBoundingClientRect();
+                const cx = rect.left + rect.width  / 2;
+                const cy = rect.top  + rect.height / 2;
+                const dx = (e.clientX - cx) * 0.25;
+                const dy = (e.clientY - cy) * 0.25;
+                this.style.transform = `translate(${dx}px, ${dy}px) translateY(-3px)`;
+            });
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+            });
+        });
+
+        /* ===================== TOAST ===================== */
+        function showToast(msg, color = '#22c55e') {
+            const toast = document.getElementById('toast');
+            const icon  = toast.querySelector('.toast-icon');
+            document.getElementById('toastMessage').textContent = msg;
+            icon.style.background = color;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        /* ===================== MODAL ===================== */
         function openModal(tab = 'login') {
             document.getElementById('signInModal').classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -1661,76 +2091,44 @@
             if (e.target === this) closeModal();
         });
 
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closePlanDetailsModal(); } });
 
         function switchTab(tab) {
-            const tabs = document.querySelectorAll('.modal-tab');
+            const tabs  = document.querySelectorAll('.modal-tab');
             const forms = document.querySelectorAll('.modal-form');
-            tabs.forEach((t, i) => t.classList.toggle('active', (i === 0) === (tab === 'login')));
+            tabs.forEach((t, i)  => t.classList.toggle('active',  (i === 0) === (tab === 'login')));
             forms.forEach((f, i) => f.classList.toggle('active', (i === 0) === (tab === 'login')));
         }
 
-        // Subscribe
-        function handleSubscribe(plan) {
-            openModal('register');
-        }
+        function handleSubscribe(plan) { openModal('register'); }
 
-        // Plan Details Modal
-        function showPlanDetails(planName, speed, planType, monthlyFee, billingCycle, dataLimit, installationFee, activationFee, routerFee, lockInPeriod, latePenalty, reconnectionFee) {
+        /* ===================== PLAN DETAILS ===================== */
+        function showPlanDetails(planName, speed, planType, monthlyFee, billingCycle, dataLimit,
+                                  installationFee, activationFee, routerFee, lockInPeriod, latePenalty, reconnectionFee) {
             const content = `
                 <div class="plan-details-grid">
-                    <div class="plan-detail-item">
-                        <div class="plan-detail-label">Plan Name</div>
-                        <div class="plan-detail-value">${planName}</div>
-                    </div>
-                    <div class="plan-detail-item">
-                        <div class="plan-detail-label">Speed</div>
-                        <div class="plan-detail-value">${speed}</div>
-                    </div>
-                    <div class="plan-detail-item">
-                        <div class="plan-detail-label">Plan Type</div>
-                        <div class="plan-detail-value">${planType}</div>
-                    </div>
-                    <div class="plan-detail-item">
-                        <div class="plan-detail-label">Monthly Fee</div>
-                        <div class="plan-detail-value price">₱${parseFloat(monthlyFee).toLocaleString()}</div>
-                    </div>
-                    <div class="plan-detail-item">
-                        <div class="plan-detail-label">Billing Cycle</div>
-                        <div class="plan-detail-value">${billingCycle}</div>
-                    </div>
-                    <div class="plan-detail-item">
-                        <div class="plan-detail-label">Data Limit</div>
-                        <div class="plan-detail-value">${dataLimit}</div>
-                    </div>
-                    <div class="plan-detail-item">
-                        <div class="plan-detail-label">Installation Fee</div>
-                        <div class="plan-detail-value">₱${parseFloat(installationFee).toLocaleString()}</div>
-                    </div>
-                    <div class="plan-detail-item">
-                        <div class="plan-detail-label">Activation Fee</div>
-                        <div class="plan-detail-value">₱${parseFloat(activationFee).toLocaleString()}</div>
-                    </div>
-                    <div class="plan-detail-item">
-                        <div class="plan-detail-label">Router Fee</div>
-                        <div class="plan-detail-value">₱${parseFloat(routerFee).toLocaleString()}</div>
-                    </div>
-                    <div class="plan-detail-item">
-                        <div class="plan-detail-label">Lock-in Period</div>
-                        <div class="plan-detail-value">${lockInPeriod}</div>
-                    </div>
-                    <div class="plan-detail-item">
-                        <div class="plan-detail-label">Late Penalty</div>
-                        <div class="plan-detail-value">₱${parseFloat(latePenalty).toLocaleString()}</div>
-                    </div>
-                    <div class="plan-detail-item">
-                        <div class="plan-detail-label">Reconnection Fee</div>
-                        <div class="plan-detail-value">₱${parseFloat(reconnectionFee).toLocaleString()}</div>
-                    </div>
+                    ${[
+                        ['Plan Name', planName, ''],
+                        ['Speed', speed, ''],
+                        ['Plan Type', planType, ''],
+                        ['Monthly Fee', '₱' + parseFloat(monthlyFee).toLocaleString(), 'price'],
+                        ['Billing Cycle', billingCycle, ''],
+                        ['Data Limit', dataLimit, ''],
+                        ['Installation Fee', '₱' + parseFloat(installationFee).toLocaleString(), ''],
+                        ['Activation Fee', '₱' + parseFloat(activationFee).toLocaleString(), ''],
+                        ['Router Fee', '₱' + parseFloat(routerFee).toLocaleString(), ''],
+                        ['Lock-in Period', lockInPeriod, ''],
+                        ['Late Penalty', '₱' + parseFloat(latePenalty).toLocaleString(), ''],
+                        ['Reconnection Fee', '₱' + parseFloat(reconnectionFee).toLocaleString(), ''],
+                    ].map(([label, val, cls]) => `
+                        <div class="plan-detail-item">
+                            <div class="plan-detail-label">${label}</div>
+                            <div class="plan-detail-value ${cls}">${val}</div>
+                        </div>
+                    `).join('')}
                 </div>
             `;
-            
-            document.getElementById('detailPlanName').textContent = planName + ' - Plan Details';
+            document.getElementById('detailPlanName').textContent = planName + ' — Plan Details';
             document.getElementById('planDetailsContent').innerHTML = content;
             document.getElementById('planDetailsModal').classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -1745,17 +2143,24 @@
             if (e.target === this) closePlanDetailsModal();
         });
 
-        // Contact
+        /* ===================== CONTACT ===================== */
         function handleContact(e) {
             e.preventDefault();
             const btn = e.target.querySelector('.contact-submit');
-            btn.textContent = '✓ Message Sent!';
-            btn.style.background = 'linear-gradient(135deg,#059669,#047857)';
+            const orig = btn.textContent;
+            btn.textContent = '✓ Sending…';
+            btn.style.opacity = '.7';
             setTimeout(() => {
-                btn.textContent = 'Send Message →';
-                btn.style.background = '';
-                e.target.reset();
-            }, 3000);
+                btn.textContent = '✓ Message Sent!';
+                btn.style.opacity = '1';
+                btn.style.background = 'linear-gradient(135deg,#059669,#047857)';
+                showToast('Message sent! We\'ll get back to you soon.', '#22c55e');
+                setTimeout(() => {
+                    btn.textContent = orig;
+                    btn.style.background = '';
+                    e.target.reset();
+                }, 3000);
+            }, 800);
         }
     </script>
 </body>
