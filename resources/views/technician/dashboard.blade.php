@@ -403,17 +403,17 @@
 
         <p class="nav-section-label">Work</p>
 
-        <a href="#" class="nav-link">
+        <a href="{{ route('technician.tasks') }}" class="nav-link">
             <div class="nav-icon">
-                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
                 </svg>
             </div>
             My Tasks
-            <span style="margin-left:auto;background:rgba(220,38,38,0.15);color:#f87171;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;">3</span>
+            <span style="margin-left:auto;background:rgba(220,38,38,0.15);color:#f87171;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;">{{ $stats['pendingJobs'] ?? 0 + $stats['inProgressJobs'] ?? 0 }}</span>
         </a>
 
-        <a href="#" class="nav-link">
+        <a href="{{ route('technician.history') }}" class="nav-link">
             <div class="nav-icon">
                 <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>

@@ -8,34 +8,54 @@ use Illuminate\Support\Facades\Auth;
 
 class TechnicianDashboardController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $user = Auth::user();
-        
-        // Find technician record
         $technician = $user->technicians()->first();
         
+        if (!$technician) {
+            abort(404, 'No technician profile found.');
+        }
+
+        $status = $request->get('status', '');
+        $search = $request->get('search', '');
+
         $stats = [
-            'todayJobs' => InstallationJob::where('technician_id', $technician?->id)
+            'todayJobs' => InstallationJob::where('technician_id', $technician->id)
                 ->whereDate('created_at', today())
                 ->count(),
-            'inProgressJobs' => InstallationJob::where('technician_id', $technician?->id)
-                ->whereIn('status', ['assigned', 'in_progress'])
+            'pendingJobs' => InstallationJob::where('technician_id', $technician->id)
+                ->where('status', 'assigned')
                 ->count(),
-            'completedJobs' => InstallationJob::where('technician_id', $technician?->id)
+            'inProgressJobs' => InstallationJob::where('technician_id', $technician->id)
+                ->where('status', 'in_progress')
+                ->count(),
+            'completedJobs' => InstallationJob::where('technician_id', $technician->id)
                 ->where('status', 'completed')
+                ->whereDate('completed_at', today())
                 ->count(),
-            'totalJobs' => InstallationJob::where('technician_id', $technician?->id)->count(),
+            'totalJobs' => InstallationJob::where('technician_id', $technician->id)->count(),
         ];
 
-        $tasks = InstallationJob::with('client')
-            ->where('technician_id', $technician?->id)
-            ->whereIn('status', ['pending', 'assigned', 'in_progress'])
-            ->latest()
-            ->limit(10)
-            ->get();
+        $query = InstallationJob::with(['client.subscriptionRate'])
+            ->where('technician_id', $technician->id);
 
-        return view('technician.dashboard', compact('stats', 'tasks', 'technician'));
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        if ($search) {
+            $query->whereHas('client', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('pppoe_name', 'like', "%{$search}%");
+            });
+        }
+
+        $tasks = $query->whereIn('status', ['assigned', 'in_progress'])
+            ->latest()
+            ->paginate(10);
+
+        return view('technician.dashboard', compact('stats', 'tasks', 'technician', 'status', 'search'));
     }
 }
 

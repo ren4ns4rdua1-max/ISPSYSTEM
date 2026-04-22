@@ -22,6 +22,13 @@ class InstallationJob extends Model
         'completed_at',
         'notes',
         'completion_notes',
+        'ip_address',
+        'mac_address',
+        'router_ssid',
+        'router_password',
+        'speed_test_result',
+        'materials_used',
+        'proof_image',
     ];
 
     protected $casts = [
@@ -30,6 +37,7 @@ class InstallationJob extends Model
         'completed_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'speed_test_result' => 'array',
     ];
 
     /**

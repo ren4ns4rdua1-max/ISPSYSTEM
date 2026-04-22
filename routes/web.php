@@ -24,7 +24,20 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/technician/dashboard', [TechnicianDashboardController::class, 'dashboard'])->name('technician.dashboard');
+});
+
+Route::middleware(['auth', 'technician'])->prefix('technician')->name('technician.')->group(function () {
+    Route::get('/dashboard', [TechnicianDashboardController::class, 'dashboard'])->name('dashboard');
+    
+    // Tasks (jobs assigned to this technician)
+    Route::get('/tasks', [\App\Http\Controllers\TechnicianJobController::class, 'index'])->name('tasks');
+    Route::get('/tasks/{job}', [\App\Http\Controllers\TechnicianJobController::class, 'show'])->name('tasks.show');
+    Route::post('/tasks/{job}/start', [\App\Http\Controllers\TechnicianJobController::class, 'start'])->name('tasks.start');
+    Route::post('/tasks/{job}/complete', [\App\Http\Controllers\TechnicianJobController::class, 'complete'])->name('tasks.complete');
+    Route::post('/tasks/{job}/update-status', [\App\Http\Controllers\TechnicianJobController::class, 'updateStatus'])->name('tasks.updateStatus');
+    
+    // History
+    Route::get('/history', [\App\Http\Controllers\TechnicianJobController::class, 'history'])->name('history');
 });
 
 Route::middleware('auth')->group(function () {
