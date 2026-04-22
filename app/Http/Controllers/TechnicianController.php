@@ -62,7 +62,7 @@ class TechnicianController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:technicians'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email', 'unique:technicians'],
             'phone_number' => ['required', 'string', 'max:20'],
             'specialization' => ['nullable', 'in:installation,repair,both'],
             'area_coverage' => ['nullable', 'string', 'max:255'],
@@ -70,9 +70,21 @@ class TechnicianController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
 
-        Technician::create($validated);
+        // Generate temp password
+        $tempPassword = Str::random(12);
 
-        return redirect()->route('technicians.index')->with('success', 'Technician created successfully.');
+        // Create user account first
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($tempPassword),
+            'role' => 'technician',
+        ]);
+
+        // Create technician linked to user
+        $technician = Technician::create(array_merge($validated, ['user_id' => $user->id]));
+
+        return redirect()->route('technicians.index')->with('success', "Technician '{$validated['name']}' created successfully. Temp password: {$tempPassword}. Share with technician to login.");
     }
 
     /**

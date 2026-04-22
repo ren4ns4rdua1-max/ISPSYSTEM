@@ -19,6 +19,7 @@ class Technician extends Model
         'area_coverage',
         'status',
         'notes',
+        'user_id',
     ];
 
     protected $casts = [
@@ -61,6 +62,14 @@ class Technician extends Model
             'offduty' => 'bg-gray-100 text-gray-700 border-gray-200',
             default => 'bg-gray-100 text-gray-700 border-gray-200',
         };
+    }
+
+    /**
+     * Get the user account for this technician.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     /**

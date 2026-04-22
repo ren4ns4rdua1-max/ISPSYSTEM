@@ -17,10 +17,11 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [
+protected $fillable = [
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -38,11 +39,37 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
+protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => 'string',
         ];
+    }
+
+    public function isTechnician(): bool
+    {
+        return $this->role === 'technician';
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function scopeTechnician($query)
+    {
+        return $query->where('role', 'technician');
+    }
+
+    public function scopeAdmin($query)
+    {
+        return $query->where('role', 'admin');
+    }
+
+    public function technicians()
+    {
+        return $this->hasOne(Technician::class);
     }
 }

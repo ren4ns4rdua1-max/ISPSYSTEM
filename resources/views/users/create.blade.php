@@ -495,10 +495,30 @@
                             @enderror
                         </div>
 
+                        </div>
+
+                        <!-- Role Select -->
+                        <div class="space-y-1.5">
+                            <label for="role" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                User Role
+                            </label>
+                            <select id="role" name="role" class="form-input">
+                                <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                                <option value="technician" {{ old('role') == 'technician' ? 'selected' : '' }}>Technician</option>
+                            </select>
+                            @error('role')
+                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
+                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ $message }}
+                                </p>
+                            @enderror
+                        </div>
+
                     </div>
 
                     <!-- Divider -->
                     <div class="border-t border-gray-100 pt-5 flex items-center justify-between gap-3 flex-wrap">
+
                         <a href="{{ route('users.index') }}"
                            class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -10,6 +10,7 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\TechnicianController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TechnicianDashboardController;
 use App\Models\SubscriptionRate;
 use Illuminate\Support\Facades\Route;
 
@@ -21,9 +22,10 @@ Route::get('/', function () {
     return view('welcome', compact('subscriptionRates'));
 });
 
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/technician/dashboard', [TechnicianDashboardController::class, 'dashboard'])->name('technician.dashboard');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/admin/templates', [\App\Http\Controllers\Admin\TemplateController::class, 'index'])->name('admin.templates');
