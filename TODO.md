@@ -1,8 +1,15 @@
-# TODO: Fix Undefined $totalSales in sales/index.blade.php
+# Client Photo Feature - Show View Fix
 
-## Approved Plan Steps:
-- [x] Step 1: Update SalesController.php index() method to calculate and pass required stats variables ($totalSales, $activeSales, $monthlySales, $totalRevenue) directly to view.
-- [x] Step 2: Clear Laravel view cache using `php artisan view:clear`.
-- [ ] Step 3: Test the sales index page loads without error.
-- [ ] Step 4: Mark task complete with attempt_completion.
+## Current Issue
+- Show view avatar shows letter (gradient) instead of photo
+- Code has @if($client->photo) but may have path/onerror issue
 
+## Plan
+1. ✅ Updated resources/views/clients/show.blade.php: Fixed Profile Card photo onerror logic to match index.blade.php exactly
+2. ✅ Verified resources/views/clients/edit.blade.php: Fixed photo preview structure with proper relative positioning
+3. [ ] Test: Upload photo → Show view displays img not letter
+
+## Steps
+**Step 1**: Edit show.blade.php profile avatar (lines ~390-410)
+**Step 2**: Test upload/edit
+**Step 3**: Complete

@@ -5,53 +5,177 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit User — NetManager</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         *, body { font-family: 'DM Sans', sans-serif; }
         .font-display { font-family: 'Syne', sans-serif; }
 
-        #sidebar { transition: width 0.3s cubic-bezier(0.4,0,0.2,1); background: linear-gradient(180deg, #0c0e1a 0%, #111827 60%, #0c0e1a 100%); }
-        #main-content { transition: margin-left 0.3s cubic-bezier(0.4,0,0.2,1); }
+        /* Fix for body scrolling */
+        body {
+            overflow: hidden;
+            height: 100vh;
+        }
 
-        .collapsible { transition: opacity 0.2s ease, max-width 0.3s ease; overflow: hidden; white-space: nowrap; }
+        /* Enhanced Sidebar Styling */
+        #sidebar { 
+            transition: width 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1); 
+            background: linear-gradient(180deg, #0a0c18 0%, #0f111e 100%);
+            backdrop-filter: blur(2px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 50;
+        }
+        #main-content { 
+            transition: margin-left 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            margin-left: 260px;
+            width: calc(100% - 260px);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Mobile sidebar */
+        @media (max-width: 1023px) {
+            #sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+            #sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            #main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .mobile-menu-btn {
+                display: block !important;
+            }
+        }
+
+        .collapsible { 
+            transition: opacity 0.25s ease, max-width 0.3s ease; 
+            overflow: hidden; 
+            white-space: nowrap; 
+        }
         .sidebar-collapsed .collapsible { opacity: 0; max-width: 0 !important; pointer-events: none; }
         .sidebar-collapsed .nav-item-inner { justify-content: center; padding-left: 0.75rem; padding-right: 0.75rem; }
+        .sidebar-collapsed .sec-lbl { opacity: 0; height: 0; margin: 0; padding: 0; overflow: hidden; }
 
+        /* Active Navigation Bar */
         .nav-active-bar {
             position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-            width: 3px; height: 60%; border-radius: 0 4px 4px 0;
-            background: linear-gradient(180deg, #dc2626, #f87171);
+            width: 3px; height: 60%; border-radius: 0 6px 6px 0;
+            background: linear-gradient(180deg, #ef4444, #f97316);
+            box-shadow: 0 0 6px rgba(239,68,68,0.6);
         }
 
-        .topbar {
-            background: rgba(255,255,255,0.88);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-bottom: 1px solid rgba(226,232,240,0.8);
+        /* Navigation item hover effect */
+        .nav-item-inner {
+            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            position: relative;
+        }
+        .nav-item-inner:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateX(4px);
         }
 
+        /* Section labels */
+        .sec-lbl {
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .13em;
+            color: rgba(255,255,255,.22);
+            font-family: 'Syne', sans-serif;
+            padding: 6px 10px 4px;
+            margin-top: 8px;
+            transition: all 0.2s;
+        }
+
+        /* Tooltip for collapsed sidebar */
         .nav-tooltip {
             position: absolute; left: calc(100% + 12px); top: 50%; transform: translateY(-50%);
-            background: #1f2937; color: #f9fafb; font-size: 12px; font-weight: 600;
-            padding: 4px 10px; border-radius: 8px; white-space: nowrap; pointer-events: none;
-            opacity: 0; transition: opacity 0.15s ease; z-index: 999;
+            background: #1e293b; color: #f1f5f9; font-size: 12px; font-weight: 600;
+            padding: 5px 12px; border-radius: 10px; white-space: nowrap; pointer-events: none;
+            opacity: 0; transition: opacity 0.2s ease; z-index: 999;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            letter-spacing: 0.3px;
         }
         .sidebar-collapsed .nav-wrapper:hover .nav-tooltip { opacity: 1; }
         .nav-tooltip::before {
             content: ''; position: absolute; right: 100%; top: 50%; transform: translateY(-50%);
-            border: 5px solid transparent; border-right-color: #1f2937;
+            border: 6px solid transparent; border-right-color: #1e293b;
         }
 
-        .avatar-grad { background: linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%); }
+        /* Submenu styles */
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: 2rem;
+        }
+        .submenu.open {
+            max-height: 300px;
+        }
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #9ca3af;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .submenu-item:hover {
+            color: #fca5a5;
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(3px);
+        }
+        .chevron-icon {
+            transition: transform 0.3s ease;
+        }
+        .chevron-icon.rotated {
+            transform: rotate(90deg);
+        }
 
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        /* Topbar glass effect */
+        .topbar {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+            flex-shrink: 0;
+        }
 
-        html { overflow-x: hidden; }
+        /* Avatar gradient with animation */
+        .avatar-grad { 
+            background: linear-gradient(125deg, #dc2626, #f97316, #ec4899);
+            background-size: 200% 200%;
+            animation: shimmerAvatar 4s ease infinite;
+        }
+        @keyframes shimmerAvatar {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-        /* Form inputs */
+        /* Main content scrollbar */
+        .main-scroll {
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+        .main-scroll::-webkit-scrollbar { width: 6px; }
+        .main-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .main-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .main-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Form input styles */
         .form-input {
             width: 100%;
             padding: 0.65rem 0.9rem;
@@ -62,6 +186,7 @@
             border-radius: 12px;
             outline: none;
             transition: all 0.2s ease;
+            font-family: 'DM Sans', sans-serif;
         }
         .form-input:focus {
             background: #fff;
@@ -70,13 +195,8 @@
         }
         .form-input::placeholder { color: #9ca3af; }
         .form-input.error { border-color: #fca5a5; background: #fff5f5; }
-        .form-input:disabled {
-            background: #f3f4f6;
-            color: #6b7280;
-            cursor: not-allowed;
-        }
 
-        /* Input icon wrapper */
+        /* Input group icons */
         .input-wrapper { position: relative; }
         .input-icon {
             position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
@@ -85,17 +205,10 @@
         }
         .input-wrapper:focus-within .input-icon { color: #dc2626; }
         .input-wrapper .form-input { padding-left: 2.5rem; }
-
-        /* Password toggle */
-        .toggle-pw {
-            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-            color: #9ca3af; cursor: pointer; transition: color 0.2s;
-        }
-        .toggle-pw:hover { color: #dc2626; }
-
-        /* Strength bar */
-        .strength-bar { height: 4px; border-radius: 100px; background: #e5e7eb; overflow: hidden; }
-        .strength-fill { height: 100%; border-radius: 100px; transition: width 0.4s ease, background 0.4s ease; width: 0%; }
+        .input-wrapper-select { position: relative; }
+        .input-wrapper-select .input-icon { transform: translateY(-50%); top: 50%; }
+        .input-wrapper-select:focus-within .input-icon { color: #dc2626; }
+        .input-wrapper-select .form-input { padding-left: 2.5rem; appearance: none; -webkit-appearance: none; }
 
         /* Card entrance */
         @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
@@ -116,16 +229,54 @@
         /* Password section toggle */
         #pw-section { transition: max-height 0.4s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
         #pw-section.open { max-height: 500px; opacity: 1; }
+        
+        /* Strength bar */
+        .strength-bar { height: 4px; border-radius: 100px; background: #e5e7eb; overflow: hidden; }
+        .strength-fill { height: 100%; border-radius: 100px; transition: width 0.4s ease, background 0.4s ease; width: 0%; }
+        
+        /* Toggle password button */
+        .toggle-pw {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            color: #9ca3af; cursor: pointer; transition: color 0.2s;
+        }
+        .toggle-pw:hover { color: #dc2626; }
+        
+        /* Mobile menu button */
+        .mobile-menu-btn {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 60;
+            display: none;
+        }
+        @media (max-width: 1023px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen flex">
+<body class="bg-slate-100">
+
+<!-- Mobile Menu Button -->
+<div class="mobile-menu-btn">
+    <button onclick="toggleMobileSidebar()"
+            class="p-2.5 rounded-xl bg-white shadow-lg text-gray-600 hover:bg-gray-50 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+    </button>
+</div>
+
+<!-- Mobile Overlay -->
+<div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden" onclick="closeMobileSidebar()"></div>
 
 <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
 <aside id="sidebar" style="width:260px;" class="fixed left-0 top-0 h-full z-50 flex flex-col shadow-2xl">
 
-    <!-- Brand -->
-    <div class="flex items-center gap-3 px-4 py-[18px] border-b border-white/[.06] min-h-[68px]">
-        <div class="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg shadow-red-900/40"
+    <!-- Brand Area -->
+    <div class="flex items-center gap-3 px-4 py-[18px] border-b border-white/[.08] min-h-[68px]">
+        <div class="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg shadow-red-900/40 transition-all duration-300 hover:scale-105"
              style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
             <svg class="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -137,7 +288,7 @@
             <p class="text-red-400 text-[10px] font-medium tracking-wide">ISP Control Center</p>
         </div>
         <button onclick="toggleSidebar()" id="toggle-btn"
-                class="ml-auto flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:bg-white/10"
+                class="ml-auto flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:bg-white/10 hover:rotate-180 duration-300"
                 style="background:rgba(255,255,255,.05);">
             <svg id="toggle-icon" class="w-[14px] h-[14px] text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
@@ -145,31 +296,26 @@
         </button>
     </div>
 
-    <!-- Nav -->
+    <!-- Navigation -->
     <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
-
-        <!-- ── OVERVIEW ── -->
+        <!-- Overview Section -->
         <p class="sec-lbl collapsible" style="max-width:200px;">Overview</p>
 
-        <!-- Dashboard — active -->
         <div class="nav-wrapper relative">
-            <a href="{{ route('dashboard') }}" class="nav-item-inner relative flex items-center gap-3 px-3 py-2.5 rounded-xl"
-               style="background:linear-gradient(135deg,rgba(220,38,38,.18),rgba(185,28,28,.12));border:1px solid rgba(220,38,38,.28);">
-                <div class="nav-active-bar"></div>
+            <a href="{{ route('dashboard') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-[17px] h-[17px] text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                     </svg>
                 </div>
-                <span class="collapsible text-sm font-semibold text-red-200" style="max-width:160px;">Dashboard</span>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Dashboard</span>
             </a>
             <span class="nav-tooltip">Dashboard</span>
         </div>
 
-        <!-- ── MANAGEMENT ── -->
+        <!-- Management Section -->
         <p class="sec-lbl collapsible mt-3" style="max-width:200px;padding-top:12px;">Management</p>
 
-        <!-- Clients -->
         <div class="nav-wrapper relative">
             <a href="{{ route('clients.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -182,7 +328,6 @@
             <span class="nav-tooltip">Clients</span>
         </div>
 
-        <!-- Subscription Rates -->
         <div class="nav-wrapper relative">
             <a href="{{ route('subscription-rates.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -190,12 +335,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
                 </div>
-                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Subscription Rates</span>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Subscription Plans</span>
             </a>
-            <span class="nav-tooltip">Subscription Rates</span>
+            <span class="nav-tooltip">Subscription Plans</span>
         </div>
 
-        <!-- Sales -->
         <div class="nav-wrapper relative">
             <a href="{{ route('sales.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -210,9 +354,6 @@
             <span class="nav-tooltip">Sales</span>
         </div>
 
-       
-
-        <!-- Billing -->
         <div class="nav-wrapper relative">
             <a href="{{ route('billings.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -225,7 +366,6 @@
             <span class="nav-tooltip">Billing</span>
         </div>
 
-        <!-- Payments -->
         <div class="nav-wrapper relative">
             <a href="{{ route('payments.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -238,27 +378,22 @@
             <span class="nav-tooltip">Payments</span>
         </div>
 
-         <!-- Technicians -->
         <div class="nav-wrapper relative">
             <a href="{{ route('technicians.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
                     <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-        d="M14.7 6.3a4 4 0 01-5.4 5.4l-5.6 5.6a2 2 0 102.8 2.8l5.6-5.6a4 4 0 005.4-5.4z"/>
-</svg>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M14.7 6.3a4 4 0 01-5.4 5.4l-5.6 5.6a2 2 0 102.8 2.8l5.6-5.6a4 4 0 005.4-5.4z"/>
+                    </svg>
                 </div>
                 <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Technicians</span>
             </a>
             <span class="nav-tooltip">Technicians</span>
         </div>
 
+        <!-- Reports & Analytics Section -->
+        <p class="sec-lbl collapsible mt-3" style="max-width:200px;padding-top:12px;">Reports</p>
 
-        <!-- ── ADMIN ── -->
-        <p class="sec-lbl collapsible mt-3" style="max-width:200px;padding-top:12px;">Admin</p>
-
-
-        
-        <!-- Reports -->
         <div class="nav-wrapper relative">
             <a href="{{ route('reports.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -271,7 +406,11 @@
             <span class="nav-tooltip">Reports</span>
         </div>
 
-        <!-- Users -->
+       
+
+        <!-- Administration Section -->
+        <p class="sec-lbl collapsible mt-3" style="max-width:200px;padding-top:12px;">Administration</p>
+
         <div class="nav-wrapper relative">
             <a href="{{ route('users.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -279,30 +418,17 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                 </div>
-                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Users</span>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">User Management</span>
             </a>
-            <span class="nav-tooltip">Users</span>
+            <span class="nav-tooltip">User Management</span>
         </div>
 
-        
-        <!-- Settings -->
-        <div class="nav-wrapper relative">
-            <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
-                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                </div>
-                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Settings</span>
-            </a>
-            <span class="nav-tooltip">Settings</span>
-        </div>
-
+      
     </nav>
+
     <!-- User Footer -->
-    <div class="border-t border-white/[.06] p-3">
-        <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[.06] transition-colors">
+    <div class="border-t border-white/[.08] p-3">
+        <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[.06] transition-all">
             <div class="w-9 h-9 rounded-xl flex-shrink-0 avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md">
                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </div>
@@ -314,8 +440,7 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" title="Logout"
-                            class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-red-500/20"
-                            style="background:rgba(255,255,255,.05);">
+                            class="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:bg-red-500/20 hover:scale-105">
                         <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                         </svg>
@@ -327,7 +452,7 @@
 </aside>
 
 <!-- ===================== MAIN CONTENT ===================== -->
-<div id="main-content" class="flex flex-col flex-1 min-h-screen" style="margin-left:260px;">
+<div id="main-content" class="flex flex-col flex-1 min-h-screen">
 
     <!-- TOP BAR -->
     <header class="topbar sticky top-0 z-40 flex items-center justify-between px-7 py-3.5">
@@ -349,19 +474,14 @@
             </div>
         </div>
         <div class="flex items-center gap-3">
-            <button class="relative w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-colors">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                </svg>
-            </button>
-            <a href="{{ route('profile.edit') }}" class="w-9 h-9 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md">
+            <a href="{{ route('profile.edit') }}" class="w-9 h-9 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md transition-all hover:scale-105">
                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </a>
         </div>
     </header>
 
-    <!-- PAGE BODY -->
-    <main class="flex-1 p-6 flex flex-col items-center justify-start">
+    <!-- PAGE BODY - Scrollable -->
+    <main class="flex-1 main-scroll p-6 flex flex-col items-center justify-start">
 
         <!-- Breadcrumb -->
         <div class="w-full max-w-3xl mb-5">
@@ -619,7 +739,7 @@
 </div>
 
 <script>
-    // Sidebar toggle
+    // Sidebar toggle with enhanced animation
     let collapsed = false;
     function toggleSidebar() {
         collapsed = !collapsed;
@@ -637,6 +757,24 @@
             sidebar.classList.remove('sidebar-collapsed');
             icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>';
         }
+    }
+
+    // Mobile sidebar functions
+    function toggleMobileSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobile-overlay');
+        sidebar.classList.toggle('mobile-open');
+        if (sidebar.classList.contains('mobile-open')) {
+            overlay.classList.remove('hidden');
+        } else {
+            overlay.classList.add('hidden');
+        }
+    }
+    function closeMobileSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobile-overlay');
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.add('hidden');
     }
 
     // Live name preview in user meta card
@@ -724,6 +862,18 @@
             label.style.color = '#ef4444';
         }
     }
+    
+    // Close mobile sidebar on window resize to desktop
+    window.addEventListener('resize', function() {
+        if (window.innerWidth >= 1024) {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            if (sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.add('hidden');
+            }
+        }
+    });
 </script>
 </body>
 </html>

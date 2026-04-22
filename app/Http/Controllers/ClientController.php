@@ -7,6 +7,7 @@ use App\Models\SubscriptionRate;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 
 class ClientController extends Controller
 {
@@ -64,9 +65,14 @@ class ClientController extends Controller
             'subscription_rate_id' => ['nullable', 'exists:subscription_rates,id'],
             'status' => ['required', 'in:active,inactive,suspended,cancelled'],
             'notes' => ['nullable', 'string'],
+            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ]);
 
         $validated['user_id'] = auth()->id();
+
+        if ($request->hasFile('photo')) {
+            $validated['photo'] = $request->file('photo')->store('clients', 'public');
+        }
 
         Client::create($validated);
 
@@ -109,7 +115,15 @@ class ClientController extends Controller
             'subscription_rate_id' => ['nullable', 'exists:subscription_rates,id'],
             'status' => ['required', 'in:active,inactive,suspended,cancelled'],
             'notes' => ['nullable', 'string'],
+            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ]);
+
+        if ($request->hasFile('photo')) {
+            if ($client->photo) {
+                Storage::disk('public')->delete($client->photo);
+            }
+            $validated['photo'] = $request->file('photo')->store('clients', 'public');
+        }
 
         $client->update($validated);
 

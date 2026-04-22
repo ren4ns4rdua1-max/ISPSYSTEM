@@ -26,7 +26,11 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/admin/templates', [\App\Http\Controllers\Admin\TemplateController::class, 'index'])->name('admin.templates');
+    Route::post('/admin/templates', [\App\Http\Controllers\Admin\TemplateController::class, 'update'])->name('admin.templates.update');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
@@ -67,4 +71,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/export', [ReportsController::class, 'export'])->name('reports.export');
 });
 
+
 require __DIR__.'/auth.php';
+
+
+
