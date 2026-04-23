@@ -12,9 +12,13 @@ class TechnicianDashboardController extends Controller
     {
         $user = Auth::user();
         $technician = $user->technicians()->first();
-        
         if (!$technician) {
-            abort(404, 'No technician profile found.');
+            $technician = $user->technicians()->create([
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone_number' => 'N/A',
+                'status' => 'available',
+            ]);
         }
 
         $status = $request->get('status', '');
