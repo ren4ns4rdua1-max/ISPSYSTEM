@@ -10,7 +10,7 @@ class InstallationJob extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+protected $fillable = [
         'client_id',
         'technician_id',
         'assigned_by',
@@ -22,6 +22,7 @@ class InstallationJob extends Model
         'completed_at',
         'notes',
         'completion_notes',
+        'photo',
     ];
 
     protected $casts = [

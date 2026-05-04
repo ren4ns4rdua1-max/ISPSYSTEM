@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create User — ISP Admin</title>
+    <title>Notifications — ISP Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
@@ -12,13 +12,13 @@
         *, body { font-family: 'DM Sans', sans-serif; }
         .font-display { font-family: 'Syne', sans-serif; }
 
-        /* Fix body scrolling layout */
+        /* Fix for body scrolling */
         body {
             overflow: hidden;
             height: 100vh;
         }
 
-        /* Modern Sidebar Styling (collapsible, gradient) */
+        /* Enhanced Sidebar Styling */
         #sidebar { 
             transition: width 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1); 
             background: linear-gradient(180deg, #0a0c18 0%, #0f111e 100%);
@@ -39,7 +39,7 @@
             flex-direction: column;
         }
 
-        /* Mobile sidebar behavior */
+        /* Mobile sidebar */
         @media (max-width: 1023px) {
             #sidebar {
                 transform: translateX(-100%);
@@ -57,7 +57,6 @@
             }
         }
 
-        /* Collapsible elements */
         .collapsible { 
             transition: opacity 0.25s ease, max-width 0.3s ease; 
             overflow: hidden; 
@@ -67,7 +66,7 @@
         .sidebar-collapsed .nav-item-inner { justify-content: center; padding-left: 0.75rem; padding-right: 0.75rem; }
         .sidebar-collapsed .sec-lbl { opacity: 0; height: 0; margin: 0; padding: 0; overflow: hidden; }
 
-        /* Active nav bar indicator */
+        /* Active Navigation Bar */
         .nav-active-bar {
             position: absolute; left: 0; top: 50%; transform: translateY(-50%);
             width: 3px; height: 60%; border-radius: 0 6px 6px 0;
@@ -75,7 +74,7 @@
             box-shadow: 0 0 6px rgba(239,68,68,0.6);
         }
 
-        /* Nav item hover */
+        /* Navigation item hover effect */
         .nav-item-inner {
             transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
             position: relative;
@@ -111,14 +110,16 @@
             border: 6px solid transparent; border-right-color: #1e293b;
         }
 
-        /* Submenu styles (if needed) */
+        /* Submenu styles */
         .submenu {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             margin-left: 2rem;
         }
-        .submenu.open { max-height: 300px; }
+        .submenu.open {
+            max-height: 300px;
+        }
         .submenu-item {
             display: flex;
             align-items: center;
@@ -136,8 +137,12 @@
             background: rgba(255, 255, 255, 0.05);
             transform: translateX(3px);
         }
-        .chevron-icon { transition: transform 0.3s ease; }
-        .chevron-icon.rotated { transform: rotate(90deg); }
+        .chevron-icon {
+            transition: transform 0.3s ease;
+        }
+        .chevron-icon.rotated {
+            transform: rotate(90deg);
+        }
 
         /* Topbar glass effect */
         .topbar {
@@ -148,7 +153,7 @@
             flex-shrink: 0;
         }
 
-        /* Avatar gradient with shimmer */
+        /* Avatar gradient with animation */
         .avatar-grad { 
             background: linear-gradient(125deg, #dc2626, #f97316, #ec4899);
             background-size: 200% 200%;
@@ -160,7 +165,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Main scrollbar */
+        /* Main content scrollbar */
         .main-scroll {
             overflow-y: auto;
             scrollbar-width: thin;
@@ -170,52 +175,20 @@
         .main-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .main-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Form input styles (from previous design) */
-        .form-input {
-            width: 100%;
-            padding: 0.65rem 0.9rem;
-            font-size: 0.9rem;
-            color: #111827;
-            background: #f9fafb;
-            border: 1.5px solid #e5e7eb;
-            border-radius: 12px;
-            outline: none;
+        /* Notifications specific styling */
+        .notification-item {
+            transition: all 0.2s ease;
+            animation: fadeUp 0.3s ease both;
+        }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+        .mark-read-btn {
             transition: all 0.2s ease;
         }
-        .form-input:focus {
-            background: #fff;
-            border-color: #dc2626;
-            box-shadow: 0 0 0 3px rgba(220,38,38,.1);
+        .mark-read-btn:hover {
+            transform: scale(1.05);
+            color: #ef4444;
         }
-        .form-input.error { border-color: #fca5a5; background: #fff5f5; }
-        .input-wrapper { position: relative; }
-        .input-icon {
-            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-            color: #9ca3af; pointer-events: none;
-            transition: color 0.2s ease;
-        }
-        .input-wrapper:focus-within .input-icon { color: #dc2626; }
-        .input-wrapper .form-input { padding-left: 2.5rem; }
-        .toggle-pw {
-            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-            color: #9ca3af; cursor: pointer; transition: color 0.2s;
-        }
-        .toggle-pw:hover { color: #dc2626; }
-        .strength-bar { height: 4px; border-radius: 100px; background: #e5e7eb; overflow: hidden; }
-        .strength-fill { height: 100%; border-radius: 100px; transition: width 0.4s ease, background 0.4s ease; width: 0%; }
-        .form-card { animation: slideUp 0.4s ease both; }
-        @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-        .btn-submit {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            position: relative; overflow: hidden;
-        }
-        .btn-submit::after {
-            content: ''; position: absolute; top: -50%; left: -60%; width: 40%; height: 200%;
-            background: rgba(255,255,255,.15); transform: skewX(-20deg);
-            transition: left 0.4s ease;
-        }
-        .btn-submit:hover::after { left: 120%; }
-
+        
         /* Mobile menu button */
         .mobile-menu-btn {
             position: fixed;
@@ -241,7 +214,7 @@
 <!-- Mobile Overlay -->
 <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden" onclick="closeMobileSidebar()"></div>
 
-<!-- ═══════════════════ MODERN SIDEBAR (COLLAPSIBLE) ═══════════════════ -->
+<!-- ═══════════════════ MODERN SIDEBAR (ISP ADMIN) ═══════════════════ -->
 <aside id="sidebar" style="width:260px;" class="fixed left-0 top-0 h-full z-50 flex flex-col shadow-2xl">
 
     <!-- Brand Area -->
@@ -350,7 +323,8 @@
             <a href="{{ route('technicians.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
                     <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.7 6.3a4 4 0 01-5.4 5.4l-5.6 5.6a2 2 0 102.8 2.8l5.6-5.6a4 4 0 005.4-5.4z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M14.7 6.3a4 4 0 01-5.4 5.4l-5.6 5.6a2 2 0 102.8 2.8l5.6-5.6a4 4 0 005.4-5.4z"/>
                     </svg>
                 </div>
                 <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">Technicians</span>
@@ -358,8 +332,9 @@
             <span class="nav-tooltip">Technicians</span>
         </div>
 
-        <!-- Reports & Admin -->
+        <!-- Reports Section -->
         <p class="sec-lbl collapsible mt-3" style="max-width:200px;padding-top:12px;">Reports</p>
+
         <div class="nav-wrapper relative">
             <a href="{{ route('reports.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -372,17 +347,17 @@
             <span class="nav-tooltip">Reports</span>
         </div>
 
+        <!-- Administration Section -->
         <p class="sec-lbl collapsible mt-3" style="max-width:200px;padding-top:12px;">Administration</p>
+
         <div class="nav-wrapper relative">
-            <a href="{{ route('users.index') }}" class="nav-item-inner relative flex items-center gap-3 px-3 py-2.5 rounded-xl"
-               style="background:linear-gradient(135deg,rgba(220,38,38,.12),rgba(185,28,28,.06));border:1px solid rgba(220,38,38,.2);">
-                <div class="nav-active-bar"></div>
+            <a href="{{ route('users.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-[17px] h-[17px] text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                 </div>
-                <span class="collapsible text-sm font-semibold text-red-300" style="max-width:160px;">User Management</span>
+                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">User Management</span>
             </a>
             <span class="nav-tooltip">User Management</span>
         </div>
@@ -413,149 +388,127 @@
     </div>
 </aside>
 
-<!-- ===================== MAIN CONTENT (CREATE USER) ===================== -->
+<!-- ===================== MAIN CONTENT (NOTIFICATIONS PAGE) ===================== -->
 <div id="main-content" class="flex flex-col flex-1 min-h-screen">
 
-    <!-- TOP BAR with Create User header -->
+    <!-- TOP BAR with Notifications header -->
     <header class="topbar sticky top-0 z-40 flex items-center justify-between px-7 py-3.5">
-        <div class="flex items-center gap-3">
-            <a href="{{ route('users.index') }}"
-               class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        <div>
+            <h1 class="font-display font-bold text-gray-900 text-[20px] leading-tight">Notifications</h1>
+            <p class="text-gray-400 text-[12px] flex items-center gap-1.5 mt-0.5">
+                <svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.658 6 8.009 6 10v4.158a2.032 2.032 0 01-.595 1.417L5 17h5m6 0a1 1 0 01-1 1h-1m-5 0v-4a1 1 0 011-1h1"/>
                 </svg>
-            </a>
-            <div>
-                <h1 class="font-display font-bold text-gray-900 text-[20px] leading-tight">Create New User</h1>
-                <p class="text-gray-400 text-[12px] flex items-center gap-1.5 mt-0.5">
-                    <svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                    </svg>
-                    Fill in the details to register a new user
-                </p>
-            </div>
+                View and manage your notifications
+            </p>
         </div>
         <div class="flex items-center gap-3">
+            <div class="relative hidden md:block">
+                <input type="text" id="notification-search" placeholder="Search notifications..." 
+                    class="w-64 text-sm bg-gray-100 rounded-xl pl-9 pr-4 py-2 text-gray-700 placeholder-gray-400 border-0 focus:outline-none focus:bg-white transition-all"/>
+                <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+            @if($unreadCount > 0)
+            <button onclick="markAllRead()" 
+                    class="inline-flex items-center gap-2 px-5 py-2.5 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                    style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Mark all as read
+            </button>
+            @endif
             <a href="{{ route('profile.edit') }}" class="w-9 h-9 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md transition-all hover:scale-105">
                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </a>
         </div>
     </header>
 
-    <!-- PAGE BODY (Scrollable) -->
-    <main class="flex-1 main-scroll p-6 flex flex-col items-center justify-start">
-
-        <!-- Form Card -->
-        <div class="form-card w-full max-w-3xl">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="px-7 py-5 border-b border-gray-100 flex items-center gap-4"
-                     style="background:linear-gradient(90deg,#fff5f5,#fff);">
-                    <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
-                         style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                        </svg>
+    <!-- PAGE BODY - Notifications List (Scrollable) -->
+    <main class="flex-1 main-scroll p-6 space-y-5">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            @forelse($notifications as $notification)
+            <div class="notification-item px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-all {{ $notification->is_read ? 'opacity-70' : '' }}" data-notification-id="{{ $notification->id }}" data-title="{{ $notification->title }}" data-message="{{ $notification->message }}">
+                <div class="flex items-start gap-4">
+                    @if(!$notification->is_read)
+                    <div class="w-2.5 h-2.5 bg-red-500 rounded-full mt-2 flex-shrink-0 shadow-sm shadow-red-200"></div>
+                    @else
+                    <div class="w-2.5 h-2.5 bg-gray-300 rounded-full mt-2 flex-shrink-0"></div>
+                    @endif
+                    
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <h3 class="font-semibold text-gray-800 text-[15px]">{{ $notification->title }}</h3>
+                            <span class="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">{{ $notification->created_at->format('M j, g:i A') }}</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mt-1.5 leading-relaxed">{{ $notification->message }}</p>
+                        
+@if($notification->data && isset($notification->data['job_id']))
+                        <div class="mt-3">
+                            <a href="{{ route('technicians.jobs') }}?search=" class="inline-flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-700 transition-all">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                View Job #{{ $notification->data['job_id'] }}
+                            </a>
+                        </div>
+                        @endif
+                        
+                        {{-- Show photo proof if uploaded --}}
+                        @if($notification->data && isset($notification->data['photo']))
+                        <div class="mt-3">
+                            <p class="text-xs font-semibold text-gray-500 mb-1">📷 Proof Photo:</p>
+                            <img src="{{ asset('storage/' . $notification->data['photo']) }}" 
+                                 alt="Work completion photo" 
+                                 class="w-32 h-24 object-cover rounded-lg border border-gray-200"
+                                 onclick="window.open('{{ asset('storage/' . $notification->data['photo']) }}', '_blank')"
+                                 style="cursor:pointer;"
+                                 title="Click to view full size">
+                        </div>
+                        @endif
+                        
+                        {{-- Show completion notes if available --}}
+                        @if($notification->data && isset($notification->data['completion_notes']))
+                        <div class="mt-2 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg">
+                            <strong>Notes:</strong> {{ $notification->data['completion_notes'] }}
+                        </div>
+                        @endif
                     </div>
-                    <div>
-                        <h2 class="font-display font-bold text-gray-900 text-base">Account Information</h2>
-                        <p class="text-gray-400 text-[12px]">All fields are required to create a new account</p>
-                    </div>
-                    <div class="ml-auto">
-                        <div id="avatar-preview"
-                             class="w-12 h-12 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-xl shadow-md transition-all"
-                             style="font-family:'Syne',sans-serif;">?</div>
-                    </div>
+                    
+                    @if(!$notification->is_read)
+                    <button onclick="markAsRead({{ $notification->id }})" 
+                            class="mark-read-btn text-xs font-medium text-gray-400 hover:text-red-500 transition-colors px-2 py-1 rounded-md hover:bg-red-50">
+                        Mark read
+                    </button>
+                    @endif
                 </div>
-
-                <form method="POST" action="{{ route('users.store') }}" enctype="multipart/form-data" class="p-7 space-y-6">
-                    @csrf
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <!-- Name -->
-                        <div class="space-y-1.5">
-                            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Full Name</label>
-                            <div class="input-wrapper">
-                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                </svg>
-                                <input id="name" name="name" type="text" value="{{ old('name') }}" placeholder="e.g. Juan dela Cruz" autofocus class="form-input" oninput="updateAvatar(this.value)"/>
-                            </div>
-                            @error('name') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-                        </div>
-
-                        <!-- Email -->
-                        <div class="space-y-1.5">
-                            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Email Address</label>
-                            <div class="input-wrapper">
-                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                </svg>
-                                <input id="email" name="email" type="email" value="{{ old('email') }}" placeholder="e.g. juan@example.com" class="form-input"/>
-                            </div>
-                            @error('email') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-                        </div>
-
-                        <!-- Password -->
-                        <div class="space-y-1.5">
-                            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Password</label>
-                            <div class="input-wrapper">
-                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                <input id="password" name="password" type="password" placeholder="Min. 8 characters" class="form-input" oninput="checkStrength(this.value); checkMatch()"/>
-                                <button type="button" class="toggle-pw" onclick="togglePassword('password', this)"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
-                            </div>
-                            <div class="strength-bar mt-1"><div id="strength-fill" class="strength-fill"></div></div>
-                            <p id="strength-label" class="text-[10px] font-semibold text-gray-400"></p>
-                            @error('password') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-                        </div>
-
-                        <!-- Confirm Password -->
-                        <div class="space-y-1.5">
-                            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Confirm Password</label>
-                            <div class="input-wrapper">
-                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                <input id="password_confirmation" name="password_confirmation" type="password" placeholder="Re-enter your password" class="form-input" oninput="checkMatch()"/>
-                                <button type="button" class="toggle-pw" onclick="togglePassword('password_confirmation', this)"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
-                            </div>
-                            <p id="match-label" class="text-[10px] font-semibold mt-1"></p>
-                            @error('password_confirmation') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-                        </div>
-
-                        <!-- Photo upload -->
-                        <div class="space-y-1.5">
-                            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Profile Photo <span class="text-gray-400">(Optional)</span></label>
-                            <div class="flex items-center gap-4">
-                                <div class="w-16 h-16 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center flex-shrink-0">
-                                    <img id="photo-preview" src="" alt="" class="w-full h-full object-cover hidden">
-                                    <svg id="photo-placeholder" class="w-7 h-7 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                </div>
-                                <div class="flex-1 space-y-1">
-                                    <input type="file" name="photo" id="photo" accept="image/*" onchange="previewPhoto(this)" class="form-input">
-                                    <button type="button" id="remove-photo" onclick="removePhoto()" class="hidden text-xs font-semibold text-red-500 hover:text-red-700">× Remove</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Role -->
-                        <div class="space-y-1.5">
-                            <label for="role" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">User Role</label>
-                            <select id="role" name="role" class="form-input">
-                                <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                                <option value="technician" {{ old('role') == 'technician' ? 'selected' : '' }}>Technician</option>
-                            </select>
-                            @error('role') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-                        </div>
-                    </div>
-
-                    <div class="border-t border-gray-100 pt-5 flex items-center justify-between gap-3 flex-wrap">
-                        <a href="{{ route('users.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all">Cancel</a>
-                        <button type="submit" class="btn-submit inline-flex items-center gap-2 px-7 py-2.5 text-sm font-semibold text-white rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">Create User</button>
-                    </div>
-                </form>
             </div>
+            @empty
+            <div class="flex flex-col items-center justify-center py-20 px-6 text-center">
+                <div class="w-20 h-20 rounded-2xl bg-red-50 flex items-center justify-center mb-5">
+                    <svg class="w-10 h-10 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.658 6 8.009 6 10v4.158a2.032 2.032 0 01-.595 1.417L5 17h5m6 0a1 1 0 01-1 1h-1m-5 0v-4a1 1 0 011-1h1"/>
+                    </svg>
+                </div>
+                <p class="font-display font-bold text-gray-800 text-lg mb-2">No notifications yet</p>
+                <p class="text-gray-400 text-sm max-w-xs">When you receive notifications, they'll appear here.</p>
+            </div>
+            @endforelse
         </div>
+
+        <!-- Pagination -->
+        @if($notifications->hasPages())
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-4 flex items-center justify-between flex-wrap gap-3">
+            <p class="text-[12px] text-gray-500">
+                Showing <span class="font-semibold text-gray-800">{{ $notifications->firstItem() }}</span>–<span class="font-semibold text-gray-800">{{ $notifications->lastItem() }}</span>
+                of <span class="font-semibold text-gray-800">{{ $notifications->total() }}</span> notifications
+            </p>
+            {{ $notifications->links() }}
+        </div>
+        @endif
     </main>
 </div>
 
 <script>
+    // Sidebar toggle logic
     let collapsed = false;
     function toggleSidebar() {
         collapsed = !collapsed;
@@ -575,11 +528,16 @@
         }
     }
 
+    // Mobile sidebar
     function toggleMobileSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('mobile-overlay');
         sidebar.classList.toggle('mobile-open');
-        overlay.classList.toggle('hidden');
+        if (sidebar.classList.contains('mobile-open')) {
+            overlay.classList.remove('hidden');
+        } else {
+            overlay.classList.add('hidden');
+        }
     }
     function closeMobileSidebar() {
         const sidebar = document.getElementById('sidebar');
@@ -587,60 +545,65 @@
         sidebar.classList.remove('mobile-open');
         overlay.classList.add('hidden');
     }
-    window.addEventListener('resize', () => { if (window.innerWidth >= 1024) closeMobileSidebar(); });
-
-    function updateAvatar(name) { document.getElementById('avatar-preview').textContent = name.trim() ? name.trim().charAt(0).toUpperCase() : '?'; }
-    function previewPhoto(input) {
-        if (input.files?.[0]) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                document.getElementById('photo-preview').src = e.target.result;
-                document.getElementById('photo-preview').classList.remove('hidden');
-                document.getElementById('photo-placeholder').classList.add('hidden');
-                document.getElementById('remove-photo').classList.remove('hidden');
-                const av = document.getElementById('avatar-preview');
-                av.style.backgroundImage = `url(${e.target.result})`;
-                av.style.backgroundSize = 'cover';
-                av.textContent = '';
-            };
-            reader.readAsDataURL(input.files[0]);
+    window.addEventListener('resize', function() {
+        if (window.innerWidth >= 1024) {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            if (sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.add('hidden');
+            }
         }
+    });
+
+    // mark single notification as read
+    function markAsRead(id) {
+        fetch(`/notifications/${id}/read`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) location.reload();
+        })
+        .catch(err => console.error(err));
     }
-    function removePhoto() {
-        document.getElementById('photo').value = '';
-        document.getElementById('photo-preview').classList.add('hidden');
-        document.getElementById('photo-placeholder').classList.remove('hidden');
-        document.getElementById('remove-photo').classList.add('hidden');
-        const av = document.getElementById('avatar-preview');
-        av.style.backgroundImage = '';
-        av.textContent = document.getElementById('name').value.trim().charAt(0).toUpperCase() || '?';
+
+    // mark all read
+    function markAllRead() {
+        fetch('/notifications/read-all', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) location.reload();
+        })
+        .catch(err => console.error(err));
     }
-    function togglePassword(id, btn) {
-        const inp = document.getElementById(id);
-        inp.type = inp.type === 'password' ? 'text' : 'password';
-    }
-    function checkStrength(val) {
-        const fill = document.getElementById('strength-fill');
-        const label = document.getElementById('strength-label');
-        let score = 0;
-        if (val.length >= 8) score++;
-        if (/[A-Z]/.test(val)) score++;
-        if (/[0-9]/.test(val)) score++;
-        if (/[^A-Za-z0-9]/.test(val)) score++;
-        const config = [{w:'0%',c:'',t:''},{w:'25%',c:'#ef4444',t:'Weak'},{w:'50%',c:'#f59e0b',t:'Fair'},{w:'75%',c:'#3b82f6',t:'Good'},{w:'100%',c:'#22c55e',t:'Strong'}];
-        fill.style.width = config[score].w;
-        fill.style.background = config[score].c;
-        label.textContent = config[score].t;
-        label.style.color = config[score].c;
-        checkMatch();
-    }
-    function checkMatch() {
-        const pw = document.getElementById('password').value;
-        const cf = document.getElementById('password_confirmation').value;
-        const label = document.getElementById('match-label');
-        if (!cf) { label.textContent = ''; return; }
-        label.textContent = pw === cf ? '✓ Passwords match' : '✗ Passwords do not match';
-        label.style.color = pw === cf ? '#22c55e' : '#ef4444';
+
+    // Simple frontend search filter for notifications (demo usability)
+    const searchField = document.getElementById('notification-search');
+    if (searchField) {
+        searchField.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const notifItems = document.querySelectorAll('.notification-item');
+            notifItems.forEach(item => {
+                const title = item.getAttribute('data-title') || '';
+                const message = item.getAttribute('data-message') || '';
+                if (title.toLowerCase().includes(searchTerm) || message.toLowerCase().includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
     }
 </script>
 </body>

@@ -410,15 +410,16 @@
 
         <!-- Administration Section -->
         <p class="sec-lbl collapsible mt-3" style="max-width:200px;padding-top:12px;">Administration</p>
-
         <div class="nav-wrapper relative">
-            <a href="{{ route('users.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
+            <a href="{{ route('users.index') }}" class="nav-item-inner relative flex items-center gap-3 px-3 py-2.5 rounded-xl"
+               style="background:linear-gradient(135deg,rgba(220,38,38,.12),rgba(185,28,28,.06));border:1px solid rgba(220,38,38,.2);">
+                <div class="nav-active-bar"></div>
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-[17px] h-[17px] text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                 </div>
-                <span class="collapsible text-sm font-medium text-gray-400" style="max-width:160px;">User Management</span>
+                <span class="collapsible text-sm font-semibold text-red-300" style="max-width:160px;">User Management</span>
             </a>
             <span class="nav-tooltip">User Management</span>
         </div>
@@ -498,9 +499,13 @@
 
             <!-- User Meta Card -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-4 flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl avatar-grad flex items-center justify-center text-white font-bold text-2xl shadow-md flex-shrink-0"
-                     id="avatar-preview" style="font-family:'Syne',sans-serif;">
-                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                <div class="w-14 h-14 rounded-2xl overflow-hidden flex-shrink-0 shadow-md"
+                     id="avatar-preview">
+                    @if($user->photo)
+                        <img src="{{ asset('storage/' . $user->photo) }}" alt="" class="w-full h-full object-cover" id="avatar-img">
+                    @else
+                        <div class="w-full h-full avatar-grad flex items-center justify-center text-white font-bold text-2xl" id="avatar-initials" style="font-family:'Syne',sans-serif;">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                    @endif
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="font-display font-bold text-gray-900 text-base leading-tight" id="name-preview">{{ $user->name }}</p>
@@ -535,7 +540,7 @@
                 </div>
 
                 <!-- Form -->
-                <form method="POST" action="{{ route('users.update', $user->id) }}" class="p-7 space-y-6">
+                <form method="POST" action="{{ route('users.update', $user->id) }}" enctype="multipart/form-data" class="p-7 space-y-6">
                     @csrf
                     @method('PATCH')
 
@@ -589,6 +594,26 @@
                                         {{ $message }}
                                     </p>
                                 @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Photo -->
+                    <div class="border-t border-gray-100 pt-5">
+                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">Profile Photo</p>
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center flex-shrink-0">
+                                @if($user->photo)
+                                    <img id="photo-preview" src="{{ asset('storage/' . $user->photo) }}" alt="" class="w-full h-full object-cover">
+                                    <svg id="photo-placeholder" class="w-7 h-7 text-gray-300 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                @else
+                                    <img id="photo-preview" src="" alt="" class="w-full h-full object-cover hidden">
+                                    <svg id="photo-placeholder" class="w-7 h-7 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                @endif
+                            </div>
+                            <div class="flex-1 space-y-1">
+                                <input type="file" name="photo" id="photo" accept="image/*" onchange="previewPhoto(this)" class="form-input">
+                                <p class="text-[11px] text-gray-400">Upload a new photo to replace the current one</p>
                             </div>
                         </div>
                     </div>
@@ -779,10 +804,32 @@
 
     // Live name preview in user meta card
     function updatePreview(name) {
-        const avatar = document.getElementById('avatar-preview');
         const nameEl = document.getElementById('name-preview');
-        avatar.textContent = name.trim() ? name.trim().charAt(0).toUpperCase() : '?';
         nameEl.textContent = name.trim() || 'User Name';
+        const initials = document.getElementById('avatar-initials');
+        if (initials) initials.textContent = name.trim() ? name.trim().charAt(0).toUpperCase() : '?';
+    }
+
+    function previewPhoto(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const preview = document.getElementById('photo-preview');
+                const placeholder = document.getElementById('photo-placeholder');
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                if (placeholder) placeholder.classList.add('hidden');
+                // Update avatar
+                const img = document.getElementById('avatar-img');
+                const initials = document.getElementById('avatar-initials');
+                if (img) { img.src = e.target.result; }
+                else if (initials) {
+                    const wrap = document.getElementById('avatar-preview');
+                    wrap.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover" id="avatar-img">`;
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
     }
 
     // Password section accordion

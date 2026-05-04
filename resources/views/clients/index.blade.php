@@ -180,11 +180,12 @@
         .trow:hover { background: #fef2f2; transform: scale(1.002); }
         @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
-        /* Status badges */
+/* Status badges */
         .status-active { background: #ecfdf5; color: #059669; border: 1px solid #d1fae5; }
         .status-inactive { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
         .status-suspended { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
         .status-cancelled { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .status-pending_approval { background: #f3e8ff; color: #7c3aed; border: 1px solid #e9d5ff; }
 
         /* Button hover effects */
         .action-btn {
@@ -292,7 +293,7 @@
         <!-- Management Section -->
         <p class="sec-lbl collapsible mt-3" style="max-width:200px;padding-top:12px;">Management</p>
 
-        <div class="nav-wrapper relative">
+<div class="nav-wrapper relative">
             <a href="{{ route('clients.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all"
                style="background:linear-gradient(135deg,rgba(220,38,38,.12),rgba(185,28,28,.08));border:1px solid rgba(220,38,38,.2);">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
@@ -490,8 +491,9 @@
                     @if($search)
                         <input type="hidden" name="search" value="{{ $search }}">
                     @endif
-                    <select name="status" onchange="this.form.submit()" class="text-xs font-semibold bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-300 cursor-pointer">
+<select name="status" onchange="this.form.submit()" class="text-xs font-semibold bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-300 cursor-pointer">
                         <option value="">All Status</option>
+                        <option value="pending_approval" {{ $status == 'pending_approval' ? 'selected' : '' }}>Pending Approval</option>
                         <option value="active" {{ $status == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ $status == 'inactive' ? 'selected' : '' }}>Inactive</option>
                         <option value="suspended" {{ $status == 'suspended' ? 'selected' : '' }}>Suspended</option>
@@ -557,11 +559,16 @@
                                         <div class="flex items-center gap-3">
 <div class="relative w-9 h-9 rounded-xl flex-shrink-0 shadow-sm overflow-hidden">
                                                 @if($client->photo)
-                                                    <img src="{{ asset('storage/' . $client->photo) }}" alt="{{ $client->name }}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                                                    <img src="{{ asset('storage/' . $client->photo) }}" alt="{{ $client->name }}" class="w-full h-full object-cover"
+                                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                    <div class="w-full h-full avatar-grad items-center justify-center text-white font-bold text-sm absolute inset-0" style="display:none;">
+                                                        {{ strtoupper(substr($client->name, 0, 1)) }}
+                                                    </div>
+                                                @else
+                                                    <div class="w-full h-full avatar-grad flex items-center justify-center text-white font-bold text-sm">
+                                                        {{ strtoupper(substr($client->name, 0, 1)) }}
+                                                    </div>
                                                 @endif
-                                                <div class="w-full h-full avatar-grad flex items-center justify-center text-white font-bold text-sm {{ $client->photo ? 'absolute inset-0 hidden' : '' }}">
-                                                    {{ strtoupper(substr($client->name, 0, 1)) }}
-                                                </div>
                                             </div>
                                             <div>
                                                 <p class="text-sm font-semibold text-gray-900">{{ $client->name }}</p>
@@ -608,33 +615,56 @@
                                             {{ ucfirst($client->status) }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right">
+<td class="px-6 py-4 whitespace-nowrap text-right">
                                         <div class="flex items-center justify-end gap-2">
-                                            <a href="{{ route('clients.show', $client->id) }}"
-                                               class="action-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-semibold rounded-lg transition-all hover:shadow-sm"
-                                               style="color:#059669;background:#ecfdf5;border:1px solid #d1fae5;">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                </svg>
-                                                View
-                                            </a>
-                                            <a href="{{ route('clients.edit', $client->id) }}"
-                                               class="action-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-semibold rounded-lg transition-all hover:shadow-sm"
-                                               style="color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                </svg>
-                                                Edit
-                                            </a>
-                                            <button onclick="confirmDelete({{ $client->id }}, '{{ addslashes($client->name) }}')"
-                                                    class="action-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-semibold rounded-lg transition-all hover:shadow-sm"
-                                                    style="color:#374151;background:#f3f4f6;border:1px solid #e5e7eb;">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                </svg>
-                                                Delete
-                                            </button>
+                                            @if($client->status === 'pending_approval')
+                                                <!-- Approve button for pending clients -->
+                                                <form method="POST" action="{{ route('clients.approve', $client->id) }}" class="inline">
+                                                    @csrf
+                                                    <button type="submit" class="action-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-semibold rounded-lg transition-all hover:shadow-sm text-white bg-green-600 hover:bg-green-700">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                        </svg>
+                                                        Approve
+                                                    </button>
+                                                </form>
+                                                <!-- Approve & Assign button -->
+                                                <button type="button" onclick="openAssignModal({{ $client->id }}, '{{ addslashes($client->name) }}')"
+                                                        class="action-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-semibold rounded-lg transition-all hover:shadow-sm"
+                                                        style="color:#7c3aed;background:#f3e8ff;border:1px solid #e9d5ff;">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                                                    </svg>
+                                                    Assign
+                                                </button>
+                                            @else
+                                                <!-- Regular buttons for non-pending clients -->
+                                                <a href="{{ route('clients.show', $client->id) }}"
+                                                   class="action-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-semibold rounded-lg transition-all hover:shadow-sm"
+                                                   style="color:#059669;background:#ecfdf5;border:1px solid #d1fae5;">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                    </svg>
+                                                    View
+                                                </a>
+                                                <a href="{{ route('clients.edit', $client->id) }}"
+                                                   class="action-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-semibold rounded-lg transition-all hover:shadow-sm"
+                                                   style="color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                    </svg>
+                                                    Edit
+                                                </a>
+                                                <button onclick="confirmDelete({{ $client->id }}, '{{ addslashes($client->name) }}')"
+                                                        class="action-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-semibold rounded-lg transition-all hover:shadow-sm"
+                                                        style="color:#374151;background:#f3f4f6;border:1px solid #e5e7eb;">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                    Delete
+                                                </button>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -649,8 +679,18 @@
                         <div class="p-5 trow" style="animation-delay: {{ $index * 40 }}ms;">
                             <div class="flex items-start justify-between mb-3">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-11 h-11 rounded-xl avatar-grad flex items-center justify-center text-white font-bold shadow-sm">
-                                        {{ strtoupper(substr($client->name, 0, 1)) }}
+                                    <div class="relative w-11 h-11 rounded-xl flex-shrink-0 shadow-sm overflow-hidden">
+                                        @if($client->photo)
+                                            <img src="{{ asset('storage/' . $client->photo) }}" alt="{{ $client->name }}" class="w-full h-full object-cover"
+                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <div class="w-full h-full avatar-grad items-center justify-center text-white font-bold text-sm absolute inset-0" style="display:none;">
+                                                {{ strtoupper(substr($client->name, 0, 1)) }}
+                                            </div>
+                                        @else
+                                            <div class="w-full h-full avatar-grad flex items-center justify-center text-white font-bold text-sm">
+                                                {{ strtoupper(substr($client->name, 0, 1)) }}
+                                            </div>
+                                        @endif
                                     </div>
                                     <div>
                                         <p class="text-sm font-semibold text-gray-900">{{ $client->name }}</p>
@@ -725,6 +765,68 @@
     </div>
 </div>
 
+<!-- ===================== APPROVE & ASSIGN MODAL ===================== -->
+<div id="assign-modal" class="fixed inset-0 z-50 items-center justify-center" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:none;">
+    <div class="modal-content bg-white rounded-2xl shadow-2xl p-6 mx-4 w-full max-w-md">
+        <div class="flex items-start gap-4 mb-5">
+            <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="font-display font-bold text-gray-900 text-lg">Approve & Assign Task</h3>
+                <p class="text-gray-500 text-sm mt-1">Client: <span id="modal-client-name" class="font-semibold text-gray-800"></span></p>
+            </div>
+        </div>
+        
+        <form id="assign-form" method="POST">
+            @csrf
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Select Technician</label>
+                    <select name="technician_id" id="technician-select" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" required>
+                        <option value="">-- Select Technician --</option>
+                        @foreach($technicians as $tech)
+                        <option value="{{ $tech->id }}">{{ $tech->name }} ({{ ucfirst($tech->status) }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Job Type</label>
+                    <select name="job_type" id="job-type" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" required>
+                        <option value="new_installation">New Installation</option>
+                        <option value="repair">Repair</option>
+                        <option value="reconnection">Reconnection</option>
+                        <option value="upgrade">Upgrade</option>
+                        <option value="transfer">Transfer</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Scheduled Date</label>
+                    <input type="datetime-local" name="scheduled_date" id="scheduled-date" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Notes (Optional)</label>
+                    <textarea name="notes" id="notes" rows="2" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" placeholder="Additional instructions for technician..."></textarea>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 mt-6">
+                <button type="button" onclick="closeAssignModal()" class="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="flex-1 px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5" style="background:linear-gradient(135deg,#4f46e5,#6366f1);">
+                    Approve & Assign
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     // Sidebar toggle with enhanced animation
     let collapsed = false;
@@ -792,10 +894,39 @@
         });
     }
 
-    // Smooth fade-in for success alerts
+// Smooth fade-in for success alerts
     const style = document.createElement('style');
     style.textContent = `@keyframes fadeIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } } .animate-fadeIn { animation: fadeIn 0.3s ease forwards; }`;
     document.head.appendChild(style);
+
+    // Set default scheduled date to current datetime
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        const scheduledDateEl = document.getElementById('scheduled-date');
+        if (scheduledDateEl) {
+            scheduledDateEl.value = now.toISOString().slice(0, 16);
+        }
+    });
+
+    // Approve & Assign modal functions
+    function openAssignModal(clientId, clientName) {
+        document.getElementById('modal-client-name').textContent = clientName;
+        document.getElementById('assign-form').action = '/clients/' + clientId + '/approve-and-assign';
+        document.getElementById('assign-modal').style.display = 'flex';
+    }
+    
+    function closeAssignModal() {
+        document.getElementById('assign-modal').style.display = 'none';
+    }
+    
+    document.getElementById('assign-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeAssignModal();
+    });
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeAssignModal();
+    });
     
     // Close mobile sidebar on window resize to desktop
     window.addEventListener('resize', function() {

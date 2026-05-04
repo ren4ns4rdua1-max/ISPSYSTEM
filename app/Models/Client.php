@@ -71,7 +71,7 @@ class Client extends Model
         return $this->hasMany(Billing::class)->latest();
     }
 
-    /**
+/**
      * Get the status badge class.
      */
     public function getStatusBadgeAttribute(): string
@@ -81,7 +81,43 @@ class Client extends Model
             'inactive' => 'bg-gray-100 text-gray-700 border-gray-200',
             'suspended' => 'bg-amber-100 text-amber-700 border-amber-200',
             'cancelled' => 'bg-red-100 text-red-700 border-red-200',
+            'pending_approval' => 'bg-purple-100 text-purple-700 border-purple-200',
             default => 'bg-gray-100 text-gray-700 border-gray-200',
+        };
+    }
+
+    /**
+     * Check if client is pending approval.
+     */
+    public function isPendingApproval(): bool
+    {
+        return $this->status === 'pending_approval';
+    }
+
+    /**
+     * Approve the client.
+     */
+    public function approve(): bool
+    {
+        return $this->update(['status' => 'active']);
+    }
+
+    /**
+     * Reject the client.
+     */
+    public function reject(): bool
+    {
+        return $this->update(['status' => 'cancelled']);
+    }
+
+    /**
+     * Get status label for display.
+     */
+    public function getStatusLabelAttribute(): string
+    {
+        return match($this->status) {
+            'pending_approval' => 'Pending Approval',
+            default => ucfirst($this->status),
         };
     }
 

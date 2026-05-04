@@ -20,6 +20,7 @@ class Technician extends Model
         'status',
         'notes',
         'user_id',
+        'photo',
     ];
 
     protected $casts = [

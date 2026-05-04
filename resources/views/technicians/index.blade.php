@@ -453,16 +453,7 @@
                     </svg>
                 </form>
             </div>
-            <a href="{{ route('technicians.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-               style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                Add Technician
-            </a>
-            <a href="{{ route('profile.edit') }}" class="w-9 h-9 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md transition-all hover:scale-105">
-                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-            </a>
+           
         </div>
     </header>
 
@@ -602,8 +593,13 @@
                                 <tr class="trow" style="animation-delay: {{ $loop->index * 40 }}ms;">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                                                {{ strtoupper(substr($technician->name, 0, 1)) }}
+                                            <div class="relative w-10 h-10 rounded-xl flex-shrink-0 shadow-sm overflow-hidden">
+                                                @if($technician->photo)
+                                                    <img src="{{ asset('storage/' . $technician->photo) }}" alt="{{ $technician->name }}" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                                    <div class="w-full h-full bg-gradient-to-br from-red-500 to-red-600 items-center justify-center text-white font-bold text-sm absolute inset-0" style="display:none;">{{ strtoupper(substr($technician->name, 0, 1)) }}</div>
+                                                @else
+                                                    <div class="w-full h-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center text-white font-bold text-sm">{{ strtoupper(substr($technician->name, 0, 1)) }}</div>
+                                                @endif
                                             </div>
                                             <div>
                                                 <p class="text-sm font-semibold text-gray-900">{{ $technician->name }}</p>

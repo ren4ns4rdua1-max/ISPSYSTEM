@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Models\Billing;
 use App\Models\SubscriptionRate;
+use App\Models\AdminNotification;
+use App\Models\InstallationJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -62,6 +65,22 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Get notifications for the admin (current logged in user)
+        $unreadNotifications = AdminNotification::where('user_id', Auth::id())
+            ->unread()
+            ->recent(5)
+            ->get();
+
+        $unreadNotificationCount = AdminNotification::unreadCount(Auth::id());
+
+        // Get recently completed jobs that need attention (completed today or yesterday)
+        $recentCompletedJobs = InstallationJob::with(['client', 'technician'])
+            ->where('status', 'completed')
+            ->whereDate('completed_at', '>=', now()->subDays(7))
+            ->latest('completed_at')
+            ->limit(5)
+            ->get();
+
         return view('dashboard', compact(
             'totalClients',
             'activeClients',
@@ -73,7 +92,10 @@ class DashboardController extends Controller
             'planDistribution',
             'billingStatus',
             'recentClients',
-            'recentBillings'
+            'recentBillings',
+            'unreadNotifications',
+            'unreadNotificationCount',
+            'recentCompletedJobs'
         ));
     }
 

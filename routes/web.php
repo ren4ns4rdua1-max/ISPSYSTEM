@@ -22,12 +22,27 @@ Route::get('/', function () {
     return view('welcome', compact('subscriptionRates'));
 });
 
+// Guest client registration route (from welcome page "Apply" button)
+Route::post('/clients/guest', [ClientController::class, 'storeGuest'])->name('clients.storeGuest');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/technician/dashboard', [TechnicianDashboardController::class, 'dashboard'])->name('technician.dashboard');
+    Route::get('/technician/tasks', [TechnicianDashboardController::class, 'tasks'])->name('technician.tasks');
+    Route::get('/technician/history', [TechnicianDashboardController::class, 'history'])->name('technician.history');
+    Route::post('/technician/jobs/{job}/start', [TechnicianDashboardController::class, 'startJob'])->name('technician.jobs.start');
+    Route::post('/technician/jobs/{job}/complete', [TechnicianDashboardController::class, 'completeJob'])->name('technician.jobs.complete');
 });
 
 Route::middleware('auth')->group(function () {
+    // Admin Notifications Routes
+    Route::get('/notifications', [\App\Http\Controllers\AdminNotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/recent', [\App\Http\Controllers\AdminNotificationController::class, 'recent'])->name('notifications.recent');
+    Route::post('/notifications/{notification}/read', [\App\Http\Controllers\AdminNotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\AdminNotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+    Route::get('/notifications/unread-count', [\App\Http\Controllers\AdminNotificationController::class, 'unreadCount'])->name('notifications.unreadCount');
+    Route::delete('/notifications/{notification}', [\App\Http\Controllers\AdminNotificationController::class, 'destroy'])->name('notifications.destroy');
+
     Route::get('/admin/templates', [\App\Http\Controllers\Admin\TemplateController::class, 'index'])->name('admin.templates');
     Route::post('/admin/templates', [\App\Http\Controllers\Admin\TemplateController::class, 'update'])->name('admin.templates.update');
 
@@ -46,7 +61,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('sales', SalesController::class);
     Route::post('sales/quick-activate', [SalesController::class, 'quickActivate'])->name('sales.quickActivate');
     
-    // Client Management Routes
+// Client Management Routes
+    // Specific routes must come BEFORE resource routes to avoid conflicts
+    Route::get('/clients/pending', [ClientController::class, 'pending'])->name('clients.pending');
+    Route::post('/clients/{client}/approve', [ClientController::class, 'approve'])->name('clients.approve');
+    Route::post('/clients/{client}/reject', [ClientController::class, 'reject'])->name('clients.reject');
+    Route::post('/clients/{client}/approve-and-assign', [ClientController::class, 'approveAndAssign'])->name('clients.approveAndAssign');
+    Route::get('/clients/technicians', [ClientController::class, 'getTechnicians'])->name('clients.getTechnicians');
     Route::resource('clients', ClientController::class);
     
     // Billing Routes

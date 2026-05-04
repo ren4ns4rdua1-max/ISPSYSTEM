@@ -445,13 +445,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
             </div>
-            <a href="{{ route('users.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-               style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                </svg>
-                Add New User
-            </a>
+           
             <a href="{{ route('profile.edit') }}" class="w-9 h-9 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md transition-all hover:scale-105">
                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </a>
@@ -540,12 +534,17 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-9 h-9 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
-                                                {{ strtoupper(substr($user->name, 0, 1)) }}
+                                            <div class="relative w-9 h-9 rounded-xl flex-shrink-0 shadow-sm overflow-hidden">
+                                                @if($user->photo)
+                                                    <img src="{{ asset('storage/' . $user->photo) }}" alt="{{ $user->name }}" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                                    <div class="w-full h-full avatar-grad items-center justify-center text-white font-bold text-sm absolute inset-0" style="display:none;">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                                                @else
+                                                    <div class="w-full h-full avatar-grad flex items-center justify-center text-white font-bold text-sm">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                                                @endif
                                             </div>
                                             <div>
                                                 <p class="text-sm font-semibold text-gray-900">{{ $user->name }}</p>
-                                                <p class="text-[10px] text-gray-400">Active account</p>
+                                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {{ $user->role === 'admin' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600' }}">{{ ucfirst($user->role) }}</span>
                                             </div>
                                         </div>
                                     </td>
@@ -595,8 +594,13 @@
                         <div class="p-5 trow" style="animation-delay: {{ $index * 40 }}ms;">
                             <div class="flex items-start justify-between mb-3">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-11 h-11 rounded-xl avatar-grad flex items-center justify-center text-white font-bold shadow-sm">
-                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                    <div class="relative w-11 h-11 rounded-xl flex-shrink-0 shadow-sm overflow-hidden">
+                                        @if($user->photo)
+                                            <img src="{{ asset('storage/' . $user->photo) }}" alt="{{ $user->name }}" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                            <div class="w-full h-full avatar-grad items-center justify-center text-white font-bold text-sm absolute inset-0" style="display:none;">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                                        @else
+                                            <div class="w-full h-full avatar-grad flex items-center justify-center text-white font-bold text-sm">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                                        @endif
                                     </div>
                                     <div>
                                         <p class="text-sm font-semibold text-gray-900">{{ $user->name }}</p>

@@ -477,11 +477,30 @@
                 </div>
                 
                 <!-- Form -->
-                <form method="POST" action="{{ route('technicians.update', $technician->id) }}" class="p-6 space-y-5">
+                <form method="POST" action="{{ route('technicians.update', $technician->id) }}" enctype="multipart/form-data" class="p-6 space-y-5">
                     @csrf
                     @method('PUT')
                     
                     <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Profile Photo <span class="text-gray-400 normal-case font-normal">(Optional)</span></label>
+                            <div class="flex items-center gap-4">
+                                <div class="w-16 h-16 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center flex-shrink-0">
+                                    @if($technician->photo)
+                                        <img id="photo-preview" src="{{ asset('storage/' . $technician->photo) }}" alt="" class="w-full h-full object-cover">
+                                        <svg id="photo-placeholder" class="w-7 h-7 text-gray-300 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    @else
+                                        <img id="photo-preview" src="" alt="" class="w-full h-full object-cover hidden">
+                                        <svg id="photo-placeholder" class="w-7 h-7 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    @endif
+                                </div>
+                                <div class="flex-1 space-y-1">
+                                    <input type="file" name="photo" id="photo" accept="image/*" onchange="previewPhoto(this)" class="form-input">
+                                    <p class="text-[11px] text-gray-400">Upload a new photo to replace the current one</p>
+                                </div>
+                            </div>
+                        </div>
+
                         <div>
                             <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Name <span class="text-red-500">*</span></label>
                             <div class="input-wrapper">

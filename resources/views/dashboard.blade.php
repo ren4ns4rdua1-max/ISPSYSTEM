@@ -298,8 +298,10 @@
             <span class="nav-tooltip">Technicians</span>
         </div>
 
-        <!-- Reports & Analytics Section -->
-        <p class="sec-lbl collapsible mt-3" style="max-width:200px;padding-top:12px;">Reports </p>
+<!-- Reports & Analytics Section -->
+      
+
+<p class="sec-lbl collapsible mt-3" style="max-width:200px;padding-top:12px;">Reports</p>
 
         <div class="nav-wrapper relative">
             <a href="{{ route('reports.index') }}" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
@@ -364,7 +366,7 @@
 <!-- ═══════════════════ MAIN CONTENT ═══════════════════ -->
 <div id="main-content" class="flex flex-col flex-1 min-h-screen" style="margin-left:260px;">
 
-    <!-- TOP BAR -->
+<!-- TOP BAR -->
     <header class="topbar sticky top-0 z-40 flex items-center justify-between px-7 py-3.5">
         <div>
             <h1 class="font-display font-bold text-gray-900 text-[20px] leading-tight">Dashboard Overview</h1>
@@ -376,12 +378,54 @@
             </p>
         </div>
         <div class="flex items-center gap-3">
-            <div class="relative hidden md:block">
-                <input type="text" placeholder="Search anything..."
-                       class="w-56 text-sm bg-gray-100 rounded-xl pl-9 pr-4 py-2 text-gray-700 placeholder-gray-400 border-0 focus:outline-none focus:ring-2 focus:ring-red-300 focus:bg-white transition-all"/>
-                <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
+            <!-- Notification Bell -->
+            <div class="relative" id="notification-wrapper">
+                <button onclick="toggleNotifications()" 
+                        class="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:bg-gray-100"
+                        style="background:rgba(255,255,255,.05);">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.658 6 8.009 6 10v4.158a2.032 2.032 0 01-.595 1.417L5 17h5m6 0a1 1 0 01-1 1h-1m-5 0v-4a1 1 0 011-1h1"/>
+                    </svg>
+                    @if($unreadNotificationCount > 0)
+                    <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                        {{ $unreadNotificationCount > 9 ? '9+' : $unreadNotificationCount }}
+                    </span>
+                    @endif
+                </button>
+                
+                <!-- Notifications Dropdown -->
+                <div id="notifications-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                        <p class="font-semibold text-gray-800 text-sm">Notifications</p>
+                        @if($unreadNotificationCount > 0)
+                        <button onclick="markAllNotificationsRead(event)" class="text-xs text-red-500 hover:text-red-700 font-medium">
+                            Mark all read
+                        </button>
+                        @endif
+                    </div>
+                    <div class="max-h-80 overflow-y-auto">
+                        @forelse($unreadNotifications as $notification)
+                        <div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-50 cursor-pointer notification-item"
+                             onclick="markNotificationRead({{ $notification->id }}, this)">
+                            <div class="flex items-start gap-3">
+                                <div class="w-2 h-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-semibold text-gray-800 text-sm truncate">{{ $notification->title }}</p>
+                                    <p class="text-gray-500 text-xs truncate">{{ $notification->message }}</p>
+                                    <p class="text-gray-400 text-[10px] mt-1">{{ $notification->created_at->diffForHumans() }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="px-4 py-6 text-center">
+                            <p class="text-gray-400 text-sm">No new notifications</p>
+                        </div>
+                        @endforelse
+                    </div>
+                    <a href="{{ route('notifications.index') }}" class="block px-4 py-2 text-center text-sm text-red-500 hover:text-red-700 font-medium border-t border-gray-100">
+                        View all notifications
+                    </a>
+                </div>
             </div>
             
             <a href="{{ route('profile.edit') }}" class="w-9 h-9 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md">
@@ -646,6 +690,60 @@
 </div>
 
 <script>
+// ═════════════════════════════════════════
+// Notifications functionality
+// ═════════════════════════════════════════
+function toggleNotifications() {
+    const dropdown = document.getElementById('notifications-dropdown');
+    dropdown.classList.toggle('hidden');
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function closeDropdown(e) {
+        const wrapper = document.getElementById('notification-wrapper');
+        if (!wrapper.contains(e.target)) {
+            dropdown.classList.add('hidden');
+            document.removeEventListener('click', closeDropdown);
+        }
+    });
+}
+
+function markNotificationRead(id, element) {
+    fetch(`/notifications/${id}/read`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            element.classList.remove('notification-item');
+            element.querySelector('.w-2.h-2.bg-red-500')?.remove();
+            location.reload();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function markAllNotificationsRead(event) {
+    event.stopPropagation();
+    fetch('/notifications/read-all', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
 // ── Sidebar toggle ──
 let collapsed = false;
 function toggleSidebar() {

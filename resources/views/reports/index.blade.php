@@ -655,45 +655,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                         </svg>
                     </div>
-                    <p class="text-xs text-blue-600 font-semibold">Bank Transfer</p>
-                    <p class="text-lg font-bold text-blue-900">₱{{ number_format($paymentStats['by_method']['bank_transfer'], 2) }}</p>
-                </div>
-                <div class="p-4 bg-purple-50 rounded-xl text-center border border-purple-100">
-                    <div class="w-10 h-10 mx-auto mb-2 rounded-lg bg-purple-100 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
+                   
                     <p class="text-xs text-purple-600 font-semibold">GCash</p>
                     <p class="text-lg font-bold text-purple-900">₱{{ number_format($paymentStats['by_method']['gcash'], 2) }}</p>
                 </div>
-                <div class="p-4 bg-indigo-50 rounded-xl text-center border border-indigo-100">
-                    <div class="w-10 h-10 mx-auto mb-2 rounded-lg bg-indigo-100 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                    <p class="text-xs text-indigo-600 font-semibold">PayMaya</p>
-                    <p class="text-lg font-bold text-indigo-900">₱{{ number_format($paymentStats['by_method']['paymaya'], 2) }}</p>
-                </div>
-                <div class="p-4 bg-amber-50 rounded-xl text-center border border-amber-100">
-                    <div class="w-10 h-10 mx-auto mb-2 rounded-lg bg-amber-100 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                    </div>
-                    <p class="text-xs text-amber-600 font-semibold">Cheque</p>
-                    <p class="text-lg font-bold text-amber-900">₱{{ number_format($paymentStats['by_method']['cheque'], 2) }}</p>
-                </div>
-                <div class="p-4 bg-rose-50 rounded-xl text-center border border-rose-100">
-                    <div class="w-10 h-10 mx-auto mb-2 rounded-lg bg-rose-100 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-                        </svg>
-                    </div>
-                    <p class="text-xs text-rose-600 font-semibold">Other</p>
-                    <p class="text-lg font-bold text-rose-900">₱{{ number_format($paymentStats['by_method']['other'], 2) }}</p>
-                </div>
+               
             </div>
         </div>
 
@@ -710,8 +676,13 @@
                 <div class="space-y-3">
                     @forelse($recentClients as $client)
                         <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
-                            <div class="w-8 h-8 rounded-lg avatar-grad flex items-center justify-center text-white font-bold text-xs">
-                                {{ strtoupper(substr($client->name, 0, 1)) }}
+                            <div class="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                                @if($client->photo)
+                                    <img src="{{ asset('storage/' . $client->photo) }}" alt="{{ $client->name }}" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                    <div class="w-full h-full avatar-grad items-center justify-center text-white font-bold text-xs absolute inset-0" style="display:none;">{{ strtoupper(substr($client->name, 0, 1)) }}</div>
+                                @else
+                                    <div class="w-full h-full avatar-grad flex items-center justify-center text-white font-bold text-xs">{{ strtoupper(substr($client->name, 0, 1)) }}</div>
+                                @endif
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-medium text-gray-900 truncate">{{ $client->name }}</p>
@@ -738,10 +709,17 @@
                 <div class="space-y-3">
                     @forelse($recentPayments as $payment)
                         <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
-                            <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
-                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
+                            <div class="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                                @if($payment->client && $payment->client->photo)
+                                    <img src="{{ asset('storage/' . $payment->client->photo) }}" alt="" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                    <div class="w-full h-full bg-emerald-100 items-center justify-center absolute inset-0" style="display:none;">
+                                        <svg class="w-4 h-4 text-emerald-600 m-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    </div>
+                                @else
+                                    <div class="w-full h-full bg-emerald-100 flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    </div>
+                                @endif
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-medium text-gray-900 truncate">{{ $payment->client->name ?? 'N/A' }}</p>
@@ -766,11 +744,17 @@
                 <div class="space-y-3">
                     @forelse($recentJobs as $job)
                         <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
-                            <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
-                                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
+                            <div class="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                                @if($job->technician && $job->technician->photo)
+                                    <img src="{{ asset('storage/' . $job->technician->photo) }}" alt="" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                    <div class="w-full h-full bg-purple-100 items-center justify-center absolute inset-0" style="display:none;">
+                                        <svg class="w-4 h-4 text-purple-600 m-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    </div>
+                                @else
+                                    <div class="w-full h-full bg-purple-100 flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    </div>
+                                @endif
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-medium text-gray-900 truncate">{{ $job->client->name ?? 'N/A' }}</p>

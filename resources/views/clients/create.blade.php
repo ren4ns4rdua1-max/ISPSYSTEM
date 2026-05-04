@@ -703,28 +703,6 @@
                             @enderror
                         </div>
 
-                        <!-- Status -->
-                        <div class="space-y-1.5">
-                            <label for="status" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Status</label>
-                            <div class="input-wrapper input-wrapper-select">
-                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                <select id="status" name="status" class="form-input {{ $errors->has('status') ? 'error' : '' }}">
-                                    <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
-                                    <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                    <option value="suspended" {{ old('status') == 'suspended' ? 'selected' : '' }}>Suspended</option>
-                                    <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                </select>
-                            </div>
-                            @error('status')
-                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
-                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
                         <!-- Notes (Full Width) -->
                         <div class="md:col-span-2 space-y-1.5">
                             <label for="notes" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Notes (Optional)</label>
@@ -741,6 +719,90 @@
 
                     </div>
 
+                    <!-- Pending Approval Notice -->
+                    <div class="flex items-start gap-3 px-4 py-3 rounded-xl" style="background:#f3e8ff;border:1px solid #e9d5ff;">
+                        <svg class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-sm text-purple-700 font-medium">This client will be set to <span class="font-bold">Pending Approval</span> and must be approved before becoming active.</p>
+                    </div>
+
+                    <!-- Assign Technician Section -->
+                    <div class="border border-gray-100 rounded-xl overflow-hidden">
+                        <div class="px-5 py-3 flex items-center justify-between cursor-pointer select-none"
+                             style="background:linear-gradient(90deg,#f0f9ff,#fff);"
+                             onclick="toggleAssignSection()">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,#4f46e5,#6366f1);">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-gray-800">Assign Technician <span class="text-gray-400 font-normal">(Optional)</span></p>
+                                    <p class="text-xs text-gray-400">Schedule an installation job for this client</p>
+                                </div>
+                            </div>
+                            <svg id="assign-chevron" class="w-4 h-4 text-gray-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+
+                        <div id="assign-section" class="hidden px-5 pb-5 pt-4 grid grid-cols-1 md:grid-cols-2 gap-5 border-t border-gray-100">
+                            <!-- Technician -->
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Technician</label>
+                                <div class="input-wrapper input-wrapper-select">
+                                    <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.7 6.3a4 4 0 01-5.4 5.4l-5.6 5.6a2 2 0 102.8 2.8l5.6-5.6a4 4 0 005.4-5.4z"/>
+                                    </svg>
+                                    <select name="technician_id" class="form-input">
+                                        <option value="">-- No Technician --</option>
+                                        @foreach($technicians as $tech)
+                                            <option value="{{ $tech->id }}" {{ old('technician_id') == $tech->id ? 'selected' : '' }}>
+                                                {{ $tech->name }} ({{ ucfirst($tech->status) }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Job Type -->
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Job Type</label>
+                                <div class="input-wrapper input-wrapper-select">
+                                    <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                    </svg>
+                                    <select name="job_type" class="form-input">
+                                        <option value="new_installation" {{ old('job_type') == 'new_installation' ? 'selected' : '' }}>New Installation</option>
+                                        <option value="repair" {{ old('job_type') == 'repair' ? 'selected' : '' }}>Repair</option>
+                                        <option value="reconnection" {{ old('job_type') == 'reconnection' ? 'selected' : '' }}>Reconnection</option>
+                                        <option value="upgrade" {{ old('job_type') == 'upgrade' ? 'selected' : '' }}>Upgrade</option>
+                                        <option value="transfer" {{ old('job_type') == 'transfer' ? 'selected' : '' }}>Transfer</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Scheduled Date -->
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Scheduled Date</label>
+                                <div class="input-wrapper">
+                                    <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    <input type="datetime-local" name="scheduled_date" value="{{ old('scheduled_date') }}" class="form-input" id="scheduled-date-input"/>
+                                </div>
+                            </div>
+
+                            <!-- Job Notes -->
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Job Notes <span class="text-gray-400 normal-case font-normal">(Optional)</span></label>
+                                <textarea name="job_notes" rows="2" placeholder="Instructions for the technician..." class="form-input">{{ old('job_notes') }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Actions -->
                     <div class="border-t border-gray-100 pt-5 flex items-center justify-between gap-3 flex-wrap">
                         <a href="{{ route('clients.index') }}"
@@ -755,7 +817,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                             </svg>
-                            Create Client
+                            Submit for Approval
                         </button>
                     </div>
 
@@ -801,6 +863,41 @@
     }
     window.addEventListener('resize', function () {
         if (window.innerWidth >= 1024) closeMobileSidebar();
+    });
+
+    // ── Assign section toggle ────────────────────────────────────
+    function toggleAssignSection() {
+        const section = document.getElementById('assign-section');
+        const chevron = document.getElementById('assign-chevron');
+        section.classList.toggle('hidden');
+        chevron.style.transform = section.classList.contains('hidden') ? '' : 'rotate(180deg)';
+    }
+
+    // Auto-set due_date_time to 1 month after start_date
+    document.addEventListener('DOMContentLoaded', function () {
+        const startInput = document.getElementById('start_date');
+        const dueInput   = document.getElementById('due_date_time');
+
+        if (startInput && dueInput) {
+            startInput.addEventListener('change', function () {
+                if (this.value) {
+                    const d = new Date(this.value);
+                    d.setMonth(d.getMonth() + 1);
+                    d.setHours(12, 0, 0, 0);
+                    // Format to datetime-local value
+                    const pad = n => String(n).padStart(2, '0');
+                    dueInput.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                }
+            });
+        }
+
+        // Set default scheduled date to now
+        const el = document.getElementById('scheduled-date-input');
+        if (el && !el.value) {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            el.value = now.toISOString().slice(0, 16);
+        }
     });
 
     // ── Photo preview (FIXED) ───────────────────────────────────────

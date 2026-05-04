@@ -1177,7 +1177,27 @@
             cursor: none;
         }
 
-        .modal-field input:focus {
+.modal-field input:focus {
+            border-color: #dc2626;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(220,38,38,.1);
+        }
+
+        .modal-field select {
+            width: 100%;
+            padding: .8rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-size: .92rem;
+            font-family: 'DM Sans', sans-serif;
+            color: #0f172a;
+            background: #f9fafb;
+            transition: all .25s;
+            outline: none;
+            cursor: none;
+        }
+
+        .modal-field select:focus {
             border-color: #dc2626;
             background: white;
             box-shadow: 0 0 0 3px rgba(220,38,38,.1);
@@ -1616,12 +1636,13 @@
                     <p class="plan-speed">{{ $rate->speed }} · {{ $rate->plan_type }}</p>
                     <div class="plan-price"><sup>₱</sup>{{ number_format($rate->monthly_fee, 0) }}</div>
                     <div class="plan-divider"></div>
-                    <p class="plan-description">
+<p class="plan-description">
                         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                         {{ $rate->data_limit ?? 'Unlimited data' }} · {{ $rate->billing_cycle }}
                     </p>
                     <div class="plan-buttons">
                         <button class="view-details-btn" onclick="showPlanDetails('{{ $rate->plan_name }}', '{{ $rate->speed }}', '{{ $rate->plan_type }}', {{ $rate->monthly_fee }}, '{{ $rate->billing_cycle }}', '{{ $rate->data_limit ?? 'Unlimited' }}', {{ $rate->installation_fee ?? 0 }}, {{ $rate->activation_fee ?? 0 }}, {{ $rate->router_fee ?? 0 }}, '{{ $rate->lock_in_period ?? 'None' }}', {{ $rate->late_penalty ?? 0 }}, {{ $rate->reconnection_fee ?? 0 }})">View Details</button>
+                        <button class="subscribe-btn" onclick="handleSubscribe('{{ $rate->plan_name }}')">Apply Now</button>
                     </div>
                 </div>
             @empty
@@ -1782,6 +1803,87 @@
             </div>
             <div class="modal-foot">
                 Need help? <a href="#contact" onclick="closeModal()">Contact support</a>
+            </div>
+        </div>
+    </div>
+
+<!-- =================== CLIENT APPLICATION MODAL =================== -->
+    <div id="applyClientModal" class="modal">
+        <div class="modal-box" style="max-width:500px;">
+            <div class="modal-head">
+                <div class="modal-head-grid"></div>
+                <div class="modal-head-glow"></div>
+                <button class="modal-close" onclick="closeApplyModal()">&times;</button>
+                <div class="modal-head-content">
+                    <h3>Apply for Internet Service</h3>
+                    <p>Fill out the form below to submit your application</p>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form id="applyClientForm" onsubmit="submitApplication(event)">
+                    <div class="modal-field">
+                        <label>Full Name</label>
+                        <input type="text" name="name" required placeholder="Juan Dela Cruz">
+                    </div>
+                    <div class="modal-field">
+                        <label>Email Address</label>
+                        <input type="email" name="email" required placeholder="juan@example.com">
+                    </div>
+                    <div class="modal-field">
+                        <label>Phone Number</label>
+                        <input type="text" name="phone_number" required placeholder="09123456789">
+                    </div>
+                    <div class="modal-field">
+                        <label>Profile Photo <span style="font-weight:400;text-transform:none;color:#94a3b8;">(Optional)</span></label>
+                        <div style="display:flex;align-items:flex-start;gap:12px;margin-top:4px;">
+                            <div id="apply-photo-preview-wrap" style="width:72px;height:72px;flex-shrink:0;border-radius:12px;overflow:hidden;border:2px dashed #e2e8f0;background:#f9fafb;display:flex;align-items:center;justify-content:center;">
+                                <img id="apply-photo-preview" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;">
+                                <svg id="apply-photo-placeholder" style="width:28px;height:28px;color:#cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            </div>
+                            <div style="flex:1;">
+                                <input type="file" name="photo" id="apply-photo-input" accept="image/*" onchange="previewApplyPhoto(this)" style="width:100%;padding:.6rem .8rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.85rem;font-family:'DM Sans',sans-serif;background:#f9fafb;cursor:pointer;">
+                                <button type="button" id="apply-photo-remove" onclick="removeApplyPhoto()" style="display:none;margin-top:6px;font-size:.78rem;font-weight:600;color:#ef4444;background:none;border:none;cursor:pointer;">✕ Remove photo</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-field">
+                        <label>PPPoE Name / Username</label>
+                        <input type="text" name="pppoe_name" required placeholder="juandelacruz123">
+                    </div>
+<div class="modal-field">
+                        <label>Barangay</label>
+                        <input type="text" name="barangay" required placeholder="Poblacion">
+                    </div>
+                    <div class="modal-field">
+                        <label>Select Plan</label>
+<select name="plan_selected" id="planDescriptionSelect" required class="modal-select">
+                            <option value="">-- Select a Plan --</option>
+                            @foreach($subscriptionRates as $rate)
+                                <option value="{{ $rate->plan_name }} - {{ $rate->speed }}">{{ $rate->plan_name }} - {{ $rate->speed }} (₱{{ number_format($rate->monthly_fee, 0) }}/month)</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="modal-field">
+                        <label>NAP Box Location</label>
+                        <input type="text" name="nap_box" required placeholder="NAP-001">
+                    </div>
+                    <div class="modal-field">
+                        <label>Start Date</label>
+                        <input type="date" name="start_date" id="apply-start-date" required onchange="syncApplyDueDate(this.value)">
+                    </div>
+                    <div class="modal-field">
+                        <label>Due Date & Time <span style="font-weight:400;text-transform:none;color:#94a3b8;font-size:.75rem;">(auto: 1 month from start)</span></label>
+                        <input type="datetime-local" name="due_date_time" id="apply-due-date" required>
+                    </div>
+                    <div class="modal-field">
+                        <label>Notes (Optional)</label>
+                        <input type="text" name="notes" placeholder="Any additional information...">
+                    </div>
+                    <button type="submit" id="applySubmitBtn" class="modal-submit">Submit Application</button>
+                </form>
+            </div>
+            <div class="modal-foot">
+                You will be notified once your application is approved by admin.
             </div>
         </div>
     </div>
@@ -2100,7 +2202,107 @@
             forms.forEach((f, i) => f.classList.toggle('active', (i === 0) === (tab === 'login')));
         }
 
-        function handleSubscribe(plan) { openModal('register'); }
+/* ===================== CLIENT APPLICATION ===================== */
+        let selectedPlan = '';
+        
+        function openApplyModal(plan) {
+            selectedPlan = plan;
+            document.getElementById('applyClientModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeApplyModal() {
+            document.getElementById('applyClientModal').classList.remove('active');
+            document.body.style.overflow = '';
+            removeApplyPhoto();
+        }
+        
+        document.getElementById('applyClientModal').addEventListener('click', function(e) {
+            if (e.target === this) closeApplyModal();
+        });
+        
+function handleSubscribe(plan) {
+            selectedPlan = plan;
+            openApplyModal(plan);
+            
+            if (plan) {
+                const planSelect = document.getElementById('planDescriptionSelect');
+                if (planSelect) {
+                    for (let i = 0; i < planSelect.options.length; i++) {
+                        if (planSelect.options[i].text.includes(plan)) {
+                            planSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Set start date to today and due date to 1 month later
+            const today = new Date();
+            const startDateInput = document.querySelector('#applyClientForm input[name="start_date"]');
+            const dueDateInput   = document.querySelector('#applyClientForm input[name="due_date_time"]');
+
+            if (startDateInput) {
+                startDateInput.value = today.toISOString().split('T')[0];
+            }
+            if (dueDateInput) {
+                const due = new Date(today);
+                due.setMonth(due.getMonth() + 1);
+                due.setHours(12, 0, 0, 0);
+                const pad = n => String(n).padStart(2, '0');
+                dueDateInput.value = `${due.getFullYear()}-${pad(due.getMonth()+1)}-${pad(due.getDate())}T${pad(due.getHours())}:${pad(due.getMinutes())}`;
+            }
+        }
+        
+        // Submit client application via AJAX
+        async function submitApplication(event) {
+            event.preventDefault();
+
+            const form = document.getElementById('applyClientForm');
+            const formData = new FormData(form);
+
+            // Use the start_date from the form and compute due_date as 1 month later
+            const startVal = document.querySelector('#applyClientForm input[name="start_date"]').value;
+            if (startVal) {
+                const due = new Date(startVal);
+                due.setMonth(due.getMonth() + 1);
+                due.setHours(12, 0, 0, 0);
+                const pad = n => String(n).padStart(2, '0');
+                formData.set('due_date_time', `${due.getFullYear()}-${pad(due.getMonth()+1)}-${pad(due.getDate())}T${pad(due.getHours())}:${pad(due.getMinutes())}`);
+            }
+            
+            const submitBtn = document.getElementById('applySubmitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('{{ route("clients.storeGuest") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    closeApplyModal();
+                    form.reset();
+                    showToast('Application Submitted! Pending admin approval.', '#22c55e');
+                } else {
+                    showToast(result.message || 'Error submitting application', '#ef4444');
+                }
+            } catch (error) {
+                showToast('Error submitting application. Please try again.', '#ef4444');
+                console.error('Error:', error);
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
 
         /* ===================== PLAN DETAILS ===================== */
         function showPlanDetails(planName, speed, planType, monthlyFee, billingCycle, dataLimit,
@@ -2142,6 +2344,43 @@
         document.getElementById('planDetailsModal').addEventListener('click', function(e) {
             if (e.target === this) closePlanDetailsModal();
         });
+
+        /* ===================== PHOTO PREVIEW ===================== */
+        function syncApplyDueDate(startVal) {
+            if (!startVal) return;
+            const due = new Date(startVal);
+            due.setMonth(due.getMonth() + 1);
+            due.setHours(12, 0, 0, 0);
+            const pad = n => String(n).padStart(2, '0');
+            document.getElementById('apply-due-date').value =
+                `${due.getFullYear()}-${pad(due.getMonth()+1)}-${pad(due.getDate())}T${pad(due.getHours())}:${pad(due.getMinutes())}`;
+        }
+
+        function previewApplyPhoto(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('apply-photo-preview');
+                    const placeholder = document.getElementById('apply-photo-placeholder');
+                    const removeBtn = document.getElementById('apply-photo-remove');
+                    const wrap = document.getElementById('apply-photo-preview-wrap');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                    removeBtn.style.display = 'inline-block';
+                    wrap.style.border = '2px solid #e2e8f0';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        function removeApplyPhoto() {
+            document.getElementById('apply-photo-input').value = '';
+            document.getElementById('apply-photo-preview').src = '';
+            document.getElementById('apply-photo-preview').style.display = 'none';
+            document.getElementById('apply-photo-placeholder').style.display = 'block';
+            document.getElementById('apply-photo-remove').style.display = 'none';
+            document.getElementById('apply-photo-preview-wrap').style.border = '2px dashed #e2e8f0';
+        }
 
         /* ===================== CONTACT ===================== */
         function handleContact(e) {

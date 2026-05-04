@@ -68,7 +68,13 @@ class TechnicianController extends Controller
             'area_coverage' => ['nullable', 'string', 'max:255'],
             'status' => ['required', 'in:available,busy,offduty'],
             'notes' => ['nullable', 'string'],
+            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ]);
+
+        $photo = null;
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo')->store('technicians', 'public');
+        }
 
         // Generate temp password
         $tempPassword = Str::random(12);
@@ -81,8 +87,7 @@ class TechnicianController extends Controller
             'role' => 'technician',
         ]);
 
-        // Create technician linked to user
-        $technician = Technician::create(array_merge($validated, ['user_id' => $user->id]));
+        $technician = Technician::create(array_merge($validated, ['user_id' => $user->id, 'photo' => $photo]));
 
         return redirect()->route('technicians.index')->with('success', "Technician '{$validated['name']}' created successfully. Temp password: {$tempPassword}. Share with technician to login.");
     }
@@ -92,14 +97,14 @@ class TechnicianController extends Controller
      */
     public function show(Technician $technician): View
     {
-        $technician->load(['jobs' => function ($query) {
-            $query->latest()->limit(10);
-        }, 'jobs.client', 'jobs.assignedBy']);
+        $technician->load(['jobs.client', 'jobs.assignedBy']);
 
-        $pendingJobs = $technician->jobs()->whereIn('status', ['pending', 'assigned', 'in_progress'])->get();
+        $pendingJobs = $technician->jobs()->whereIn('status', ['pending', 'assigned'])->with('client')->get();
+        $inProgressJobs = $technician->jobs()->where('status', 'in_progress')->count();
         $completedJobs = $technician->jobs()->where('status', 'completed')->count();
+        $completedJobsList = $technician->jobs()->where('status', 'completed')->with('client')->latest()->limit(10)->get();
 
-        return view('technicians.show', compact('technician', 'pendingJobs', 'completedJobs'));
+        return view('technicians.show', compact('technician', 'pendingJobs', 'inProgressJobs', 'completedJobs', 'completedJobsList'));
     }
 
     /**
@@ -123,7 +128,13 @@ class TechnicianController extends Controller
             'area_coverage' => ['nullable', 'string', 'max:255'],
             'status' => ['required', 'in:available,busy,offduty'],
             'notes' => ['nullable', 'string'],
+            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ]);
+
+        if ($request->hasFile('photo')) {
+            if ($technician->photo) \Illuminate\Support\Facades\Storage::disk('public')->delete($technician->photo);
+            $validated['photo'] = $request->file('photo')->store('technicians', 'public');
+        }
 
         $technician->update($validated);
 
@@ -267,21 +278,35 @@ class TechnicianController extends Controller
         return redirect()->back()->with('success', 'Job started.');
     }
 
-    /**
+/**
      * Complete a job (technician marks as completed).
      */
     public function completeJob(Request $request, InstallationJob $job): RedirectResponse
     {
         $validated = $request->validate([
             'completion_notes' => ['nullable', 'string'],
+            'photo' => ['nullable', 'image', 'max:5120'],
         ]);
+
+        $photoPath = null;
+        
+        // Handle photo upload
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
+            $fileName = 'job-' . $job->id . '-' . time() . '.' . $photo->getClientOriginalExtension();
+            $photoPath = $photo->storeAs('job-photos', $fileName, 'public');
+        }
 
         $job->update([
             'status' => 'completed',
             'completed_by' => Auth::id(),
             'completed_at' => now(),
             'completion_notes' => $validated['completion_notes'],
+            'photo' => $photoPath,
         ]);
+
+        // Refresh to get updated photo value
+        $job->refresh();
 
         // Update client - activate after installation
         $job->client->update([
@@ -294,6 +319,9 @@ class TechnicianController extends Controller
         if ($job->technician) {
             $job->technician->update(['status' => 'available']);
         }
+
+        // Notify admins about job completion (with fresh job data including photo)
+        \App\Models\AdminNotification::notifyJobCompleted($job);
 
         return redirect()->back()->with('success', 'Job completed! Client has been activated.');
     }
