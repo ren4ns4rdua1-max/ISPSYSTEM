@@ -219,16 +219,38 @@ class BillingController extends Controller
     /**
      * Get client details for AJAX.
      */
-    public function getClientDetails(Client $client): array
+    public function getClientDetails(Client $client): \Illuminate\Http\JsonResponse
     {
         $client->load('subscriptionRate');
-        
-        return [
-            'client' => $client,
-            'subscription_rate' => $client->subscriptionRate,
-            'outstanding_billings' => Billing::where('client_id', $client->id)
-                ->whereIn('status', ['pending', 'overdue', 'partial'])
-                ->count(),
-        ];
+
+        // Try to find matching subscription rate by plan_description if not directly linked
+        $matchedRate = $client->subscriptionRate;
+        if (!$matchedRate && $client->plan_description) {
+            $matchedRate = SubscriptionRate::where('is_active', true)
+                ->get()
+                ->first(function ($rate) use ($client) {
+                    return str_contains(
+                        strtolower($client->plan_description),
+                        strtolower($rate->plan_name)
+                    );
+                });
+        }
+
+        return response()->json([
+            'id'                   => $client->id,
+            'name'                 => $client->name,
+            'email'                => $client->email,
+            'phone_number'         => $client->phone_number,
+            'pppoe_name'           => $client->pppoe_name,
+            'barangay'             => $client->barangay,
+            'plan_description'     => $client->plan_description,
+            'due_date_time'        => $client->due_date_time?->format('Y-m-d'),
+            'subscription_rate_id' => $matchedRate?->id ?? $client->subscription_rate_id,
+            'monthly_fee'          => $matchedRate?->monthly_fee ?? 0,
+            'plan_name'            => $matchedRate?->plan_name ?? $client->plan_description,
+            'outstanding'          => Billing::where('client_id', $client->id)
+                                        ->whereIn('status', ['pending', 'overdue', 'partial'])
+                                        ->count(),
+        ]);
     }
 }

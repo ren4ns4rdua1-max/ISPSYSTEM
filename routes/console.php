@@ -12,12 +12,12 @@ Artisan::command('inspire', function () {
 
 // Notify admins 1 week before due date (runs daily)
 Schedule::call(function () {
-    $targetDate = now()->addDays(7)->toDateString();
+    $from = now()->addDays(1)->startOfDay();
+    $to   = now()->addDays(7)->endOfDay();
 
     Client::where('status', 'active')
-        ->whereDate('due_date_time', $targetDate)
+        ->whereBetween('due_date_time', [$from, $to])
         ->each(function (Client $client) {
-            // Avoid duplicate notifications on the same day
             $alreadySent = AdminNotification::where('type', AdminNotification::TYPE_PAYMENT_DUE_SOON)
                 ->whereDate('created_at', today())
                 ->whereJsonContains('data->client_id', $client->id)
@@ -26,8 +26,8 @@ Schedule::call(function () {
             if (!$alreadySent) {
                 AdminNotification::notifyAdmins(
                     AdminNotification::TYPE_PAYMENT_DUE_SOON,
-                    'Payment Due in 1 Week',
-                    "Client {$client->name} has a payment due on " . $client->due_date_time->format('M d, Y') . '.',
+                    'Payment Due Soon',
+                    "Client {$client->name} has a payment due on " . $client->due_date_time->format('M d, Y') . '. Please follow up.',
                     ['client_id' => $client->id, 'due_date' => $client->due_date_time->toDateString()]
                 );
             }

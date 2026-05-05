@@ -65,15 +65,23 @@ class SettingsSeeder extends Seeder
             ['welcome_footer_quicklinks_title', 'Quick Links', 'welcome', 'text'],
             ['welcome_footer_contact_title', 'Contact', 'welcome', 'text'],
             ['welcome_footer_copyright', '© 2024 ISP Billing Management System. All rights reserved.', 'welcome', 'text'],
+
+            // Contact Info (footer & contact section)
+            ['welcome_contact_address', '123 Internet Street, Tech City, TC 12345', 'welcome', 'text'],
+            ['welcome_contact_phone', '+1 (555) 123-4567', 'welcome', 'text'],
+            ['welcome_contact_email', 'support@netmanager.com', 'welcome', 'text'],
+            ['welcome_contact_social_fb', '#', 'welcome', 'text'],
+            ['welcome_contact_social_twitter', '#', 'welcome', 'text'],
+            ['welcome_contact_social_instagram', '#', 'welcome', 'text'],
         ];
 
         foreach ($welcomeSettings as $setting) {
             Setting::updateOrCreate(
                 ['key' => $setting[0]],
                 [
-'content' => $setting[1],
+                    'value' => $setting[1],
                     'group' => $setting[2],
-                    'type' => $setting[3],
+                    'type'  => $setting[3],
                 ]
             );
         }

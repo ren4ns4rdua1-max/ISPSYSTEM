@@ -15,15 +15,27 @@ use App\Models\SubscriptionRate;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    $subscriptionRates = SubscriptionRate::where('is_active', true)
+    $subscriptionRates = \App\Models\SubscriptionRate::where('is_active', true)
         ->orderBy('monthly_fee', 'asc')
         ->get();
-    
-    return view('welcome', compact('subscriptionRates'));
+
+    // Load all welcome settings as a keyed array
+    $s = \App\Models\Setting::where('group', 'welcome')
+        ->get()
+        ->keyBy('key')
+        ->map(fn($item) => $item->value);
+
+    // Clear cache so fresh values always load
+    \Illuminate\Support\Facades\Cache::flush();
+
+    return view('welcome', compact('subscriptionRates', 's'));
 });
 
 // Guest client registration route (from welcome page "Apply" button)
 Route::post('/clients/guest', [ClientController::class, 'storeGuest'])->name('clients.storeGuest');
+
+// Contact form (public)
+Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -92,6 +104,11 @@ Route::middleware('auth')->group(function () {
     // Reports Routes
     Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
     Route::get('/reports/export', [ReportsController::class, 'export'])->name('reports.export');
+
+    // Contact Messages (admin)
+    Route::get('/contact-messages', [\App\Http\Controllers\ContactController::class, 'index'])->name('contact.index');
+    Route::post('/contact-messages/{message}/read', [\App\Http\Controllers\ContactController::class, 'markRead'])->name('contact.markRead');
+    Route::delete('/contact-messages/{message}', [\App\Http\Controllers\ContactController::class, 'destroy'])->name('contact.destroy');
 });
 
 

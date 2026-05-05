@@ -10,23 +10,22 @@ class Setting extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['key', 'content', 'group', 'type'];
+    protected $fillable = ['key', 'value', 'group', 'type'];
 
-    protected $casts = [
-        'content' => 'array', // For potential JSON values later
-    ];
-
-    public static function getValue($key, $default = null)
+    public static function getValue(string $key, string $default = ''): string
     {
         return Cache::remember("setting_{$key}", 3600, function () use ($key, $default) {
-        return static::where('key', $key)->first()?->content ?? $default;
+            return static::where('key', $key)->value('value') ?? $default;
         });
     }
 
-public static function scopeWelcome($query)
+    public static function clearCache(string $key): void
+    {
+        Cache::forget("setting_{$key}");
+    }
+
+    public static function scopeWelcome($query)
     {
         return $query->where('group', 'welcome');
     }
-
 }
-

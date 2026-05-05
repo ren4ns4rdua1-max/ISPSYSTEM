@@ -764,91 +764,92 @@
             cursor: none;
         }
 
-        .subscribe-btn {
-            display: block;
-            width: 100%;
-            padding: .85rem;
-            border-radius: 14px;
-            font-weight: 700;
-            font-size: .9rem;
-            border: 2px solid var(--border);
-            background: white;
-            color: #374151;
-            transition: all .3s ease;
-            font-family: 'DM Sans', sans-serif;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .subscribe-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 0; height: 0;
-            background: rgba(220,38,38,.08);
-            border-radius: 50%;
-            transform: translate(-50%,-50%);
-            transition: width 0.5s ease, height 0.5s ease;
-        }
-
-        .subscribe-btn:hover::before { width: 300px; height: 300px; }
-
-        .subscribe-btn:hover {
-            border-color: #dc2626;
-            color: #dc2626;
-            background: #fff5f5;
-        }
-
-        .plan-card.featured .subscribe-btn {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            border-color: transparent;
-            color: white;
-            box-shadow: 0 8px 24px rgba(220,38,38,.35);
-        }
-
-        .plan-card.featured .subscribe-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(220,38,38,.45);
-        }
-
         .plan-buttons {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.6rem;
             margin-top: 1.5rem;
         }
 
+        /* View Details button */
         .view-details-btn {
             flex: 1;
-            padding: .85rem;
-            border-radius: 14px;
+            padding: .75rem 1rem;
+            border-radius: 12px;
             font-weight: 600;
-            font-size: .85rem;
-            border: 2px solid var(--border);
-            background: white;
+            font-size: .82rem;
+            border: 1.5px solid #e5e7eb;
+            background: #f9fafb;
             color: #374151;
-            transition: all .3s ease;
+            transition: all .25s ease;
             font-family: 'DM Sans', sans-serif;
-            position: relative;
-            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .4rem;
+            white-space: nowrap;
         }
-
         .view-details-btn:hover {
             border-color: #dc2626;
             color: #dc2626;
             background: #fff5f5;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220,38,38,.12);
         }
-
         .plan-card.featured .view-details-btn {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            border-color: transparent;
+            border-color: rgba(255,255,255,.4);
+            background: rgba(255,255,255,.15);
             color: white;
-            box-shadow: 0 8px 24px rgba(220,38,38,.35);
+        }
+        .plan-card.featured .view-details-btn:hover {
+            background: rgba(255,255,255,.25);
+            border-color: white;
+            transform: translateY(-2px);
         }
 
-        .plan-card.featured .view-details-btn:hover {
+        /* Apply Now button */
+        .subscribe-btn {
+            flex: 1.4;
+            padding: .75rem 1rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: .85rem;
+            border: none;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            transition: all .25s ease;
+            font-family: 'DM Sans', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .4rem;
+            white-space: nowrap;
+            box-shadow: 0 4px 14px rgba(220,38,38,.35);
+            position: relative;
+            overflow: hidden;
+        }
+        .subscribe-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -60%;
+            width: 40%; height: 200%;
+            background: rgba(255,255,255,.18);
+            transform: skewX(-20deg);
+            transition: left .4s ease;
+        }
+        .subscribe-btn:hover::after { left: 120%; }
+        .subscribe-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(220,38,38,.45);
+            box-shadow: 0 8px 24px rgba(220,38,38,.45);
+        }
+        .plan-card.featured .subscribe-btn {
+            background: white;
+            color: #dc2626;
+            box-shadow: 0 4px 14px rgba(0,0,0,.1);
+        }
+        .plan-card.featured .subscribe-btn:hover {
+            background: #fff5f5;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,.15);
         }
 
         /* =================== FEATURES =================== */
@@ -1454,6 +1455,107 @@
 
         .footer-bottom-links a:hover { color: rgba(255,255,255,.65); }
 
+        /* =================== HOVER ANIMATIONS =================== */
+
+        /* Tilt card */
+        .tilt-card { transform-style: preserve-3d; will-change: transform; }
+
+        /* Letter pop on headings */
+        .letter-pop span {
+            display: inline-block;
+            transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), color 0.2s;
+        }
+        .letter-pop span:hover {
+            transform: translateY(-6px) scale(1.15);
+            color: #dc2626;
+        }
+
+        /* Floating tooltip */
+        #cursor-tooltip {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9997;
+            background: rgba(12,14,26,.92);
+            color: #f1f5f9;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            padding: .35rem .85rem;
+            border-radius: 50px;
+            border: 1px solid rgba(220,38,38,.35);
+            white-space: nowrap;
+            opacity: 0;
+            transform: translate(-50%, -140%) scale(0.85);
+            transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: 0 8px 24px rgba(0,0,0,.3);
+        }
+        #cursor-tooltip.show {
+            opacity: 1;
+            transform: translate(-50%, -140%) scale(1);
+        }
+
+        /* Glow on stat hover */
+        .hero-stat {
+            transition: background 0.3s ease;
+            border-radius: 16px;
+        }
+        .hero-stat:hover {
+            background: rgba(220,38,38,.08);
+        }
+        .hero-stat:hover .hero-stat-label {
+            color: #fca5a5;
+        }
+
+        /* Nav link underline pop */
+        .nav-links a:not(.nav-login-btn) {
+            transition: color .25s, letter-spacing .2s;
+        }
+        .nav-links a:not(.nav-login-btn):hover {
+            letter-spacing: .06em;
+        }
+
+        /* Feature card text pop */
+        .feature-card:hover .feature-title {
+            color: #fca5a5;
+            transition: color 0.3s;
+        }
+
+        /* Plan name pop */
+        .plan-card:hover .plan-name {
+            color: #dc2626;
+            transition: color 0.3s;
+        }
+
+        /* Section eyebrow bounce */
+        .section-eyebrow {
+            transition: letter-spacing 0.3s ease, transform 0.3s ease;
+            display: inline-block;
+        }
+        .section-eyebrow:hover {
+            letter-spacing: .22em;
+            transform: scale(1.05);
+        }
+
+        /* Footer link arrow pop */
+        .footer-links a::before {
+            content: '→';
+            opacity: 0;
+            margin-right: 0;
+            transition: opacity 0.2s, margin-right 0.2s;
+            font-size: .8rem;
+        }
+        .footer-links a:hover::before {
+            opacity: 1;
+            margin-right: .3rem;
+        }
+
+        /* Scroll indicator pulse on hover */
+        .scroll-indicator:hover .scroll-mouse {
+            border-color: rgba(220,38,38,.6);
+            box-shadow: 0 0 12px rgba(220,38,38,.3);
+            transition: all 0.3s;
+        }
+
         /* =================== SCROLL REVEAL =================== */
         .reveal {
             opacity: 0;
@@ -1500,7 +1602,9 @@
             .nav-links li:not(:last-child):not(:nth-last-child(2)) { display: none; }
             .hero-ctas { flex-direction: column; align-items: stretch; text-align: center; }
             .btn-primary, .btn-secondary { justify-content: center; }
-            .plan-buttons { flex-direction: column; }
+            .plan-buttons { gap: 0.4rem; }
+            .view-details-btn { flex: 0 0 auto; padding: .65rem .75rem; font-size: .78rem; }
+            .subscribe-btn { flex: 1; padding: .65rem .75rem; font-size: .82rem; }
         }
     </style>
 </head>
@@ -1509,6 +1613,7 @@
     <!-- Custom Cursor -->
     <div class="cursor-dot" id="cursorDot"></div>
     <div class="cursor-ring" id="cursorRing"></div>
+    <div id="cursor-tooltip"></div>
 
     <!-- Toast -->
     <div class="toast" id="toast">
@@ -1526,17 +1631,17 @@
                               d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
                     </svg>
                 </div>
-                ISP BILLING SYSTEM
+                {{ $s['welcome_nav_logo'] ?? 'ISP BILLING SYSTEM' }}
             </a>
             <ul class="nav-links">
-                <li><a href="#plans">Plans</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="#plans" data-tip="View our internet plans">Plans</a></li>
+                <li><a href="#features" data-tip="Why choose us">Features</a></li>
+                <li><a href="#contact" data-tip="Get in touch">Contact</a></li>
                 <li><a href="#" onclick="openModal(); return false;" class="nav-login-btn">
                     <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                     </svg>
-                    Login
+                    {{ $s['welcome_nav_login_btn'] ?? 'Login' }}
                 </a></li>
             </ul>
         </div>
@@ -1561,40 +1666,39 @@
                 Fast · Reliable · Affordable
             </div>
             <h1 class="hero-title font-display">
-                Reliable Internet for<br>
-                <span class="line-accent" id="scrambleText">Every Connection</span>
+                {{ $s['welcome_hero_title_1'] ?? 'Reliable Internet for' }}<br>
+                <span class="line-accent letter-pop" id="scrambleText">{{ $s['welcome_hero_title_2'] ?? 'Every Connection' }}</span>
             </h1>
             <p class="hero-subtitle">
-                Fiber &amp; wireless internet built for homes and businesses.
-                Blazing speeds, zero downtime, and support that actually picks up.
+                {{ $s['welcome_hero_subtitle'] ?? 'Fiber & wireless internet built for homes and businesses. Blazing speeds, zero downtime, and support that actually picks up.' }}
             </p>
             <div class="hero-ctas">
-                <button class="btn-primary" onclick="document.getElementById('plans').scrollIntoView({behavior:'smooth'})">
+                <button class="btn-primary" data-tip="Browse all plans" onclick="document.getElementById('plans').scrollIntoView({behavior:'smooth'})">
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
-                    View Plans
+                    {{ $s['welcome_hero_cta_primary'] ?? 'View Plans' }}
                 </button>
-                <button class="btn-secondary" onclick="openModal()">
-                    Sign In to Portal
+                <button class="btn-secondary" data-tip="Access your account" onclick="openModal()">
+                    {{ $s['welcome_hero_cta_secondary'] ?? 'Sign In to Portal' }}
                 </button>
             </div>
             <div class="hero-stats">
-                <div class="hero-stat">
+                <div class="hero-stat" data-tip="99.9% guaranteed uptime">
                     <div class="hero-stat-num"><span class="count" data-target="99">0</span><span>.9%</span></div>
-                    <div class="hero-stat-label">Uptime SLA</div>
+                    <div class="hero-stat-label">{{ $s['welcome_hero_stat_uptime_label'] ?? 'Uptime SLA' }}</div>
                 </div>
-                <div class="hero-stat">
+                <div class="hero-stat" data-tip="Up to 100 Mbps fiber speed">
                     <div class="hero-stat-num"><span class="count" data-target="100">0</span><span>Mbps</span></div>
-                    <div class="hero-stat-label">Max Speed</div>
+                    <div class="hero-stat-label">{{ $s['welcome_hero_stat_speed_label'] ?? 'Max Speed' }}</div>
                 </div>
-                <div class="hero-stat">
+                <div class="hero-stat" data-tip="Round-the-clock support">
                     <div class="hero-stat-num"><span class="count" data-target="24">0</span><span>/7</span></div>
-                    <div class="hero-stat-label">Support</div>
+                    <div class="hero-stat-label">{{ $s['welcome_hero_stat_support_label'] ?? 'Support' }}</div>
                 </div>
-                <div class="hero-stat">
+                <div class="hero-stat" data-tip="Plans starting at ₱999/mo">
                     <div class="hero-stat-num">₱<span class="count" data-target="999">0</span></div>
-                    <div class="hero-stat-label">Starts At</div>
+                    <div class="hero-stat-label">{{ $s['welcome_hero_stat_price_label'] ?? 'Starts At' }}</div>
                 </div>
             </div>
         </div>
@@ -1614,9 +1718,9 @@
     <!-- =================== PLANS =================== -->
     <section id="plans" class="plans-section">
         <div class="section-header reveal">
-            <span class="section-eyebrow">Internet Plans</span>
-            <h2 class="section-title">Pick Your Perfect Plan</h2>
-            <p class="section-subtitle">Transparent pricing. No hidden fees. Cancel anytime.</p>
+            <span class="section-eyebrow">{{ $s['welcome_plans_eyebrow'] ?? 'Internet Plans' }}</span>
+            <h2 class="section-title letter-pop">{{ $s['welcome_plans_title'] ?? 'Pick Your Perfect Plan' }}</h2>
+            <p class="section-subtitle">{{ $s['welcome_plans_subtitle'] ?? 'Transparent pricing. No hidden fees. Cancel anytime.' }}</p>
         </div>
 
         <div class="plans-grid">
@@ -1641,8 +1745,14 @@
                         {{ $rate->data_limit ?? 'Unlimited data' }} · {{ $rate->billing_cycle }}
                     </p>
                     <div class="plan-buttons">
-                        <button class="view-details-btn" onclick="showPlanDetails('{{ $rate->plan_name }}', '{{ $rate->speed }}', '{{ $rate->plan_type }}', {{ $rate->monthly_fee }}, '{{ $rate->billing_cycle }}', '{{ $rate->data_limit ?? 'Unlimited' }}', {{ $rate->installation_fee ?? 0 }}, {{ $rate->activation_fee ?? 0 }}, {{ $rate->router_fee ?? 0 }}, '{{ $rate->lock_in_period ?? 'None' }}', {{ $rate->late_penalty ?? 0 }}, {{ $rate->reconnection_fee ?? 0 }})">View Details</button>
-                        <button class="subscribe-btn" onclick="handleSubscribe('{{ $rate->plan_name }}')">Apply Now</button>
+                        <button class="view-details-btn" onclick="showPlanDetails('{{ $rate->plan_name }}', '{{ $rate->speed }}', '{{ $rate->plan_type }}', {{ $rate->monthly_fee }}, '{{ $rate->billing_cycle }}', '{{ $rate->data_limit ?? 'Unlimited' }}', {{ $rate->installation_fee ?? 0 }}, {{ $rate->activation_fee ?? 0 }}, {{ $rate->router_fee ?? 0 }}, '{{ $rate->lock_in_period ?? 'None' }}', {{ $rate->late_penalty ?? 0 }}, {{ $rate->reconnection_fee ?? 0 }})">
+                            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            Details
+                        </button>
+                        <button class="subscribe-btn" onclick="handleSubscribe('{{ $rate->plan_name }}')">
+                            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            Apply Now
+                        </button>
                     </div>
                 </div>
             @empty
@@ -1657,8 +1767,14 @@
                         No data cap, great for solo use
                     </p>
                     <div class="plan-buttons">
-                        <button class="view-details-btn" onclick="showPlanDetails('Basic','25 Mbps','Fiber',999,'Monthly','Unlimited',0,0,0,'None',0,0)">View Details</button>
-                        <button class="subscribe-btn" onclick="handleSubscribe('Basic')">Get Basic Plan</button>
+                        <button class="view-details-btn" onclick="showPlanDetails('Basic','25 Mbps','Fiber',999,'Monthly','Unlimited',0,0,0,'None',0,0)">
+                            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            Details
+                        </button>
+                        <button class="subscribe-btn" onclick="handleSubscribe('Basic')">
+                            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            Apply Now
+                        </button>
                     </div>
                 </div>
 
@@ -1674,8 +1790,14 @@
                         Ideal for families with multiple devices
                     </p>
                     <div class="plan-buttons">
-                        <button class="view-details-btn" onclick="showPlanDetails('Standard','50 Mbps','Fiber',1499,'Monthly','Unlimited',0,0,0,'None',0,0)">View Details</button>
-                        <button class="subscribe-btn" onclick="handleSubscribe('Standard')">Get Standard Plan</button>
+                        <button class="view-details-btn" onclick="showPlanDetails('Standard','50 Mbps','Fiber',1499,'Monthly','Unlimited',0,0,0,'None',0,0)">
+                            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            Details
+                        </button>
+                        <button class="subscribe-btn" onclick="handleSubscribe('Standard')">
+                            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            Apply Now
+                        </button>
                     </div>
                 </div>
 
@@ -1690,8 +1812,14 @@
                         Best for power users and businesses
                     </p>
                     <div class="plan-buttons">
-                        <button class="view-details-btn" onclick="showPlanDetails('Premium','100 Mbps','Fiber',2499,'Monthly','Unlimited',0,0,0,'None',0,0)">View Details</button>
-                        <button class="subscribe-btn" onclick="handleSubscribe('Premium')">Get Premium Plan</button>
+                        <button class="view-details-btn" onclick="showPlanDetails('Premium','100 Mbps','Fiber',2499,'Monthly','Unlimited',0,0,0,'None',0,0)">
+                            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            Details
+                        </button>
+                        <button class="subscribe-btn" onclick="handleSubscribe('Premium')">
+                            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            Apply Now
+                        </button>
                     </div>
                 </div>
             @endforelse
@@ -1701,26 +1829,26 @@
     <!-- =================== FEATURES =================== -->
     <section id="features" class="features-section">
         <div class="section-header reveal" style="position:relative;z-index:1;">
-            <span class="section-eyebrow" style="color:#fca5a5;">Why Choose Us</span>
-            <h2 class="section-title">Built Different</h2>
-            <p class="section-subtitle">We're not just another ISP. Here's what sets us apart.</p>
+            <span class="section-eyebrow" style="color:#fca5a5;">{{ $s['welcome_features_eyebrow'] ?? 'Why Choose Us' }}</span>
+            <h2 class="section-title letter-pop">{{ $s['welcome_features_title'] ?? 'Built Different' }}</h2>
+            <p class="section-subtitle">{{ $s['welcome_features_subtitle'] ?? "We're not just another ISP. Here's what sets us apart." }}</p>
         </div>
 
         <div class="features-grid reveal-stagger">
-            <div class="feature-card">
+            <div class="feature-card" data-tip="Stream 4K without buffering">
                 <div class="feature-icon-wrap">⚡</div>
-                <h3 class="feature-title">Blazing Speeds</h3>
-                <p class="feature-desc">Low latency, high throughput. Stream 4K, game online, and video call — all at the same time without a hitch.</p>
+                <h3 class="feature-title">{{ $s['welcome_features_blazing_title'] ?? 'Blazing Speeds' }}</h3>
+                <p class="feature-desc">{{ $s['welcome_features_blazing_desc'] ?? 'Low latency, high throughput. Stream 4K, game online, and video call — all at the same time without a hitch.' }}</p>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" data-tip="Fiber across the entire region">
                 <div class="feature-icon-wrap">📡</div>
-                <h3 class="feature-title">Wide Coverage</h3>
-                <p class="feature-desc">Our fiber network spans homes and businesses across the entire region. Reliable connectivity wherever you are.</p>
+                <h3 class="feature-title">{{ $s['welcome_features_coverage_title'] ?? 'Wide Coverage' }}</h3>
+                <p class="feature-desc">{{ $s['welcome_features_coverage_desc'] ?? 'Our fiber network spans homes and businesses across the entire region. Reliable connectivity wherever you are.' }}</p>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" data-tip="Real humans, always available">
                 <div class="feature-icon-wrap">🔧</div>
-                <h3 class="feature-title">24/7 Support</h3>
-                <p class="feature-desc">Real humans answer your calls. Technical assistance available around the clock, every day of the year.</p>
+                <h3 class="feature-title">{{ $s['welcome_features_support_title'] ?? '24/7 Support' }}</h3>
+                <p class="feature-desc">{{ $s['welcome_features_support_desc'] ?? 'Real humans answer your calls. Technical assistance available around the clock, every day of the year.' }}</p>
             </div>
         </div>
     </section>
@@ -1728,23 +1856,23 @@
     <!-- =================== CONTACT =================== -->
     <section id="contact" class="contact-section">
         <div class="section-header reveal">
-            <span class="section-eyebrow">Get In Touch</span>
-            <h2 class="section-title">Let's Get You Connected</h2>
-            <p class="section-subtitle">Drop us a message and we'll reach out within 24 hours.</p>
+            <span class="section-eyebrow">{{ $s['welcome_contact_eyebrow'] ?? 'Get In Touch' }}</span>
+            <h2 class="section-title letter-pop">{{ $s['welcome_contact_title'] ?? "Let's Get You Connected" }}</h2>
+            <p class="section-subtitle">{{ $s['welcome_contact_subtitle'] ?? "Drop us a message and we'll reach out within 24 hours." }}</p>
         </div>
 
         <div class="contact-wrap reveal" style="transition-delay:.15s;">
             <form class="contact-form" onsubmit="handleContact(event)">
                 <div class="form-field">
-                    <input type="text" placeholder="Your Full Name" required>
+                    <input type="text" placeholder="{{ $s['welcome_contact_form_name_ph'] ?? 'Your Full Name' }}" required>
                 </div>
                 <div class="form-field">
-                    <input type="email" placeholder="Email Address" required>
+                    <input type="email" placeholder="{{ $s['welcome_contact_form_email_ph'] ?? 'Email Address' }}" required>
                 </div>
                 <div class="form-field">
-                    <textarea placeholder="Tell us how we can help you…" required></textarea>
+                    <textarea placeholder="{{ $s['welcome_contact_form_message_ph'] ?? 'Tell us how we can help you…' }}" required></textarea>
                 </div>
-                <button type="submit" class="contact-submit">Send Message →</button>
+                <button type="submit" class="contact-submit">{{ $s['welcome_contact_submit'] ?? 'Send Message →' }}</button>
             </form>
         </div>
     </section>
@@ -1757,14 +1885,14 @@
                 <div class="modal-head-glow"></div>
                 <button class="modal-close" onclick="closeModal()">&times;</button>
                 <div class="modal-head-content">
-                    <h3>Welcome Back</h3>
-                    <p>Sign in to your NetManager account</p>
+                    <h3>{{ $s['welcome_modal_welcome_back'] ?? 'Welcome Back' }}</h3>
+                    <p>{{ $s['welcome_modal_signin_sub'] ?? 'Sign in to your NetManager account' }}</p>
                 </div>
             </div>
             <div class="modal-body">
                 <div class="modal-tabs">
-                    <button class="modal-tab active" onclick="switchTab('login')">Sign In</button>
-                    <button class="modal-tab" onclick="switchTab('register')">Create Account</button>
+                    <button class="modal-tab active" onclick="switchTab('login')">{{ $s['welcome_modal_tab_signin'] ?? 'Sign In' }}</button>
+                    <button class="modal-tab" onclick="switchTab('register')">{{ $s['welcome_modal_tab_register'] ?? 'Create Account' }}</button>
                 </div>
 
                 <form id="loginForm" class="modal-form active" method="POST" action="{{ route('login') }}">
@@ -1921,11 +2049,11 @@
                         </div>
                         NetManager
                     </div>
-                    <p class="footer-desc">Your trusted partner for reliable internet. Fast, secure, and affordable connectivity for every home and business.</p>
+                    <p class="footer-desc">{{ $s['welcome_footer_desc'] ?? 'Your trusted partner for reliable internet. Fast, secure, and affordable connectivity for every home and business.' }}</p>
                     <div class="footer-socials">
-                        <a href="#" class="social-btn" title="Facebook">📘</a>
-                        <a href="#" class="social-btn" title="Twitter">🐦</a>
-                        <a href="#" class="social-btn" title="Instagram">📷</a>
+                        <a href="{{ $s['welcome_contact_social_fb'] ?? '#' }}" class="social-btn" title="Facebook">📘</a>
+                        <a href="{{ $s['welcome_contact_social_twitter'] ?? '#' }}" class="social-btn" title="Twitter">🐦</a>
+                        <a href="{{ $s['welcome_contact_social_instagram'] ?? '#' }}" class="social-btn" title="Instagram">📷</a>
                     </div>
                 </div>
 
@@ -1945,15 +2073,15 @@
                     <h4>Contact</h4>
                     <div class="footer-contact-item">
                         <div class="footer-contact-icon">📍</div>
-                        <div class="footer-contact-text">123 Internet Street<br>Tech City, TC 12345</div>
+                        <div class="footer-contact-text">{{ $s['welcome_contact_address'] ?? '123 Internet Street, Tech City, TC 12345' }}</div>
                     </div>
                     <div class="footer-contact-item">
                         <div class="footer-contact-icon">📞</div>
-                        <div class="footer-contact-text">+1 (555) 123-4567</div>
+                        <div class="footer-contact-text">{{ $s['welcome_contact_phone'] ?? '+1 (555) 123-4567' }}</div>
                     </div>
                     <div class="footer-contact-item">
                         <div class="footer-contact-icon">✉️</div>
-                        <div class="footer-contact-text">support@netmanager.com</div>
+                        <div class="footer-contact-text">{{ $s['welcome_contact_email'] ?? 'support@netmanager.com' }}</div>
                     </div>
                 </div>
             </div>
@@ -1961,7 +2089,7 @@
             <div class="footer-divider"></div>
 
             <div class="footer-bottom">
-                <p class="footer-copy">&copy; 2024 ISP Billing Management System. All rights reserved.</p>
+                <p class="footer-copy">{{ $s['welcome_footer_copyright'] ?? '© 2024 ISP Billing Management System. All rights reserved.' }}</p>
                 <ul class="footer-bottom-links">
                     <li><a href="#">Privacy Policy</a></li>
                     <li><a href="#">Terms of Service</a></li>
@@ -1972,6 +2100,62 @@
     </footer>
 
     <script>
+        /* ===================== LETTER POP — split headings into spans ===================== */
+        document.querySelectorAll('.letter-pop').forEach(el => {
+            // Don't split if it has child elements (scramble span etc)
+            if (el.children.length) return;
+            el.innerHTML = el.textContent.split('').map(ch =>
+                ch === ' ' ? ' ' : `<span>${ch}</span>`
+            ).join('');
+        });
+
+        /* ===================== 3D TILT on plan & feature cards ===================== */
+        document.querySelectorAll('.plan-card, .feature-card').forEach(card => {
+            card.classList.add('tilt-card');
+            card.addEventListener('mousemove', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width  - 0.5;
+                const y = (e.clientY - rect.top)  / rect.height - 0.5;
+                const tiltX = y * -10;
+                const tiltY = x *  10;
+                this.style.transform = `perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateY(-8px) scale(1.02)`;
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+                // restore featured card default
+                if (this.classList.contains('featured')) {
+                    this.style.transform = 'translateY(-8px) scale(1.02)';
+                }
+            });
+        });
+
+        /* ===================== FLOATING TOOLTIP ===================== */
+        const tooltip = document.getElementById('cursor-tooltip');
+        let tooltipTimeout;
+
+        function showTooltip(text, x, y) {
+            clearTimeout(tooltipTimeout);
+            tooltip.textContent = text;
+            tooltip.style.left = x + 'px';
+            tooltip.style.top  = y + 'px';
+            tooltip.classList.add('show');
+        }
+        function hideTooltip() {
+            tooltipTimeout = setTimeout(() => tooltip.classList.remove('show'), 80);
+        }
+
+        // Elements with data-tip attribute get a floating tooltip
+        document.querySelectorAll('[data-tip]').forEach(el => {
+            el.addEventListener('mouseenter', function(e) {
+                showTooltip(this.dataset.tip, e.clientX, e.clientY);
+            });
+            el.addEventListener('mousemove', function(e) {
+                tooltip.style.left = e.clientX + 'px';
+                tooltip.style.top  = e.clientY + 'px';
+            });
+            el.addEventListener('mouseleave', hideTooltip);
+        });
+
         /* ===================== CURSOR ===================== */
         const dot  = document.getElementById('cursorDot');
         const ring = document.getElementById('cursorRing');
@@ -2385,21 +2569,55 @@ function handleSubscribe(plan) {
         /* ===================== CONTACT ===================== */
         function handleContact(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('.contact-submit');
+            const form = e.target;
+            const btn  = form.querySelector('.contact-submit');
             const orig = btn.textContent;
+            const name    = form.querySelector('input[type="text"]').value.trim();
+            const email   = form.querySelector('input[type="email"]').value.trim();
+            const message = form.querySelector('textarea').value.trim();
+
             btn.textContent = '✓ Sending…';
             btn.style.opacity = '.7';
-            setTimeout(() => {
-                btn.textContent = '✓ Message Sent!';
-                btn.style.opacity = '1';
-                btn.style.background = 'linear-gradient(135deg,#059669,#047857)';
-                showToast('Message sent! We\'ll get back to you soon.', '#22c55e');
-                setTimeout(() => {
+            btn.disabled = true;
+
+            fetch('{{ route("contact.store") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ name, email, message })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    btn.textContent = '✓ Message Sent!';
+                    btn.style.opacity = '1';
+                    btn.style.background = 'linear-gradient(135deg,#059669,#047857)';
+                    showToast(data.message, '#22c55e');
+                    if (data.remaining === 0) {
+                        showToast('You have used all 3 message slots for this email.', '#f59e0b');
+                    }
+                    form.reset();
+                    setTimeout(() => {
+                        btn.textContent = orig;
+                        btn.style.background = '';
+                        btn.disabled = false;
+                    }, 3000);
+                } else {
                     btn.textContent = orig;
-                    btn.style.background = '';
-                    e.target.reset();
-                }, 3000);
-            }, 800);
+                    btn.style.opacity = '1';
+                    btn.disabled = false;
+                    showToast(data.message || 'Failed to send message.', '#ef4444');
+                }
+            })
+            .catch(() => {
+                btn.textContent = orig;
+                btn.style.opacity = '1';
+                btn.disabled = false;
+                showToast('Network error. Please try again.', '#ef4444');
+            });
         }
     </script>
 </body>

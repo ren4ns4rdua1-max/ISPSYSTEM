@@ -83,7 +83,6 @@ class SalesController extends Controller
             'plan_description' => ['required', 'string', 'max:255'],
             'due_date_time' => ['required', 'date'],
             'subscription_rate_id' => ['nullable', 'exists:subscription_rates,id'],
-            'status' => ['required', 'in:active,inactive,suspended,cancelled'],
             'notes' => ['nullable', 'string'],
         ]);
 
@@ -149,7 +148,7 @@ class SalesController extends Controller
         $billing = Billing::create($billingData);
 
         // Redirect based on action
-        if ($request->has('create_payment')) {
+        if ($request->input('create_payment') == '1') {
             return redirect()->route('payments.create', ['client_id' => $client->id, 'billing_id' => $billing->id])
                 ->with('success', 'Client created successfully! Please record the payment.');
         }

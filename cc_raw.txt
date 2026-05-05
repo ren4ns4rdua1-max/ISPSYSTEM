@@ -176,7 +176,7 @@ class ClientController extends Controller
             \Log::error('Failed to send approval email to ' . $client->email . ': ' . $e->getMessage());
         }
 
-        return redirect()->route('billings.index')->with('success', "Client '{$client->name}' approved. Initial billing created — please review.");
+        return redirect()->route('billings.index')->with('success', "Client '{$client->name}' approved. Initial billing created ? please review.");
     }
 
     /**
@@ -269,7 +269,7 @@ class ClientController extends Controller
             'due_date'            => $client->due_date_time
                                         ? $client->due_date_time->toDateString()
                                         : now()->addMonth()->toDateString(),
-            'notes'               => 'Initial billing — auto-generated on client approval.',
+            'notes'               => 'Initial billing ? auto-generated on client approval.',
             'created_by'          => auth()->id(),
         ]);
     }
@@ -383,4 +383,5 @@ class ClientController extends Controller
         return redirect()->route('clients.index')->with('success', 'Client deleted successfully.');
     }
 }
+
 
