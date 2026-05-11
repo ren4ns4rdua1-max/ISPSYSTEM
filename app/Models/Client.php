@@ -31,6 +31,10 @@ class Client extends Model
         'status',
         'notes',
         'photo',
+        'email_verification_token',
+        'email_verified_at',
+        'latitude',
+        'longitude',
     ];
 
     /**
@@ -82,6 +86,7 @@ class Client extends Model
             'suspended' => 'bg-amber-100 text-amber-700 border-amber-200',
             'cancelled' => 'bg-red-100 text-red-700 border-red-200',
             'pending_approval' => 'bg-purple-100 text-purple-700 border-purple-200',
+            'pending_installation' => 'bg-blue-100 text-blue-700 border-blue-200',
             default => 'bg-gray-100 text-gray-700 border-gray-200',
         };
     }
@@ -117,6 +122,7 @@ class Client extends Model
     {
         return match($this->status) {
             'pending_approval' => 'Pending Approval',
+            'pending_installation' => 'Pending Installation',
             default => ucfirst($this->status),
         };
     }

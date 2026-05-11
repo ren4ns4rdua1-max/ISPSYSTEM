@@ -66,7 +66,7 @@ class BillingController extends Controller
      */
     public function create(Request $request): View
     {
-        $clients = Client::with('subscriptionRate')->where('status', 'active')->orderBy('name', 'asc')->get();
+        $clients = Client::with('subscriptionRate')->whereIn('status', ['active', 'pending_installation'])->orderBy('name', 'asc')->get();
         $subscriptionRates = SubscriptionRate::where('is_active', true)->orderBy('monthly_fee', 'asc')->get();
         $prefillClientId = $request->get('client_id');
         

@@ -186,6 +186,7 @@
         .status-suspended { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
         .status-cancelled { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
         .status-pending_approval { background: #f3e8ff; color: #7c3aed; border: 1px solid #e9d5ff; }
+        .status-pending_installation { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
 
         /* Button hover effects */
         .action-btn {
@@ -220,6 +221,10 @@
             }
         }
         
+        /* Map modal */
+        #map-modal-container { height: 500px; width: 100%; border-radius: 12px; overflow: hidden; }
+        .leaflet-popup-content { font-family: 'DM Sans', sans-serif; font-size: 13px; }
+
         /* Pagination styling */
         nav[aria-label="Pagination"] span, nav[aria-label="Pagination"] a {
             border-radius: 10px !important;
@@ -284,6 +289,21 @@
     <!-- PAGE BODY - Scrollable -->
     <main class="flex-1 main-scroll p-6 space-y-5">
 
+        <!-- Error Alert -->
+        @if (session('error'))
+            <div class="flex items-center gap-3 px-5 py-4 rounded-xl border animate-fadeIn" style="background:#fef2f2;border-color:#fecaca;">
+                <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </div>
+                <p class="text-red-800 text-sm font-semibold">{{ session('error') }}</p>
+                <button onclick="this.parentElement.remove()" class="ml-auto text-red-400 hover:text-red-600 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        @endif
+
         <!-- Success Alert -->
         @if (session('success'))
             <div class="flex items-center gap-3 px-5 py-4 rounded-xl border animate-fadeIn" style="background:#f0fdf4;border-color:#bbf7d0;">
@@ -317,6 +337,7 @@
 <select name="status" onchange="this.form.submit()" class="text-xs font-semibold bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-300 cursor-pointer">
                         <option value="">All Status</option>
                         <option value="pending_approval" {{ $status == 'pending_approval' ? 'selected' : '' }}>Pending Approval</option>
+                        <option value="pending_installation" {{ $status == 'pending_installation' ? 'selected' : '' }}>Pending Installation</option>
                         <option value="active" {{ $status == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ $status == 'inactive' ? 'selected' : '' }}>Inactive</option>
                         <option value="suspended" {{ $status == 'suspended' ? 'selected' : '' }}>Suspended</option>
@@ -324,14 +345,20 @@
                     </select>
                 </form>
             </div>
-            <a href="{{ route('clients.create') }}"
-               class="inline-flex items-center gap-2 px-5 py-2.5 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-               style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                </svg>
-                Add New Client
-            </a>
+            <div class="flex items-center gap-2">
+                <button onclick="openMapModal(null)" class="inline-flex items-center gap-2 px-5 py-2.5 font-semibold text-sm rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                    View Map
+                </button>
+                <a href="{{ route('clients.create') }}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                   style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                    Add New Client
+                </a>
+            </div>
         </div>
 
         <!-- Main Table Card -->
@@ -406,6 +433,15 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                                 </svg>
                                                 <span class="text-xs text-gray-600">{{ $client->email }}</span>
+                                                @if($client->email_verified_at)
+                                                    <span title="Email verified" class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-100">
+                                                        <svg class="w-2.5 h-2.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                                    </span>
+                                                @else
+                                                    <span title="Email not verified" class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-100">
+                                                        <svg class="w-2.5 h-2.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01"/></svg>
+                                                    </span>
+                                                @endif
                                             </div>
                                             <div class="flex items-center gap-1.5">
                                                 <svg class="w-3 h-3 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -419,9 +455,18 @@
                                         <span class="text-xs font-medium text-gray-700 bg-gray-100 px-2 py-1 rounded">{{ $client->pppoe_name }}</span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-xs">
-                                            <p class="text-gray-700 font-medium">{{ $client->barangay }}</p>
-                                            <p class="text-gray-400">NAP: {{ $client->nap_box }}</p>
+                                        <div class="text-xs flex items-start gap-1.5">
+                                            <div>
+                                                <p class="text-gray-700 font-medium">{{ $client->barangay }}</p>
+                                                <p class="text-gray-400">NAP: {{ $client->nap_box }}</p>
+                                            </div>
+                                            @if($client->latitude && $client->longitude)
+                                                <button onclick="openMapModal({{ $client->id }}, {{ $client->latitude }}, {{ $client->longitude }}, '{{ addslashes($client->name) }}')"
+                                                        title="View on map"
+                                                        class="flex-shrink-0 w-6 h-6 rounded-lg bg-blue-50 hover:bg-blue-100 flex items-center justify-center transition-colors mt-0.5">
+                                                    <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                </button>
+                                            @endif
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -452,7 +497,7 @@
                                                     </button>
                                                 </form>
                                                 <!-- Approve & Assign button -->
-                                                <button type="button" onclick="openAssignModal({{ $client->id }}, '{{ addslashes($client->name) }}')"
+                                                <button type="button" onclick="openAssignModal({{ $client->id }}, '{{ addslashes($client->name) }}', '{{ addslashes($client->email) }}', {{ $client->id }})"
                                                         class="action-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-semibold rounded-lg transition-all hover:shadow-sm"
                                                         style="color:#7c3aed;background:#f3e8ff;border:1px solid #e9d5ff;">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -588,9 +633,32 @@
     </div>
 </div>
 
+<!-- ===================== EMAIL PREVIEW MODAL ===================== -->
+<div id="email-preview-modal" class="fixed inset-0 z-[60] items-center justify-center" style="background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:none;">
+    <div class="modal-content bg-white rounded-2xl shadow-2xl mx-4 w-full max-w-2xl flex flex-col" style="max-height:90vh;">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-900 text-sm">Email Preview</p>
+                    <p class="text-xs text-gray-400">This email will be sent to: <span id="preview-email" class="font-semibold text-indigo-600"></span></p>
+                </div>
+            </div>
+            <button onclick="closeEmailPreview()" class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="overflow-y-auto flex-1 p-4">
+            <iframe id="email-preview-frame" style="width:100%;height:600px;border:none;border-radius:12px;background:#f1f5f9;"></iframe>
+        </div>
+    </div>
+</div>
+
 <!-- ===================== APPROVE & ASSIGN MODAL ===================== -->
 <div id="assign-modal" class="fixed inset-0 z-50 items-center justify-center" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:none;">
-    <div class="modal-content bg-white rounded-2xl shadow-2xl p-6 mx-4 w-full max-w-md">
+    <div class="modal-content bg-white rounded-2xl shadow-2xl p-6 mx-4 w-full max-w-md" style="max-height:90vh;overflow-y:auto;">
         <div class="flex items-start gap-4 mb-5">
             <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
                 <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -606,6 +674,17 @@
         <form id="assign-form" method="POST">
             @csrf
             <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Send Approval Email To</label>
+                    <div class="relative">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        <input type="email" name="override_email" id="modal-client-email"
+                               class="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                               placeholder="client@example.com" required
+                               oninput="document.getElementById('inline-preview-to').textContent=this.value; document.getElementById('preview-email').textContent=this.value;">
+                    </div>
+                    <p class="text-[11px] text-gray-400 mt-1">Edit to send the approval email to a different address.</p>
+                </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Select Technician</label>
                     <select name="technician_id" id="technician-select" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" required>
@@ -636,8 +715,36 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Notes (Optional)</label>
                     <textarea name="notes" id="notes" rows="2" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" placeholder="Additional instructions for technician..."></textarea>
                 </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Email Message to Client</label>
+                    <textarea name="custom_message" id="custom-message" rows="4" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" placeholder="Write a custom message for the client's approval email..."></textarea>
+                    <p class="text-[11px] text-gray-400 mt-1">This message will appear in the body of the approval email sent to the client.</p>
+                </div>
             </div>
             
+            <!-- Email Preview Toggle -->
+            <div class="mt-4 rounded-xl border border-indigo-100 bg-indigo-50 overflow-hidden">
+                <button type="button" onclick="toggleEmailPreview()"
+                        class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 transition-colors">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        Preview Email Sent to Client
+                    </span>
+                    <svg id="preview-chevron" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div id="email-preview-inline" style="display:none;" class="border-t border-indigo-100">
+                    <div class="p-3 bg-white">
+                        <div class="flex items-center gap-2 mb-2 text-xs text-gray-500">
+                            <span class="font-semibold">To:</span> <span id="inline-preview-to" class="text-indigo-600 font-semibold"></span>
+                            <span class="ml-auto font-semibold">Subject:</span> <span class="italic">Your Internet Service Application Has Been Approved! 🎉</span>
+                        </div>
+                        <iframe id="email-inline-frame" style="width:100%;height:320px;border:1px solid #e2e8f0;border-radius:10px;background:#f1f5f9;"></iframe>
+                        <button type="button" onclick="openFullEmailPreview()" class="mt-2 text-xs text-indigo-600 hover:underline font-semibold">Open full preview →</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="flex items-center gap-3 mt-6">
                 <button type="button" onclick="closeAssignModal()" class="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
                     Cancel
@@ -650,6 +757,32 @@
     </div>
 </div>
 
+
+<!-- ===================== MAP MODAL ===================== -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div id="map-modal" class="fixed inset-0 z-[70] items-center justify-center" style="background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:none;">
+    <div class="modal-content bg-white rounded-2xl shadow-2xl mx-4 w-full flex flex-col" style="max-width:900px;max-height:92vh;">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-900 text-sm">Client Locations Map</p>
+                    <p class="text-xs text-gray-400" id="map-modal-subtitle">All clients with pinned locations</p>
+                </div>
+            </div>
+            <button onclick="closeMapModal()" class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="p-4 flex-1 overflow-hidden">
+            <div id="map-modal-container"></div>
+        </div>
+    </div>
+</div>
 
 @include('partials.sidebar-js')
 
@@ -674,9 +807,18 @@
     });
 
     // ── Approve & Assign modal ────────────────────────────────────────
-    function openAssignModal(clientId, clientName) {
+    let currentEmailPreviewUrl = '';
+
+    function openAssignModal(clientId, clientName, clientEmail, previewClientId) {
         document.getElementById('modal-client-name').textContent = clientName;
+        document.getElementById('modal-client-email').value = clientEmail;
+        document.getElementById('inline-preview-to').textContent = clientEmail;
+        document.getElementById('preview-email').textContent = clientEmail;
         document.getElementById('assign-form').action = '/clients/' + clientId + '/approve-and-assign';
+        currentEmailPreviewUrl = '/clients/' + previewClientId + '/email-preview';
+        // Reset preview state
+        document.getElementById('email-preview-inline').style.display = 'none';
+        document.getElementById('preview-chevron').style.transform = '';
         document.getElementById('assign-modal').style.display = 'flex';
         // Set default scheduled date to now
         const now = new Date();
@@ -684,6 +826,39 @@
         const el = document.getElementById('scheduled-date');
         if (el && !el.value) el.value = now.toISOString().slice(0, 16);
     }
+
+    function toggleEmailPreview() {
+        const box = document.getElementById('email-preview-inline');
+        const chevron = document.getElementById('preview-chevron');
+        const isOpen = box.style.display !== 'none';
+        if (isOpen) {
+            box.style.display = 'none';
+            chevron.style.transform = '';
+        } else {
+            box.style.display = 'block';
+            chevron.style.transform = 'rotate(180deg)';
+            const frame = document.getElementById('email-inline-frame');
+            if (!frame.src || frame.src === 'about:blank' || frame.getAttribute('data-loaded') !== currentEmailPreviewUrl) {
+                frame.src = currentEmailPreviewUrl;
+                frame.setAttribute('data-loaded', currentEmailPreviewUrl);
+            }
+        }
+    }
+
+    function openFullEmailPreview() {
+        document.getElementById('preview-email').textContent = document.getElementById('modal-client-email').textContent;
+        const fullFrame = document.getElementById('email-preview-frame');
+        fullFrame.src = currentEmailPreviewUrl;
+        document.getElementById('email-preview-modal').style.display = 'flex';
+    }
+
+    function closeEmailPreview() {
+        document.getElementById('email-preview-modal').style.display = 'none';
+    }
+
+    document.getElementById('email-preview-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeEmailPreview();
+    });
     function closeAssignModal() {
         document.getElementById('assign-modal').style.display = 'none';
     }
@@ -693,7 +868,7 @@
 
     // ── Escape closes any open modal ──────────────────────────────────
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') { closeModal(); closeAssignModal(); }
+        if (e.key === 'Escape') { closeModal(); closeAssignModal(); closeEmailPreview(); closeMapModal(); }
     });
 
     // ── Live search ───────────────────────────────────────────────────
@@ -710,6 +885,86 @@
     const s = document.createElement('style');
     s.textContent = '@keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}.animate-fadeIn{animation:fadeIn .3s ease forwards}';
     document.head.appendChild(s);
+
+    // ── Map Modal ──────────────────────────────────────────────────────
+    let mapInstance = null;
+
+    const statusColors = {
+        active: '#059669', pending_approval: '#7c3aed',
+        pending_installation: '#1d4ed8', inactive: '#6b7280',
+        suspended: '#d97706', cancelled: '#dc2626'
+    };
+
+    function makeIcon(status) {
+        const color = statusColors[status] || '#6b7280';
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
+            <path d="M14 0C6.268 0 0 6.268 0 14c0 9.333 14 22 14 22S28 23.333 28 14C28 6.268 21.732 0 14 0z" fill="${color}"/>
+            <circle cx="14" cy="14" r="6" fill="white"/>
+        </svg>`;
+        return L.divIcon({
+            html: svg, className: '', iconSize: [28, 36], iconAnchor: [14, 36], popupAnchor: [0, -36]
+        });
+    }
+
+    async function openMapModal(focusClientId, lat, lng, name) {
+        document.getElementById('map-modal').style.display = 'flex';
+        document.getElementById('map-modal-subtitle').textContent =
+            focusClientId ? 'Showing: ' + name : 'All clients with pinned locations';
+
+        await new Promise(r => setTimeout(r, 50));
+
+        if (mapInstance) { mapInstance.remove(); mapInstance = null; }
+
+        const center = (lat && lng) ? [lat, lng] : [12.8797, 121.7740];
+        const zoom   = (lat && lng) ? 16 : 7;
+
+        mapInstance = L.map('map-modal-container').setView(center, zoom);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(mapInstance);
+
+        const res = await fetch('{{ route("clients.mapData") }}');
+        const clients = await res.json();
+
+        clients.forEach(c => {
+            const marker = L.marker([c.latitude, c.longitude], { icon: makeIcon(c.status) })
+                .addTo(mapInstance);
+
+            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${c.latitude},${c.longitude}`;
+
+            marker.bindPopup(`
+                <div style="min-width:200px;font-family:'DM Sans',sans-serif;">
+                    <p style="font-weight:700;font-size:14px;margin-bottom:4px;">${c.name}</p>
+                    <p style="color:#64748b;font-size:12px;margin-bottom:2px;">📍 ${c.barangay} — NAP: ${c.nap_box}</p>
+                    <p style="color:#64748b;font-size:12px;margin-bottom:2px;">📞 ${c.phone_number}</p>
+                    <p style="color:#64748b;font-size:12px;margin-bottom:8px;">📶 ${c.plan_description}</p>
+                    <a href="${directionsUrl}" target="_blank"
+                       style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:white;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">
+                        🧭 Get Directions
+                    </a>
+                </div>
+            `);
+
+            if (focusClientId && c.id == focusClientId) {
+                marker.openPopup();
+            }
+        });
+
+        if (!focusClientId && clients.length > 0) {
+            const group = L.featureGroup(clients.map(c => L.marker([c.latitude, c.longitude])));
+            mapInstance.fitBounds(group.getBounds().pad(0.2));
+        }
+    }
+
+    function closeMapModal() {
+        document.getElementById('map-modal').style.display = 'none';
+        if (mapInstance) { mapInstance.remove(); mapInstance = null; }
+    }
+
+    document.getElementById('map-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeMapModal();
+    });
 </script>
 </body>
 </html>

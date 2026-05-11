@@ -176,9 +176,14 @@ $job->update([
         // Refresh to get updated photo value
         $job->refresh();
         
-        // Update client status to active if this was a new installation
-        if ($job->job_type === 'new_installation') {
+        // Update client status to active when job is completed
+        if (in_array($job->job_type, ['new_installation', 'reconnection']) || $job->client->status === 'pending_installation') {
             $job->client->update(['status' => 'active']);
+        }
+
+        // Create initial billing now that installation is complete
+        if ($job->client->status === 'active' && !$job->client->billings()->exists()) {
+            app(ClientController::class)->createBillingForClient($job->client);
         }
         
         // Notify admins about job completion (with fresh job data including photo)

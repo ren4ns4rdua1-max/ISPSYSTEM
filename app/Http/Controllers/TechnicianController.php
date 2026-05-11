@@ -308,12 +308,17 @@ class TechnicianController extends Controller
         // Refresh to get updated photo value
         $job->refresh();
 
-        // Update client - activate after installation
+        // Update client - activate after job completion
         $job->client->update([
             'installation_status' => 'completed',
             'installation_date' => now(),
             'status' => 'active',
         ]);
+
+        // Create initial billing now that installation is complete
+        if (!$job->client->billings()->exists()) {
+            app(ClientController::class)->createBillingForClient($job->client);
+        }
 
         // Make technician available again
         if ($job->technician) {

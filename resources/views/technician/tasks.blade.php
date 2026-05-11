@@ -6,6 +6,8 @@
     <title>My Tasks - Technician</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         *, body { font-family: 'DM Sans', sans-serif; }
@@ -42,6 +44,10 @@
         .job-upgrade { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
         .btn-start { padding: 8px 18px; border-radius: 14px; font-size: 12px; font-weight: 700; background: linear-gradient(105deg, #dc2626, #b91c1c); color: white; border: none; cursor: pointer; }
         .btn-details { padding: 8px 18px; border-radius: 14px; font-size: 12px; font-weight: 700; background: #f2efed; color: #3f2e2a; border: 1px solid #f0dbd6; cursor: pointer; }
+        /* Map modal */
+        #nav-map { height: 380px; width: 100%; border-radius: 14px; overflow: hidden; }
+        .tech-dot { width: 18px; height: 18px; background: #2563eb; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 4px rgba(37,99,235,.35); animation: techPulse 1.8s ease-in-out infinite; }
+        @keyframes techPulse { 0%,100%{box-shadow:0 0 0 4px rgba(37,99,235,.35);} 50%{box-shadow:0 0 0 10px rgba(37,99,235,.08);} }
     </style>
 </head>
 <body>
@@ -126,7 +132,22 @@
                                 </div>
                             </td>
                             <td><span class="job-badge job-install">{{ $task->job_type_label }}</span></td>
-                            <td><span class="text-gray-600 text-sm">{{ $task->client->address ?? 'N/A' }}</span></td>
+                            <td>
+                                @php $hasCoords = $task->client->latitude && $task->client->longitude; @endphp
+                                <div class="text-sm">
+                                    <p class="text-gray-700 font-semibold">{{ $task->client->barangay }}</p>
+                                    @if($hasCoords)
+                                        <button type="button"
+                                            onclick="openNavMap({{ $task->client->latitude }}, {{ $task->client->longitude }}, '{{ addslashes($task->client->name) }}', '{{ addslashes($task->client->barangay) }}', null)"
+                                            class="inline-flex items-center gap-1 text-xs text-blue-600 font-semibold mt-0.5 hover:underline">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                            View on map
+                                        </button>
+                                    @else
+                                        <span class="text-xs text-gray-400">No coordinates</span>
+                                    @endif
+                                </div>
+                            </td>
                             <td>
                                 <span class="badge badge-{{ $task->status == 'in_progress' ? 'progress' : ($task->status == 'completed' ? 'done' : 'pending') }}">
                                     <span class="badge-dot"></span>{{ ucfirst($task->status) }}
@@ -136,9 +157,11 @@
                             <td class="text-right">
                                 <div class="flex gap-2 justify-end">
                                     @if($task->status === 'assigned')
-                                    <form method="POST" action="{{ route('technician.jobs.start', $task->id) }}">
+                                    @php $hasCoords = $task->client->latitude && $task->client->longitude; @endphp
+                                    <form method="POST" action="{{ route('technician.jobs.start', $task->id) }}" id="start-form-{{ $task->id }}">
                                         @csrf
-                                        <button type="submit" class="btn-start inline-block">Start</button>
+                                        <button type="button" class="btn-start inline-block"
+                                            onclick="startJobWithMap({{ $task->id }}, {{ $task->client->latitude ?? 'null' }}, {{ $task->client->longitude ?? 'null' }}, '{{ addslashes($task->client->name) }}', '{{ addslashes($task->client->barangay) }}')">Start</button>
                                     </form>
 @elseif($task->status === 'in_progress')
                                     <button onclick="openCompleteModal({{ $task->id }})" class="btn-start inline-block" style="background:linear-gradient(105deg,#059669,#047857);">Complete</button>
@@ -210,6 +233,157 @@
         </div>
     </form>
 </dialog>
+
+<!-- ===================== NAV MAP MODAL ===================== -->
+<div id="nav-map-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:24px;width:90%;max-width:720px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(0,0,0,.4);overflow:hidden;">
+        <!-- Header -->
+        <div style="padding:18px 22px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:40px;height:40px;border-radius:12px;background:#eff6ff;display:flex;align-items:center;justify-content:center;">
+                    <svg style="width:20px;height:20px;color:#1d4ed8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </div>
+                <div>
+                    <p style="font-weight:700;font-size:15px;color:#0f172a;" id="nav-map-title">Client Location</p>
+                    <p style="font-size:12px;color:#64748b;" id="nav-map-subtitle">Loading your position...</p>
+                </div>
+            </div>
+            <button onclick="closeNavMap()" style="width:32px;height:32px;border-radius:10px;background:#f1f5f9;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                <svg style="width:16px;height:16px;color:#64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <!-- Map -->
+        <div style="padding:16px;flex:1;overflow:hidden;">
+            <div id="nav-map" style="height:340px;width:100%;border-radius:14px;"></div>
+        </div>
+        <!-- Footer buttons -->
+        <div style="padding:0 16px 16px;display:flex;gap:10px;flex-shrink:0;">
+            <a id="google-directions-btn" href="#" target="_blank"
+               style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:white;border-radius:14px;font-size:13px;font-weight:700;text-decoration:none;">
+                🧭 Open Google Maps Navigation
+            </a>
+            <button id="confirm-start-btn" onclick="confirmStartJob()"
+                    style="flex:1;padding:12px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;">
+                ✅ Start Job
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let navMap = null;
+    let currentStartFormId = null;
+    let watchId = null;
+    let techMarker = null;
+
+    function startJobWithMap(jobId, clientLat, clientLng, clientName, barangay) {
+        currentStartFormId = 'start-form-' + jobId;
+        openNavMap(clientLat, clientLng, clientName, barangay, jobId);
+    }
+
+    function openNavMap(clientLat, clientLng, clientName, barangay, jobId) {
+        if (jobId) currentStartFormId = 'start-form-' + jobId;
+        document.getElementById('nav-map-modal').style.display = 'flex';
+        document.getElementById('nav-map-title').textContent = clientName;
+        document.getElementById('nav-map-subtitle').textContent = barangay + ' — Locating you...';
+
+        // Show/hide start button
+        document.getElementById('confirm-start-btn').style.display = jobId ? 'block' : 'none';
+
+        setTimeout(() => initNavMap(clientLat, clientLng, clientName, barangay), 80);
+    }
+
+    function initNavMap(clientLat, clientLng, clientName, barangay) {
+        if (navMap) { navMap.remove(); navMap = null; }
+        if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+
+        const hasClient = clientLat && clientLng;
+        const center = hasClient ? [clientLat, clientLng] : [12.8797, 121.7740];
+
+        navMap = L.map('nav-map').setView(center, hasClient ? 15 : 7);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(navMap);
+
+        // Client pin
+        if (hasClient) {
+            const clientIcon = L.divIcon({
+                html: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="42" viewBox="0 0 32 42">
+                    <path d="M16 0C7.163 0 0 7.163 0 16c0 10.667 16 26 16 26S32 26.667 32 16C32 7.163 24.837 0 16 0z" fill="#dc2626"/>
+                    <circle cx="16" cy="16" r="7" fill="white"/>
+                    <circle cx="16" cy="16" r="4" fill="#dc2626"/>
+                </svg>`,
+                className: '', iconSize: [32, 42], iconAnchor: [16, 42], popupAnchor: [0, -44]
+            });
+
+            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${clientLat},${clientLng}&travelmode=driving`;
+            document.getElementById('google-directions-btn').href = directionsUrl;
+
+            L.marker([clientLat, clientLng], { icon: clientIcon })
+                .addTo(navMap)
+                .bindPopup(`<b style="font-size:13px;">${clientName}</b><br><span style="color:#64748b;font-size:12px;">📍 ${barangay}</span>`)
+                .openPopup();
+        } else {
+            document.getElementById('google-directions-btn').href = '#';
+            document.getElementById('nav-map-subtitle').textContent = barangay + ' — No coordinates saved';
+        }
+
+        // Technician live position
+        if (navigator.geolocation) {
+            const techIcon = L.divIcon({
+                html: `<div class="tech-dot"></div>`,
+                className: '', iconSize: [18, 18], iconAnchor: [9, 9]
+            });
+
+            watchId = navigator.geolocation.watchPosition(pos => {
+                const tLat = pos.coords.latitude;
+                const tLng = pos.coords.longitude;
+
+                if (techMarker) {
+                    techMarker.setLatLng([tLat, tLng]);
+                } else {
+                    techMarker = L.marker([tLat, tLng], { icon: techIcon })
+                        .addTo(navMap)
+                        .bindPopup('<b style="font-size:12px;">📍 You are here</b>');
+                }
+
+                document.getElementById('nav-map-subtitle').textContent = barangay + ' — Your location found';
+
+                // Update directions URL to include origin
+                if (hasClient) {
+                    const url = `https://www.google.com/maps/dir/?api=1&origin=${tLat},${tLng}&destination=${clientLat},${clientLng}&travelmode=driving`;
+                    document.getElementById('google-directions-btn').href = url;
+                }
+
+                // Fit both markers
+                if (hasClient) {
+                    navMap.fitBounds([[tLat, tLng], [clientLat, clientLng]], { padding: [40, 40] });
+                }
+            }, null, { enableHighAccuracy: true, maximumAge: 5000 });
+        }
+    }
+
+    function closeNavMap() {
+        document.getElementById('nav-map-modal').style.display = 'none';
+        if (navMap) { navMap.remove(); navMap = null; }
+        if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+        techMarker = null;
+        currentStartFormId = null;
+    }
+
+    function confirmStartJob() {
+        if (currentStartFormId) {
+            closeNavMap();
+            document.getElementById(currentStartFormId).submit();
+        }
+    }
+
+    document.getElementById('nav-map-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeNavMap();
+    });
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNavMap(); });
+</script>
 
 <script>
     function previewPhoto(input) {

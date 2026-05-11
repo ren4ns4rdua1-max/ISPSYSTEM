@@ -33,6 +33,7 @@ Route::get('/', function () {
 
 // Guest client registration route (from welcome page "Apply" button)
 Route::post('/clients/guest', [ClientController::class, 'storeGuest'])->name('clients.storeGuest');
+Route::get('/clients/verify-email/{token}', [ClientController::class, 'verifyEmail'])->name('clients.verifyEmail');
 
 // Contact form (public)
 Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
@@ -76,6 +77,8 @@ Route::middleware('auth')->group(function () {
 // Client Management Routes
     // Specific routes must come BEFORE resource routes to avoid conflicts
     Route::get('/clients/pending', [ClientController::class, 'pending'])->name('clients.pending');
+    Route::get('/clients/map-data', [ClientController::class, 'mapData'])->name('clients.mapData');
+    Route::get('/clients/{client}/email-preview', [ClientController::class, 'emailPreview'])->name('clients.emailPreview');
     Route::post('/clients/{client}/approve', [ClientController::class, 'approve'])->name('clients.approve');
     Route::post('/clients/{client}/reject', [ClientController::class, 'reject'])->name('clients.reject');
     Route::post('/clients/{client}/approve-and-assign', [ClientController::class, 'approveAndAssign'])->name('clients.approveAndAssign');

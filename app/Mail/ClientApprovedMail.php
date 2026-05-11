@@ -14,12 +14,14 @@ class ClientApprovedMail extends Mailable
     public Client $client;
     public ?Technician $technician;
     public ?InstallationJob $job;
+    public ?string $customMessage;
 
-    public function __construct(Client $client, ?Technician $technician = null, ?InstallationJob $job = null)
+    public function __construct(Client $client, ?Technician $technician = null, ?InstallationJob $job = null, ?string $customMessage = null)
     {
-        $this->client     = $client;
-        $this->technician = $technician;
-        $this->job        = $job;
+        $this->client        = $client;
+        $this->technician    = $technician;
+        $this->job           = $job;
+        $this->customMessage = $customMessage;
     }
 
     public function envelope(): Envelope

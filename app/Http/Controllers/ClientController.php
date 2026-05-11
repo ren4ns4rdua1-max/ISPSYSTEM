@@ -9,11 +9,13 @@ use App\Models\InstallationJob;
 use App\Models\Billing;
 use App\Models\AdminNotification;
 use App\Mail\ClientApprovedMail;
+use App\Mail\ClientVerifyEmailMail;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class ClientController extends Controller
 {
@@ -76,6 +78,8 @@ class ClientController extends Controller
             'plan_selected'=> ['required', 'string', 'max:255'],
             'notes'        => ['nullable', 'string'],
             'photo'        => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'latitude'     => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude'    => ['nullable', 'numeric', 'between:-180,180'],
         ]);
 
         $pppoeBase = strtolower(explode('@', $validated['email'])[0]);
@@ -86,6 +90,8 @@ class ClientController extends Controller
         $validated['plan_description']= $validated['plan_selected'];
         $validated['status']          = 'pending_approval';
         $validated['user_id']         = null;
+        $validated['email_verification_token'] = Str::random(64);
+        $validated['email_verified_at']        = null;
 
         unset($validated['plan_selected']);
 
@@ -94,6 +100,12 @@ class ClientController extends Controller
         }
 
         $client = Client::create($validated);
+
+        try {
+            Mail::to($client->email)->send(new ClientVerifyEmailMail($client));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send verification email to ' . $client->email . ': ' . $e->getMessage());
+        }
 
         return response()->json([
             'success'   => true,
@@ -151,11 +163,50 @@ class ClientController extends Controller
         return redirect()->route('clients.index')->with('success', 'Client registered successfully. Pending admin approval.');
     }
 
+    public function mapData(): \Illuminate\Http\JsonResponse
+    {
+        $clients = Client::whereNotNull('latitude')->whereNotNull('longitude')
+            ->get(['id', 'name', 'barangay', 'nap_box', 'phone_number', 'status', 'latitude', 'longitude', 'plan_description']);
+        return response()->json($clients);
+    }
+
+    public function emailPreview(Client $client)
+    {
+        $mailable = new ClientApprovedMail($client);
+        return response($mailable->render());
+    }
+
+    /**
+     * Verify client email via token link.
+     */
+    public function verifyEmail(string $token)
+    {
+        $client = Client::where('email_verification_token', $token)->first();
+
+        if (!$client) {
+            return view('clients.verify-email-result', ['success' => false, 'message' => 'Invalid or expired verification link.']);
+        }
+
+        if ($client->email_verified_at) {
+            return view('clients.verify-email-result', ['success' => true, 'message' => 'Your email is already verified. Please wait for admin approval.']);
+        }
+
+        $client->update([
+            'email_verified_at'        => now(),
+            'email_verification_token' => null,
+        ]);
+
+        return view('clients.verify-email-result', ['success' => true, 'message' => 'Your email has been verified! Your application is now pending admin review. We will notify you once approved.']);
+    }
+
 /**
      * Approve a pending client registration.
      */
     public function approve(Client $client): RedirectResponse
     {
+        if (!$client->email_verified_at) {
+            return redirect()->back()->with('error', "Cannot approve '{$client->name}' — email not yet verified by the client.");
+        }
         $client->approve();
 
         // Auto-create initial billing on approval
@@ -194,14 +245,19 @@ class ClientController extends Controller
      */
     public function approveAndAssign(Request $request, Client $client): RedirectResponse
     {
+        if (!$client->email_verified_at) {
+            return redirect()->back()->with('error', "Cannot assign '{$client->name}' — email not yet verified by the client.");
+        }
         $validated = $request->validate([
             'technician_id'  => ['required', 'exists:technicians,id'],
             'scheduled_date' => ['required', 'date'],
             'job_type'       => ['required', 'in:new_installation,repair,reconnection,upgrade,transfer'],
             'notes'          => ['nullable', 'string'],
+            'override_email' => ['nullable', 'email'],
+            'custom_message' => ['nullable', 'string'],
         ]);
 
-        $client->approve();
+        $client->update(['status' => 'pending_installation']);
 
         $job = InstallationJob::create([
             'client_id'      => $client->id,
@@ -215,8 +271,7 @@ class ClientController extends Controller
 
         $technician = Technician::find($validated['technician_id']);
 
-        // Auto-create initial billing on approval
-        $this->createInitialBilling($client);
+        // Billing is NOT created here — it will be created when the technician completes the job
 
         // Notify admins
         AdminNotification::notifyAdmins(
@@ -226,14 +281,25 @@ class ClientController extends Controller
             ['client_id' => $client->id, 'technician_id' => $technician->id]
         );
 
+        $sendTo = !empty($validated['override_email']) ? $validated['override_email'] : $client->email;
+
         try {
-            Mail::to($client->email)->send(new ClientApprovedMail($client, $technician, $job));
-            \Log::info('Approval+assign email sent to ' . $client->email . ' | Technician: ' . $technician->name);
+            Mail::to($sendTo)->send(new ClientApprovedMail($client, $technician, $job, $validated['custom_message'] ?? null));
+            \Log::info('Approval+assign email sent to ' . $sendTo . ' | Technician: ' . $technician->name);
         } catch (\Exception $e) {
-            \Log::error('Failed to send approval+assign email to ' . $client->email . ': ' . $e->getMessage());
+            \Log::error('Failed to send approval+assign email to ' . $sendTo . ': ' . $e->getMessage());
         }
 
-        return redirect()->route('billings.index')->with('success', "Client '{$client->name}' approved and assigned to {$technician->name}. Initial billing created.");
+        return redirect()->route('clients.index')->with('success', "Client '{$client->name}' assigned to {$technician->name}. Waiting for technician to complete the job.");
+    }
+
+    /**
+     * Auto-create initial billing when a client is approved.
+     * Called publicly by technician controllers on job completion.
+     */
+    public function createBillingForClient(Client $client): void
+    {
+        $this->createInitialBilling($client);
     }
 
     /**

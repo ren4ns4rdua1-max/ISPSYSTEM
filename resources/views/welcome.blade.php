@@ -2007,6 +2007,17 @@
                         <label>Notes (Optional)</label>
                         <input type="text" name="notes" placeholder="Any additional information...">
                     </div>
+                    <div class="modal-field">
+                        <label>Your Location <span style="font-weight:400;text-transform:none;color:#94a3b8;">(Optional but recommended)</span></label>
+                        <input type="hidden" name="latitude" id="apply-latitude">
+                        <input type="hidden" name="longitude" id="apply-longitude">
+                        <button type="button" id="pin-location-btn" onclick="pinMyLocation()"
+                                style="width:100%;padding:.75rem 1rem;border-radius:12px;font-weight:600;font-size:.88rem;border:1.5px dashed #bfdbfe;background:#eff6ff;color:#1d4ed8;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .25s;">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span id="pin-location-text">📍 Pin My Location</span>
+                        </button>
+                        <p id="pin-location-status" style="font-size:.75rem;color:#64748b;margin-top:4px;display:none;"></p>
+                    </div>
                     <button type="submit" id="applySubmitBtn" class="modal-submit">Submit Application</button>
                 </form>
             </div>
@@ -2475,7 +2486,7 @@ function handleSubscribe(plan) {
                 if (result.success) {
                     closeApplyModal();
                     form.reset();
-                    showToast('Application Submitted! Pending admin approval.', '#22c55e');
+                    showToast('Application submitted! Please check your email to verify your address.', '#22c55e');
                 } else {
                     showToast(result.message || 'Error submitting application', '#ef4444');
                 }
@@ -2564,6 +2575,43 @@ function handleSubscribe(plan) {
             document.getElementById('apply-photo-placeholder').style.display = 'block';
             document.getElementById('apply-photo-remove').style.display = 'none';
             document.getElementById('apply-photo-preview-wrap').style.border = '2px dashed #e2e8f0';
+        }
+
+        /* ===================== PIN LOCATION ===================== */
+        function pinMyLocation() {
+            const btn  = document.getElementById('pin-location-btn');
+            const text = document.getElementById('pin-location-text');
+            const status = document.getElementById('pin-location-status');
+
+            if (!navigator.geolocation) {
+                status.textContent = 'Geolocation is not supported by your browser.';
+                status.style.display = 'block'; status.style.color = '#ef4444';
+                return;
+            }
+
+            text.textContent = 'Detecting location...';
+            btn.style.opacity = '.7';
+
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    document.getElementById('apply-latitude').value  = pos.coords.latitude.toFixed(7);
+                    document.getElementById('apply-longitude').value = pos.coords.longitude.toFixed(7);
+                    text.textContent = '\u2713 Location pinned!';
+                    btn.style.background = '#f0fdf4';
+                    btn.style.borderColor = '#86efac';
+                    btn.style.color = '#15803d';
+                    btn.style.opacity = '1';
+                    status.textContent = `Lat: ${pos.coords.latitude.toFixed(5)}, Lng: ${pos.coords.longitude.toFixed(5)}`;
+                    status.style.display = 'block'; status.style.color = '#15803d';
+                },
+                err => {
+                    text.textContent = '\ud83d\udccd Pin My Location';
+                    btn.style.opacity = '1';
+                    status.textContent = 'Could not get location. Please allow location access.';
+                    status.style.display = 'block'; status.style.color = '#ef4444';
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
         }
 
         /* ===================== CONTACT ===================== */

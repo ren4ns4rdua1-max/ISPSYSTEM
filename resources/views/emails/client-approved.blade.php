@@ -57,8 +57,12 @@
 
         <p class="greeting">Hello, {{ $client->name }}!</p>
         <p class="intro">
-            Great news! Your internet service application has been <strong>approved</strong> by our admin team.
-            Your connection will be set up soon. Below are your account details and installation information.
+            @if(!empty($customMessage))
+                {!! nl2br(e($customMessage)) !!}
+            @else
+                Great news! Your internet service application has been <strong>approved</strong> by our admin team.
+                Your connection will be set up soon. Below are your account details and installation information.
+            @endif
         </p>
 
         <!-- Account Info -->
