@@ -1891,8 +1891,6 @@
             </div>
             <div class="modal-body">
                 <div class="modal-tabs">
-                    <button class="modal-tab active" onclick="switchTab('login')">{{ $s['welcome_modal_tab_signin'] ?? 'Sign In' }}</button>
-                    <button class="modal-tab" onclick="switchTab('register')">{{ $s['welcome_modal_tab_register'] ?? 'Create Account' }}</button>
                 </div>
 
                 <form id="loginForm" class="modal-form active" method="POST" action="{{ route('login') }}">

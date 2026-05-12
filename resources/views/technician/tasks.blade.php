@@ -149,8 +149,8 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="badge badge-{{ $task->status == 'in_progress' ? 'progress' : ($task->status == 'completed' ? 'done' : 'pending') }}">
-                                    <span class="badge-dot"></span>{{ ucfirst($task->status) }}
+                                <span id="status-badge-{{ $task->id }}" class="badge badge-{{ $task->status == 'in_progress' ? 'progress' : ($task->status == 'completed' ? 'done' : 'pending') }}">
+                                    <span class="badge-dot"></span><span class="badge-label">{{ ucfirst(str_replace('_',' ',$task->status)) }}</span>
                                 </span>
                             </td>
 <td class="text-sm font-semibold">{{ $task->scheduled_date ? $task->scheduled_date->format('M d, Y h:i A') : 'Not scheduled' }}</td>
@@ -158,13 +158,14 @@
                                 <div class="flex gap-2 justify-end">
                                     @if($task->status === 'assigned')
                                     @php $hasCoords = $task->client->latitude && $task->client->longitude; @endphp
-                                    <form method="POST" action="{{ route('technician.jobs.start', $task->id) }}" id="start-form-{{ $task->id }}">
-                                        @csrf
-                                        <button type="button" class="btn-start inline-block"
+                                    <div id="action-{{ $task->id }}">
+                                        <button type="button" class="btn-start"
                                             onclick="startJobWithMap({{ $task->id }}, {{ $task->client->latitude ?? 'null' }}, {{ $task->client->longitude ?? 'null' }}, '{{ addslashes($task->client->name) }}', '{{ addslashes($task->client->barangay) }}')">Start</button>
-                                    </form>
-@elseif($task->status === 'in_progress')
-                                    <button onclick="openCompleteModal({{ $task->id }})" class="btn-start inline-block" style="background:linear-gradient(105deg,#059669,#047857);">Complete</button>
+                                    </div>
+                                    @elseif($task->status === 'in_progress')
+                                    <div id="action-{{ $task->id }}">
+                                        <button onclick="openCompleteModal({{ $task->id }})" class="btn-start" style="background:linear-gradient(105deg,#059669,#047857);">Complete</button>
+                                    </div>
                                     @elseif($task->status === 'completed')
                                     <span class="text-xs font-semibold text-emerald-600">✓ Done</span>
                                     @else
@@ -372,10 +373,39 @@
     }
 
     function confirmStartJob() {
-        if (currentStartFormId) {
-            closeNavMap();
-            document.getElementById(currentStartFormId).submit();
+        if (!currentStartFormId) return;
+        const jobId = currentStartFormId.replace('start-form-', '');
+        closeNavMap();
+
+        const actionDiv  = document.getElementById('action-' + jobId);
+        const badgeSpan  = document.getElementById('status-badge-' + jobId);
+
+        // Optimistic UI — swap immediately
+        if (actionDiv) {
+            actionDiv.innerHTML = `<button onclick="openCompleteModal(${jobId})" class="btn-start" style="background:linear-gradient(105deg,#059669,#047857);">Complete</button>`;
         }
+        if (badgeSpan) {
+            badgeSpan.className = 'badge badge-progress';
+            badgeSpan.querySelector('.badge-label').textContent = 'In Progress';
+        }
+
+        // AJAX POST to start the job
+        fetch('/technician/jobs/' + jobId + '/start', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+            }
+        }).catch(() => {
+            // On failure revert
+            if (actionDiv) {
+                actionDiv.innerHTML = `<button type="button" class="btn-start" onclick="startJobWithMap(${jobId},null,null,'','');">Start</button>`;
+            }
+            if (badgeSpan) {
+                badgeSpan.className = 'badge badge-pending';
+                badgeSpan.querySelector('.badge-label').textContent = 'Assigned';
+            }
+        });
     }
 
     document.getElementById('nav-map-modal').addEventListener('click', function(e) {

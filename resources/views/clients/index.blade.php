@@ -723,24 +723,57 @@
                 </div>
             </div>
             
-            <!-- Email Preview Toggle -->
+            <!-- Email Previews -->
             <div class="mt-4 rounded-xl border border-indigo-100 bg-indigo-50 overflow-hidden">
-                <button type="button" onclick="toggleEmailPreview()"
-                        class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 transition-colors">
-                    <span class="flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                        Preview Email Sent to Client
-                    </span>
-                    <svg id="preview-chevron" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </button>
-                <div id="email-preview-inline" style="display:none;" class="border-t border-indigo-100">
-                    <div class="p-3 bg-white">
-                        <div class="flex items-center gap-2 mb-2 text-xs text-gray-500">
-                            <span class="font-semibold">To:</span> <span id="inline-preview-to" class="text-indigo-600 font-semibold"></span>
-                            <span class="ml-auto font-semibold">Subject:</span> <span class="italic">Your Internet Service Application Has Been Approved! 🎉</span>
+                <!-- Tab buttons -->
+                <div class="flex border-b border-indigo-100">
+                    <button type="button" id="tab-approval" onclick="switchEmailTab('approval')"
+                            class="flex-1 px-4 py-2.5 text-xs font-semibold text-indigo-700 bg-indigo-100 border-b-2 border-indigo-500 transition-colors">
+                        ✉️ Approval Email
+                    </button>
+                    <button type="button" id="tab-credentials" onclick="switchEmailTab('credentials')"
+                            class="flex-1 px-4 py-2.5 text-xs font-semibold text-indigo-500 hover:bg-indigo-100 transition-colors">
+                        🔑 Portal Credentials Email
+                    </button>
+                </div>
+
+                <!-- Approval email panel -->
+                <div id="panel-approval">
+                    <button type="button" onclick="toggleEmailPreview()"
+                            class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 transition-colors">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            Preview Approval Email
+                        </span>
+                        <svg id="preview-chevron" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div id="email-preview-inline" style="display:none;" class="border-t border-indigo-100">
+                        <div class="p-3 bg-white">
+                            <div class="flex items-center gap-2 mb-2 text-xs text-gray-500">
+                                <span class="font-semibold">To:</span> <span id="inline-preview-to" class="text-indigo-600 font-semibold"></span>
+                                <span class="ml-auto font-semibold">Subject:</span> <span class="italic">Your Internet Service Application Has Been Approved! 🎉</span>
+                            </div>
+                            <iframe id="email-inline-frame" style="width:100%;height:320px;border:1px solid #e2e8f0;border-radius:10px;background:#f1f5f9;"></iframe>
+                            <button type="button" onclick="openFullEmailPreview()" class="mt-2 text-xs text-indigo-600 hover:underline font-semibold">Open full preview →</button>
                         </div>
-                        <iframe id="email-inline-frame" style="width:100%;height:320px;border:1px solid #e2e8f0;border-radius:10px;background:#f1f5f9;"></iframe>
-                        <button type="button" onclick="openFullEmailPreview()" class="mt-2 text-xs text-indigo-600 hover:underline font-semibold">Open full preview →</button>
+                    </div>
+                </div>
+
+                <!-- Credentials email panel -->
+                <div id="panel-credentials" style="display:none;">
+                    <button type="button" onclick="toggleCredentialsPreview()"
+                            class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 transition-colors">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                            Preview Portal Credentials Email
+                        </span>
+                        <svg id="creds-chevron" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div id="creds-preview-inline" style="display:none;" class="border-t border-indigo-100">
+                        <div class="p-3 bg-white">
+                            <p class="text-xs text-amber-600 font-semibold mb-2">⚠ This email is sent automatically when the client account is created on approval. It contains their portal login credentials.</p>
+                            <iframe id="creds-inline-frame" style="width:100%;height:320px;border:1px solid #e2e8f0;border-radius:10px;background:#f1f5f9;"></iframe>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -808,6 +841,15 @@
 
     // ── Approve & Assign modal ────────────────────────────────────────
     let currentEmailPreviewUrl = '';
+    let currentCredentialsPreviewUrl = '';
+
+    function switchEmailTab(tab) {
+        const isApproval = tab === 'approval';
+        document.getElementById('panel-approval').style.display    = isApproval ? 'block' : 'none';
+        document.getElementById('panel-credentials').style.display = isApproval ? 'none'  : 'block';
+        document.getElementById('tab-approval').className    = 'flex-1 px-4 py-2.5 text-xs font-semibold transition-colors ' + (isApproval ? 'text-indigo-700 bg-indigo-100 border-b-2 border-indigo-500' : 'text-indigo-500 hover:bg-indigo-100');
+        document.getElementById('tab-credentials').className = 'flex-1 px-4 py-2.5 text-xs font-semibold transition-colors ' + (!isApproval ? 'text-indigo-700 bg-indigo-100 border-b-2 border-indigo-500' : 'text-indigo-500 hover:bg-indigo-100');
+    }
 
     function openAssignModal(clientId, clientName, clientEmail, previewClientId) {
         document.getElementById('modal-client-name').textContent = clientName;
@@ -816,15 +858,38 @@
         document.getElementById('preview-email').textContent = clientEmail;
         document.getElementById('assign-form').action = '/clients/' + clientId + '/approve-and-assign';
         currentEmailPreviewUrl = '/clients/' + previewClientId + '/email-preview';
+        currentCredentialsPreviewUrl = '/clients/' + previewClientId + '/credentials-preview';
         // Reset preview state
         document.getElementById('email-preview-inline').style.display = 'none';
+        document.getElementById('creds-preview-inline').style.display = 'none';
         document.getElementById('preview-chevron').style.transform = '';
+        document.getElementById('creds-chevron').style.transform = '';
+        document.getElementById('email-inline-frame').removeAttribute('data-loaded');
+        document.getElementById('creds-inline-frame').removeAttribute('data-loaded');
+        switchEmailTab('approval');
         document.getElementById('assign-modal').style.display = 'flex';
-        // Set default scheduled date to now
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
         const el = document.getElementById('scheduled-date');
         if (el && !el.value) el.value = now.toISOString().slice(0, 16);
+    }
+
+    function toggleCredentialsPreview() {
+        const box     = document.getElementById('creds-preview-inline');
+        const chevron = document.getElementById('creds-chevron');
+        const isOpen  = box.style.display !== 'none';
+        if (isOpen) {
+            box.style.display = 'none';
+            chevron.style.transform = '';
+        } else {
+            box.style.display = 'block';
+            chevron.style.transform = 'rotate(180deg)';
+            const frame = document.getElementById('creds-inline-frame');
+            if (frame.getAttribute('data-loaded') !== currentCredentialsPreviewUrl) {
+                frame.src = currentCredentialsPreviewUrl;
+                frame.setAttribute('data-loaded', currentCredentialsPreviewUrl);
+            }
+        }
     }
 
     function toggleEmailPreview() {

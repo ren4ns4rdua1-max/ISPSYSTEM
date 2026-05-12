@@ -10,6 +10,7 @@ use App\Models\Billing;
 use App\Models\AdminNotification;
 use App\Mail\ClientApprovedMail;
 use App\Mail\ClientVerifyEmailMail;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -208,6 +209,7 @@ class ClientController extends Controller
             return redirect()->back()->with('error', "Cannot approve '{$client->name}' — email not yet verified by the client.");
         }
         $client->approve();
+        $this->createClientPortalUser($client);
 
         // Auto-create initial billing on approval
         $this->createInitialBilling($client);
@@ -258,6 +260,7 @@ class ClientController extends Controller
         ]);
 
         $client->update(['status' => 'pending_installation']);
+        $this->createClientPortalUser($client);
 
         $job = InstallationJob::create([
             'client_id'      => $client->id,
@@ -291,6 +294,50 @@ class ClientController extends Controller
         }
 
         return redirect()->route('clients.index')->with('success', "Client '{$client->name}' assigned to {$technician->name}. Waiting for technician to complete the job.");
+    }
+
+    /**
+     * Create a portal User account for the client if one doesn't exist.
+     */
+    private function createClientPortalUser(Client $client): void
+    {
+        if ($client->client_user_id) return;
+
+        // Check if a user with this email already exists
+        $existingUser = User::where('email', $client->email)->first();
+
+        if ($existingUser) {
+            // Just link the existing user to this client
+            $client->update(['client_user_id' => $existingUser->id]);
+            return;
+        }
+
+        $tempPassword = Str::random(10);
+
+        $user = User::create([
+            'name'     => $client->name,
+            'email'    => $client->email,
+            'password' => bcrypt($tempPassword),
+            'role'     => 'client',
+        ]);
+
+        $client->update([
+            'client_user_id'       => $user->id,
+            'portal_temp_password' => $tempPassword,
+        ]);
+
+        try {
+            \Mail::to($client->email)->send(new \App\Mail\ClientPortalCredentialsMail($client, $tempPassword));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send portal credentials to ' . $client->email . ': ' . $e->getMessage());
+        }
+    }
+
+    public function credentialsPreview(Client $client)
+    {
+        $password = $client->portal_temp_password ?? '••••••••••';
+        $mailable = new \App\Mail\ClientPortalCredentialsMail($client, $password);
+        return response($mailable->render());
     }
 
     /**

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\InstallationJob;
+use App\Models\SupportTicket;
 
 class Client extends Model
 {
@@ -35,6 +37,10 @@ class Client extends Model
         'email_verified_at',
         'latitude',
         'longitude',
+        'client_user_id',
+        'portal_temp_password',
+        'magic_login_token',
+        'magic_token_expires_at',
     ];
 
     /**
@@ -67,13 +73,10 @@ class Client extends Model
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the billings for this client.
-     */
-    public function billings(): HasMany
-    {
-        return $this->hasMany(Billing::class)->latest();
-    }
+    public function billings(): HasMany { return $this->hasMany(Billing::class)->latest(); }
+    public function payments(): HasMany { return $this->hasMany(Payment::class)->latest(); }
+    public function tickets(): HasMany  { return $this->hasMany(SupportTicket::class)->latest(); }
+    public function installationJobs(): HasMany { return $this->hasMany(InstallationJob::class)->latest(); }
 
 /**
      * Get the status badge class.

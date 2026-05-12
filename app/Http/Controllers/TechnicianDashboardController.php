@@ -136,6 +136,9 @@ class TechnicianDashboardController extends Controller
             'started_at' => now(),
         ]);
         
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
         return redirect()->back()->with('success', 'Job started! Good luck.');
     }
     
@@ -182,8 +185,17 @@ $job->update([
         }
 
         // Create initial billing now that installation is complete
-        if ($job->client->status === 'active' && !$job->client->billings()->exists()) {
+        if (!$job->client->billings()->exists()) {
             app(ClientController::class)->createBillingForClient($job->client);
+        }
+
+        // Send full account info + portal credentials to client on completion
+        $job->client->refresh();
+        try {
+            \Mail::to($job->client->email)->send(new \App\Mail\ClientJobCompletedMail($job->client, $job));
+            \Log::info('Job completion email sent to ' . $job->client->email);
+        } catch (\Exception $e) {
+            \Log::error('Failed to send job completion email: ' . $e->getMessage());
         }
         
         // Notify admins about job completion (with fresh job data including photo)

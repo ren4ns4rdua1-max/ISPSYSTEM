@@ -320,6 +320,15 @@ class TechnicianController extends Controller
             app(ClientController::class)->createBillingForClient($job->client);
         }
 
+        // Send full account info + portal credentials to client on completion
+        $job->client->refresh();
+        try {
+            \Mail::to($job->client->email)->send(new \App\Mail\ClientJobCompletedMail($job->client, $job));
+            \Log::info('Job completion email sent to ' . $job->client->email);
+        } catch (\Exception $e) {
+            \Log::error('Failed to send job completion email: ' . $e->getMessage());
+        }
+
         // Make technician available again
         if ($job->technician) {
             $job->technician->update(['status' => 'available']);

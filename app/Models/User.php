@@ -49,28 +49,14 @@ protected function casts(): array
         ];
     }
 
-    public function isTechnician(): bool
-    {
-        return $this->role === 'technician';
-    }
+    public function isTechnician(): bool { return $this->role === 'technician'; }
+    public function isAdmin(): bool       { return $this->role === 'admin'; }
+    public function isClient(): bool      { return $this->role === 'client'; }
 
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
+    public function scopeTechnician($q) { return $q->where('role', 'technician'); }
+    public function scopeAdmin($q)      { return $q->where('role', 'admin'); }
+    public function scopeClient($q)     { return $q->where('role', 'client'); }
 
-    public function scopeTechnician($query)
-    {
-        return $query->where('role', 'technician');
-    }
-
-    public function scopeAdmin($query)
-    {
-        return $query->where('role', 'admin');
-    }
-
-    public function technicians()
-    {
-        return $this->hasOne(Technician::class);
-    }
+    public function technicians() { return $this->hasOne(Technician::class); }
+    public function clientProfile() { return $this->hasOne(Client::class, 'client_user_id'); }
 }

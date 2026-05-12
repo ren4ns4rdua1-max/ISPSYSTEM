@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClientPortalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SubscriptionRateController;
@@ -34,6 +35,7 @@ Route::get('/', function () {
 // Guest client registration route (from welcome page "Apply" button)
 Route::post('/clients/guest', [ClientController::class, 'storeGuest'])->name('clients.storeGuest');
 Route::get('/clients/verify-email/{token}', [ClientController::class, 'verifyEmail'])->name('clients.verifyEmail');
+Route::get('/portal/magic-login/{token}', [\App\Http\Controllers\ClientPortalController::class, 'magicLogin'])->name('portal.magicLogin');
 
 // Contact form (public)
 Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
@@ -79,6 +81,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/clients/pending', [ClientController::class, 'pending'])->name('clients.pending');
     Route::get('/clients/map-data', [ClientController::class, 'mapData'])->name('clients.mapData');
     Route::get('/clients/{client}/email-preview', [ClientController::class, 'emailPreview'])->name('clients.emailPreview');
+    Route::get('/clients/{client}/credentials-preview', [ClientController::class, 'credentialsPreview'])->name('clients.credentialsPreview');
     Route::post('/clients/{client}/approve', [ClientController::class, 'approve'])->name('clients.approve');
     Route::post('/clients/{client}/reject', [ClientController::class, 'reject'])->name('clients.reject');
     Route::post('/clients/{client}/approve-and-assign', [ClientController::class, 'approveAndAssign'])->name('clients.approveAndAssign');
@@ -116,6 +119,19 @@ Route::middleware('auth')->group(function () {
 
 
 require __DIR__.'/auth.php';
+
+// ── Client Portal ─────────────────────────────────────────────────────────
+Route::middleware(['auth', 'client'])->prefix('portal')->name('portal.')->group(function () {
+    Route::get('/',               [ClientPortalController::class, 'dashboard'])->name('dashboard');
+    Route::get('/billing',        [ClientPortalController::class, 'billing'])->name('billing');
+    Route::get('/payments',       [ClientPortalController::class, 'payments'])->name('payments');
+    Route::post('/payments/proof',[ClientPortalController::class, 'submitPaymentProof'])->name('payments.proof');
+    Route::get('/tickets',        [ClientPortalController::class, 'tickets'])->name('tickets');
+    Route::post('/tickets',       [ClientPortalController::class, 'storeTicket'])->name('tickets.store');
+    Route::get('/profile',        [ClientPortalController::class, 'profile'])->name('profile');
+    Route::post('/profile',       [ClientPortalController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/password',      [ClientPortalController::class, 'changePassword'])->name('password.update');
+});
 
 
 
