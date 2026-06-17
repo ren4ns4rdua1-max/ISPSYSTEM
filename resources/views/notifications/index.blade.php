@@ -274,7 +274,7 @@
                         </div>
                         <p class="text-gray-600 text-sm mt-1.5 leading-relaxed">{{ $notification->message }}</p>
                         
-@if($notification->data && isset($notification->data['job_id']))
+                        @if($notification->data && isset($notification->data['job_id']))
                         <div class="mt-3">
                             <a href="{{ route('technicians.jobs') }}?search=" class="inline-flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-700 transition-all">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
@@ -284,6 +284,36 @@
                         @endif
                         
                         {{-- Show photo proof if uploaded --}}
+
+                        {{-- Payment approval buttons --}}
+                        @if($notification->type === 'payment_received' && isset($notification->data['payment_id']))
+                        @php $payId = $notification->data['payment_id']; $pmt = \App\Models\Payment::find($payId); @endphp
+                        @if($pmt && $pmt->approval_status === 'pending')
+                        <div class="mt-3 flex items-center gap-2 flex-wrap">
+                            <span class="text-xs font-semibold text-orange-600 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-full">Awaiting Approval</span>
+                            @if($pmt->attachment_path)
+<a href="{{ asset('storage/' . $pmt->attachment_path) }}" target="_blank" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full hover:bg-blue-100 transition-colors">View Proof</a>
+                            @endif
+                            <form method="POST" action="{{ route('payments.approve', $payId) }}" style="display:inline;" onsubmit="return confirm('Approve this payment?')">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center gap-1 text-xs font-bold text-white px-3 py-1.5 rounded-lg" style="background:linear-gradient(135deg,#16a34a,#15803d);">
+                                    Approve Payment
+                                </button>
+                            </form>
+                            <button onclick="openRejectFromNotif({{ $payId }})" class="inline-flex items-center gap-1 text-xs font-bold text-white px-3 py-1.5 rounded-lg" style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
+                                Reject
+                            </button>
+                        </div>
+                        @elseif($pmt)
+                        <div class="mt-2">
+                            @if($pmt->approval_status === 'approved')
+                            <span class="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">Payment Approved</span>
+                            @else
+                            <span class="text-xs font-semibold text-red-600 bg-red-50 border border-red-200 px-2.5 py-1 rounded-full">Payment Rejected</span>
+                            @endif
+                        </div>
+                        @endif
+                        @endif
                         @if($notification->data && isset($notification->data['photo']))
                         <div class="mt-3">
                             <p class="text-xs font-semibold text-gray-500 mb-1">📷 Proof Photo:</p>
@@ -455,3 +485,38 @@
 
 </body>
 </html>
+
+<!-- Reject Payment Modal (from Notifications) -->
+<div id="notif-reject-modal" class="fixed inset-0 z-[60] items-center justify-center" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:none;">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 mx-4 w-full max-w-sm" style="animation:modalPop .25s cubic-bezier(0.2,0.9,0.4,1.1) both;">
+        <div class="flex items-start gap-4 mb-5">
+            <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </div>
+            <div>
+                <h3 class="font-bold text-gray-900 text-lg">Reject Payment</h3>
+                <p class="text-gray-500 text-sm mt-1">Provide an optional reason for rejection.</p>
+            </div>
+        </div>
+        <form id="notif-reject-form" method="POST">
+            @csrf
+            <div class="mb-4">
+                <label class="block text-xs font-semibold text-gray-500 mb-1.5">Reason (optional)</label>
+                <textarea name="reason" rows="3" placeholder="e.g. Unclear screenshot, wrong amount..." class="w-full text-sm bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"></textarea>
+            </div>
+            <div class="flex gap-3">
+                <button type="button" onclick="closeRejectFromNotif()" class="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">Cancel</button>
+                <button type="submit" class="flex-1 px-4 py-2.5 text-sm font-semibold text-white rounded-xl hover:shadow-md transition-all" style="background:linear-gradient(135deg,#dc2626,#b91c1c);">Reject</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+function openRejectFromNotif(paymentId) {
+    document.getElementById('notif-reject-form').action = '/payments/' + paymentId + '/reject';
+    document.getElementById('notif-reject-modal').style.display = 'flex';
+}
+function closeRejectFromNotif() {
+    document.getElementById('notif-reject-modal').style.display = 'none';
+}
+</script>
