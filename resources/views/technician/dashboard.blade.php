@@ -325,7 +325,7 @@
         <p class="nav-section-label">WORKFLOW</p>
         <a href="{{ route('technician.tasks') }}" class="nav-link"><div class="nav-icon"><svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>My Tasks <span style="margin-left:auto;background:#dc2626;color:white;font-size:9px;padding:2px 8px;border-radius:30px;">{{ $stats['pendingJobs'] }}</span></a>
         <a href="{{ route('technician.history') }}" class="nav-link"><div class="nav-icon"><svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>History</a>
-       
+        <a href="{{ route('technician.tickets.index') }}" class="nav-link"><div class="nav-icon"><svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m-4 0v2m4-11a2 2 0 00-2-2h-2a2 2 0 00-2 2m12 0a9 9 0 11-18 0 9 9 0 0118 0zm-5 4a4 4 0 11-8 0 4 4 0 018 0z"/></svg></div>Support Tickets</a>
     </nav>
 
 <div class="sidebar-footer p-4 border-t border-red-900/30">

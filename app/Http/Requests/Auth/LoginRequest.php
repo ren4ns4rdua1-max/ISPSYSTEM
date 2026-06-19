@@ -49,6 +49,15 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+        if ($user->role === 'technician' && is_null($user->email_verified_at)) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages([
+                'email' => 'Your account is pending email verification. Please check your email and verify your account before logging in.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

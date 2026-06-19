@@ -94,6 +94,20 @@
         </div>
 
         <div class="nav-wrapper relative">
+            <a href="{{ route('admin.support-tickets.index') }}" class="nav-item-inner relative flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.support-tickets.*') ? 'active' : '' }}"
+               style="{{ request()->routeIs('admin.support-tickets.*') ? 'background:linear-gradient(135deg,rgba(220,38,38,.18),rgba(185,28,28,.12));border:1px solid rgba(220,38,38,.28%);' : '' }}">
+                @if(request()->routeIs('admin.support-tickets.*'))
+                <div class="nav-active-bar"></div>
+                @endif
+                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-[17px] h-[17px] {{ request()->routeIs('admin.support-tickets.*') ? 'text-red-400' : 'text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </div>
+                <span class="collapsible text-sm font-{{ request()->routeIs('admin.support-tickets.*') ? 'semibold text-red-200' : 'medium text-gray-400' }}" style="max-width:160px;">Support Tickets</span>
+            </a>
+            <span class="nav-tooltip">Support Tickets</span>
+        </div>
             <a href="#" class="nav-item-inner flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[.06] transition-all">
                 <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
                     <svg class="w-[17px] h-[17px] text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -415,23 +415,17 @@
                             @enderror
                         </div>
 
-                        <!-- PPPoE Name -->
+                        <!-- PPPoE Name (auto-generated) -->
                         <div class="space-y-1.5">
-                            <label for="pppoe_name" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">PPPoE Name</label>
+                            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">PPPoE Name</label>
                             <div class="input-wrapper">
                                 <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                <input id="pppoe_name" name="pppoe_name" type="text"
-                                       value="{{ old('pppoe_name') }}" placeholder="e.g. johndoe123"
-                                       class="form-input {{ $errors->has('pppoe_name') ? 'error' : '' }}"/>
+                                <input type="text" value="Auto-generated on save" disabled
+                                       class="form-input" style="color:#9ca3af;cursor:not-allowed;"/>
                             </div>
-                            @error('pppoe_name')
-                                <p class="flex items-center gap-1.5 text-[11px] font-semibold text-red-600 mt-1">
-                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    {{ $message }}
-                                </p>
-                            @enderror
+                            <p class="text-[11px] text-gray-400 mt-1">PPPoE username &amp; password are auto-generated and emailed to the client upon approval.</p>
                         </div>
 
                         <!-- Barangay -->

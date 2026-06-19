@@ -131,7 +131,90 @@ class ReportsController extends Controller
      */
     public function export(Request $request)
     {
-        // This can be expanded to export PDF/Excel reports
-        return redirect()->route('reports.index')->with('success', 'Export feature coming soon!');
+        $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $endDate   = $request->get('end_date',   Carbon::now()->endOfMonth()->format('Y-m-d'));
+
+        $filename = 'report_' . $startDate . '_to_' . $endDate . '.csv';
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $callback = function () use ($startDate, $endDate) {
+            $out = fopen('php://output', 'w');
+
+            // ── CLIENT STATS ──────────────────────────────────────────────
+            fputcsv($out, ['=== CLIENT OVERVIEW ===']);
+            fputcsv($out, ['Metric', 'Value']);
+            fputcsv($out, ['Total Clients',      Client::count()]);
+            fputcsv($out, ['Active',             Client::where('status','active')->count()]);
+            fputcsv($out, ['Inactive',           Client::where('status','inactive')->count()]);
+            fputcsv($out, ['Suspended',          Client::where('status','suspended')->count()]);
+            fputcsv($out, ['Cancelled',          Client::where('status','cancelled')->count()]);
+            fputcsv($out, ['New This Month',     Client::whereBetween('created_at',[Carbon::now()->startOfMonth(),Carbon::now()->endOfMonth()])->count()]);
+            fputcsv($out, []);
+
+            // ── BILLING STATS ─────────────────────────────────────────────
+            fputcsv($out, ['=== BILLING SUMMARY ===']);
+            fputcsv($out, ['Metric', 'Count', 'Amount (PHP)']);
+            fputcsv($out, ['Total Invoices', Billing::count(), number_format(Billing::sum('total_amount'),2)]);
+            fputcsv($out, ['Paid',    Billing::where('status','paid')->count(),    number_format(Billing::where('status','paid')->sum('total_amount'),2)]);
+            fputcsv($out, ['Pending', Billing::where('status','pending')->count(), number_format(Billing::where('status','pending')->sum('total_amount'),2)]);
+            fputcsv($out, ['Overdue', Billing::where('status','overdue')->count(), number_format(Billing::where('status','overdue')->sum('total_amount'),2)]);
+            fputcsv($out, ['Period Invoices ('.$startDate.' – '.$endDate.')', Billing::whereBetween('billing_date',[$startDate,$endDate])->count(), number_format(Billing::whereBetween('billing_date',[$startDate,$endDate])->sum('total_amount'),2)]);
+            fputcsv($out, []);
+
+            // ── PAYMENT STATS ─────────────────────────────────────────────
+            fputcsv($out, ['=== PAYMENT COLLECTION ===']);
+            fputcsv($out, ['Metric', 'Count', 'Amount (PHP)']);
+            fputcsv($out, ['Total Payments',   Payment::count(), number_format(Payment::sum('amount'),2)]);
+            fputcsv($out, ['Period Payments',  Payment::whereBetween('payment_date',[$startDate,$endDate])->count(), number_format(Payment::whereBetween('payment_date',[$startDate,$endDate])->sum('amount'),2)]);
+            fputcsv($out, []);
+            fputcsv($out, ['=== PAYMENT BY METHOD ===']);
+            fputcsv($out, ['Method', 'Amount (PHP)']);
+            foreach (['cash','bank_transfer','gcash','paymaya','cheque','other'] as $method) {
+                fputcsv($out, [ucfirst(str_replace('_',' ',$method)), number_format(Payment::where('payment_method',$method)->sum('amount'),2)]);
+            }
+            fputcsv($out, []);
+
+            // ── TECHNICIAN STATS ──────────────────────────────────────────
+            fputcsv($out, ['=== TECHNICIAN OVERVIEW ===']);
+            fputcsv($out, ['Metric', 'Value']);
+            fputcsv($out, ['Total Technicians', Technician::count()]);
+            fputcsv($out, ['Available',         Technician::where('status','available')->count()]);
+            fputcsv($out, ['Busy',              Technician::where('status','busy')->count()]);
+            fputcsv($out, ['Off Duty',          Technician::where('status','offduty')->count()]);
+            fputcsv($out, []);
+
+            // ── JOB STATS ─────────────────────────────────────────────────
+            fputcsv($out, ['=== INSTALLATION JOBS ===']);
+            fputcsv($out, ['Metric', 'Value']);
+            fputcsv($out, ['Total',       InstallationJob::count()]);
+            fputcsv($out, ['Pending',     InstallationJob::where('status','pending')->count()]);
+            fputcsv($out, ['Assigned',    InstallationJob::where('status','assigned')->count()]);
+            fputcsv($out, ['In Progress', InstallationJob::where('status','in_progress')->count()]);
+            fputcsv($out, ['Completed',   InstallationJob::where('status','completed')->count()]);
+            fputcsv($out, ['Cancelled',   InstallationJob::where('status','cancelled')->count()]);
+            fputcsv($out, ['Period Completed ('.$startDate.' – '.$endDate.')', InstallationJob::where('status','completed')->whereBetween('completed_at',[$startDate,$endDate])->count()]);
+            fputcsv($out, []);
+
+            // ── RECENT PAYMENTS ───────────────────────────────────────────
+            fputcsv($out, ['=== RECENT PAYMENTS (Last 20) ===']);
+            fputcsv($out, ['Date','Client','Amount (PHP)','Method','Reference']);
+            Payment::with('client')->latest()->take(20)->get()->each(function ($p) use ($out) {
+                fputcsv($out, [
+                    $p->payment_date ? \Carbon\Carbon::parse($p->payment_date)->format('Y-m-d') : '',
+                    $p->client->name ?? 'N/A',
+                    number_format($p->amount, 2),
+                    ucfirst(str_replace('_',' ', $p->payment_method ?? '')),
+                    $p->reference_number ?? '',
+                ]);
+            });
+
+            fclose($out);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

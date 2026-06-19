@@ -23,6 +23,9 @@ class Payment extends Model
         'payment_date',
         'notes',
         'attachment_path',
+        'approval_status',
+        'approved_at',
+        'rejection_reason',
     ];
 
     protected $casts = [
@@ -30,6 +33,7 @@ class Payment extends Model
         'change_amount' => 'decimal:2',
         'total_paid' => 'decimal:2',
         'payment_date' => 'date',
+        'approved_at' => 'datetime',
     ];
 
     /**

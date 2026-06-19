@@ -370,11 +370,55 @@
                         <!-- Role -->
                         <div class="space-y-1.5">
                             <label for="role" class="block text-xs font-bold text-gray-600 uppercase tracking-wider">User Role</label>
-                            <select id="role" name="role" class="form-input">
+                            <select id="role" name="role" class="form-input" onchange="toggleTechnicianFields(this.value)">
                                 <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                                 <option value="technician" {{ old('role') == 'technician' ? 'selected' : '' }}>Technician</option>
                             </select>
                             @error('role') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
+                    <!-- Technician Extra Fields -->
+                    <div id="technician-fields" class="grid grid-cols-1 md:grid-cols-2 gap-5 border-t border-gray-100 pt-5" style="display:none;">
+                        <div class="md:col-span-2">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-1 h-5 rounded-full bg-red-500"></div>
+                                <p class="text-xs font-bold text-gray-600 uppercase tracking-wider">Technician Details</p>
+                            </div>
+                        </div>
+                        <!-- Phone -->
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Phone Number <span class="text-red-500">*</span></label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                <input name="phone_number" type="text" value="{{ old('phone_number') }}" placeholder="e.g. 09171234567" class="form-input"/>
+                            </div>
+                            @error('phone_number') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                        <!-- Specialization -->
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Specialization</label>
+                            <select name="specialization" class="form-input">
+                                <option value="">-- Select --</option>
+                                <option value="installation" {{ old('specialization') == 'installation' ? 'selected' : '' }}>Installation</option>
+                                <option value="repair" {{ old('specialization') == 'repair' ? 'selected' : '' }}>Repair</option>
+                                <option value="both" {{ old('specialization') == 'both' ? 'selected' : '' }}>Both</option>
+                            </select>
+                            @error('specialization') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                        <!-- Area Coverage -->
+                        <div class="space-y-1.5 md:col-span-2">
+                            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Area Coverage</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <input name="area_coverage" type="text" value="{{ old('area_coverage') }}" placeholder="e.g. Quezon City, Marikina" class="form-input"/>
+                            </div>
+                            @error('area_coverage') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                        <!-- Verification notice -->
+                        <div class="md:col-span-2 flex items-start gap-3 px-4 py-3 rounded-xl" style="background:#fffbeb;border:1px solid #fde68a;">
+                            <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <p class="text-xs text-amber-700">A verification email will be sent to the technician. Their account status will be <strong>Pending</strong> until they verify their email. They cannot log in until verified.</p>
                         </div>
                     </div>
 
@@ -388,6 +432,17 @@
     </main>
 </div>
 
+
+<script>
+function toggleTechnicianFields(role) {
+    const fields = document.getElementById('technician-fields');
+    fields.style.display = role === 'technician' ? 'grid' : 'none';
+}
+// Run on page load in case of old() repopulation
+document.addEventListener('DOMContentLoaded', function() {
+    toggleTechnicianFields(document.getElementById('role').value);
+});
+</script>
 
 @include('partials.sidebar-js')
 

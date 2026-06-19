@@ -286,7 +286,24 @@
                     </a>
                 </div>
             </div>
-            
+
+            <!-- Support Tickets Icon -->
+            @php $unreadTickets = \App\Models\SupportTicket::where('status', '!=', 'closed')->count(); @endphp
+            <div class="relative">
+                <a href="{{ route('admin.support-tickets.index') }}"
+                   class="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:bg-gray-100 hover:scale-105"
+                   style="background:rgba(255,255,255,.05);" title="Support Tickets">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    @if($unreadTickets > 0)
+                    <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-yellow-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                        {{ $unreadTickets > 9 ? '9+' : $unreadTickets }}
+                    </span>
+                    @endif
+                </a>
+            </div>
+
             <a href="{{ route('profile.edit') }}" class="w-9 h-9 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md">
                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </a>
@@ -426,6 +443,26 @@
                 <div class="flex items-center justify-between mt-2">
                     <p class="text-gray-400" style="font-size:10px;">From subscriptions</p>
                     <a href="{{ route('reports.index') }}" class="text-amber-500 font-semibold" style="font-size:10px;">Report →</a>
+                </div>
+            </div>
+
+            <div class="metric-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-11 h-11 rounded-xl bg-purple-50 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg" style="color:#7c3aed;background:#f5f3ff;">Support</span>
+                </div>
+                <p class="text-gray-400 text-[11px] font-semibold uppercase tracking-wider mb-1">Support Tickets</p>
+                <p class="font-display font-extrabold text-gray-900 mb-3" style="font-size:2.1rem;line-height:1;">{{ \App\Models\SupportTicket::count() }}</p>
+                <div class="h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                    <div class="progress-fill h-full rounded-full" style="width:{{ \App\Models\SupportTicket::count() > 0 ? min((\App\Models\SupportTicket::where('status', '!=', 'closed')->count() / \App\Models\SupportTicket::count()) * 100, 100) : 0 }}%;background:linear-gradient(90deg,#a78bfa,#7c3aed);"></div>
+                </div>
+                <div class="flex items-center justify-between mt-2">
+                    <p class="text-gray-400" style="font-size:10px;">Manage all tickets</p>
+                    <a href="{{ route('admin.support-tickets.index') }}" class="text-purple-600 hover:text-purple-700 font-semibold transition-colors" style="font-size:10px;">Manage →</a>
                 </div>
             </div>
         </div>

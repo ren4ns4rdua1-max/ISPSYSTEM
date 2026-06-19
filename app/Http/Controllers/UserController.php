@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Technician;
+use App\Mail\TechnicianVerifyEmailMail;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -25,38 +28,60 @@ class UserController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $rules = [
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', 'min:8'],
             'role'     => ['required', 'in:admin,technician'],
             'photo'    => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
-        ]);
+        ];
+
+        if ($request->role === 'technician') {
+            $rules['phone_number']   = ['required', 'string', 'max:20'];
+            $rules['specialization'] = ['nullable', 'in:installation,repair,both'];
+            $rules['area_coverage']  = ['nullable', 'string', 'max:255'];
+        }
+
+        $request->validate($rules);
 
         $photo = null;
         if ($request->hasFile('photo')) {
             $photo = $request->file('photo')->store('users', 'public');
         }
 
+        // Technicians start unverified (email_verified_at = null)
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => $request->role,
-            'photo'    => $photo,
+            'name'              => $request->name,
+            'email'             => $request->email,
+            'password'          => Hash::make($request->password),
+            'role'              => $request->role,
+            'photo'             => $photo,
+            'email_verified_at' => $request->role === 'admin' ? now() : null,
         ]);
 
         if ($request->role === 'technician') {
-            Technician::create([
-                'user_id'        => $user->id,
-                'name'           => $user->name,
-                'email'          => $user->email,
-                'status'         => 'available',
-                'phone_number'   => '',
-                'specialization' => '',
-                'area_coverage'  => '',
-                'photo'          => $photo,
+            $verificationToken = Str::random(64);
+
+            $technician = Technician::create([
+                'user_id'                  => $user->id,
+                'name'                     => $user->name,
+                'email'                    => $user->email,
+                'status'                   => 'available',
+                'phone_number'             => $request->phone_number,
+                'specialization'           => $request->specialization,
+                'area_coverage'            => $request->area_coverage,
+                'photo'                    => $photo,
+                'email_verification_token' => $verificationToken,
+                'email_verified_at'        => null,
             ]);
+
+            try {
+                Mail::to($technician->email)->send(new TechnicianVerifyEmailMail($technician));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send technician verification email: ' . $e->getMessage());
+            }
+
+            return redirect()->route('users.index')->with('success', "Technician '{$user->name}' created. A verification email has been sent to {$user->email}. Status is pending until verified.");
         }
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');

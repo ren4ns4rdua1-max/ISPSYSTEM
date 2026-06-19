@@ -468,45 +468,44 @@
                         </svg>
                         Quick Actions
                     </h3>
+
+                    {{-- Pay Now button: goes straight to payment create pre-filled --}}
+                    <a href="{{ route('payments.create', ['client_id' => $billing->client_id, 'billing_id' => $billing->id]) }}"
+                       class="w-full mb-4 inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-white rounded-xl shadow-md hover:shadow-lg transition-all"
+                       style="background:linear-gradient(135deg,#2563eb,#1d4ed8);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                        </svg>
+                        💳 Record Payment for This Invoice
+                    </a>
+
+                    <div class="border-t border-gray-100 pt-4">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Or Mark as Paid Manually</p>
                     <form method="POST" action="{{ route('billings.markAsPaid', $billing->id) }}" class="space-y-4">
                         @csrf
                         <div>
                             <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Paid Date</label>
-                            <div class="input-wrapper">
-                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                                <input type="date" name="paid_date" value="{{ date('Y-m-d') }}" class="form-input">
-                            </div>
+                            <input type="date" name="paid_date" value="{{ date('Y-m-d') }}" class="w-full text-sm bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-300">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Payment Method</label>
-                            <div class="input-wrapper-select">
-                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                                </svg>
-                                <select name="payment_method" class="form-input">
-                                    <option value="cash">Cash</option>
-                                    <option value="bank_transfer">Bank Transfer</option>
-                                    <option value="gcash">GCash</option>
-                                    <option value="paymaya">PayMaya</option>
-                                    <option value="cheque">Cheque</option>
-                                </select>
-                            </div>
+                            <select name="payment_method" class="w-full text-sm bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-300">
+                                <option value="cash">Cash</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="gcash">GCash</option>
+                                <option value="paymaya">PayMaya</option>
+                                <option value="cheque">Cheque</option>
+                            </select>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Reference Number (Optional)</label>
-                            <div class="input-wrapper">
-                                <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                <input type="text" name="payment_reference" placeholder="e.g. Transaction ID" class="form-input">
-                            </div>
+                            <input type="text" name="payment_reference" placeholder="e.g. Transaction ID" class="w-full text-sm bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-300">
                         </div>
                         <button type="submit" class="w-full px-4 py-2.5 text-sm font-semibold text-white rounded-xl shadow-md hover:shadow-lg transition-all" style="background:linear-gradient(135deg,#059669,#10b981);">
                             Mark as Paid
                         </button>
                     </form>
+                    </div>
                 </div>
                 @endif
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -2044,8 +2044,231 @@
         </div>
     </div>
 
+    <!-- =================== CHAT WIDGET (welcome page) =================== -->
+    <style>
+        /* Chat widget (welcome page) */
+        .chat-fab {
+            position: fixed;
+            cursor: pointer;
+
+            right: 1.75rem;
+            bottom: 1.75rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 1px solid rgba(220,38,38,.35);
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            cursor: pointer;
+            z-index: 10000;
+            box-shadow: 0 18px 40px rgba(220,38,38,.28);
+            transition: transform .2s ease;
+        }
+        .chat-fab:hover { transform: translateY(-2px); }
+        .chat-panel {
+            position: fixed;
+            right: 1.1rem;
+            bottom: 5.9rem;
+            width: 360px;
+            max-width: calc(100vw - 2rem);
+            height: 520px;
+            max-height: calc(100vh - 7rem);
+            background: rgba(12,14,26,.92);
+            border: 1px solid rgba(220,38,38,.25);
+            border-radius: 18px;
+            box-shadow: 0 30px 90px rgba(0,0,0,.55);
+            backdrop-filter: blur(12px);
+            transform: translateY(14px);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-panel.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .chat-head {
+            padding: .9rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem;
+            background: linear-gradient(135deg, rgba(220,38,38,.18), rgba(185,28,28,.08));
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+        .chat-title {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+        .chat-title strong {
+            font-family: 'Syne', sans-serif;
+            color: #fff;
+            font-size: .95rem;
+        }
+        .chat-title span {
+            color: rgba(255,255,255,.6);
+            font-size: .78rem;
+            font-weight: 600;
+        }
+        .chat-close {
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            background: rgba(255,255,255,.08);
+            color: rgba(255,255,255,.9);
+            border: 1px solid rgba(255,255,255,.12);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .2s ease;
+        }
+        .chat-close:hover { background: rgba(255,255,255,.14); transform: rotate(90deg) scale(1.02); }
+
+        .chat-body {
+            padding: .9rem 1rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .chat-quick {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .55rem;
+            margin-bottom: .9rem;
+        }
+
+        .chat-chip {
+            border: 1px solid rgba(255,255,255,.12);
+            background: rgba(255,255,255,.06);
+            color: rgba(255,255,255,.85);
+            padding: .45rem .7rem;
+            border-radius: 999px;
+            font-size: .82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .18s ease;
+        }
+        .chat-chip:hover {
+            border-color: rgba(220,38,38,.45);
+            background: rgba(220,38,38,.14);
+        }
+
+        .chat-messages { display: flex; flex-direction: column; gap: .55rem; }
+.chat-msg {
+            max-width: 88%;
+            padding: .7rem .9rem;
+            font-size: 1rem;
+            line-height: 1.5;
+
+            border-radius: 14px;
+            font-size: .9rem;
+            line-height: 1.4;
+            border: 1px solid rgba(255,255,255,.08);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .chat-msg.user {
+            align-self: flex-end;
+            background: rgba(220,38,38,.18);
+            border-color: rgba(220,38,38,.35);
+            color: rgba(255,255,255,.95);
+        }
+        .chat-msg.bot {
+            align-self: flex-start;
+            background: rgba(255,255,255,.06);
+            color: rgba(255,255,255,.92);
+        }
+
+        .chat-foot {
+            padding: .85rem 1rem;
+            border-top: 1px solid rgba(255,255,255,.08);
+            display: flex;
+            gap: .6rem;
+            align-items: center;
+        }
+        .chat-input {
+            flex: 1;
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 14px;
+            padding: .65rem .85rem;
+            color: #fff;
+            outline: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .9rem;
+        }
+        .chat-input::placeholder { color: rgba(255,255,255,.55); }
+        .chat-send {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            border: 1px solid rgba(220,38,38,.35);
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            transition: transform .15s ease;
+        }
+        .chat-send:hover { transform: translateY(-1px); }
+
+        @media (max-width: 560px) {
+            .chat-panel { right: .7rem; left: .7rem; width: auto; }
+            .chat-fab { right: 1rem; bottom: 1rem; }
+        }
+    </style>
+
+    <div id="chat-widget" aria-label="Support chat widget">
+        <button id="chat-fab" class="chat-fab" aria-expanded="false" aria-controls="chat-panel" title="Chat with support">
+            💬
+        </button>
+
+        <div id="chat-panel" class="chat-panel" role="dialog" aria-modal="false">
+            <div class="chat-head">
+                <div class="chat-title">
+                    <strong>Support Chat</strong>
+                    <span>Ask about plans, installation, or problems</span>
+                </div>
+                <button id="chat-close" class="chat-close" aria-label="Close chat">×</button>
+            </div>
+
+            <div class="chat-body">
+                <div class="chat-quick" id="chat-quick">
+                    <button type="button" class="chat-chip" data-chat="pricing">Pricing / Plan comparison</button>
+                    <button type="button" class="chat-chip" data-chat="apply">How to apply</button>
+                    <button type="button" class="chat-chip" data-chat="installation">Installation time</button>
+                    <button type="button" class="chat-chip" data-chat="support">I have a problem</button>
+                </div>
+
+                <div id="chat-messages" class="chat-messages">
+                    <div class="chat-msg bot">Hi! I’m NetManager support assistant. What problem are you encountering?</div>
+                    <div class="chat-msg bot">You can ask things like: “pricing”, “how to apply”, “installation time”, or “help—my internet is down”.</div>
+
+                </div>
+            </div>
+
+            <div class="chat-foot">
+                <input id="chat-input" class="chat-input" type="text" placeholder="Type your question…" autocomplete="off" />
+                <button id="chat-send" class="chat-send" type="button" aria-label="Send">➤</button>
+            </div>
+        </div>
+    </div>
+
     <!-- =================== FOOTER =================== -->
     <footer>
+
         <div class="footer-inner">
             <div class="footer-top">
                 <div>
@@ -2109,7 +2332,106 @@
     </footer>
 
     <script>
+        /* ===================== CHAT WIDGET (welcome page) ===================== */
+        (function(){
+            const widget = document.getElementById('chat-widget');
+            if (!widget) return;
+
+            const panel = document.getElementById('chat-panel');
+            const fab = document.getElementById('chat-fab');
+            const closeBtn = document.getElementById('chat-close');
+            const messages = document.getElementById('chat-messages');
+            const quick = document.getElementById('chat-quick');
+            const input = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('chat-send');
+
+            function addMsg(text, who){
+                const div = document.createElement('div');
+                div.className = 'chat-msg ' + (who === 'user' ? 'user' : 'bot');
+                div.textContent = text;
+                messages.appendChild(div);
+                messages.scrollTop = messages.scrollHeight;
+            }
+
+            function botReply(userText){
+                const t = (userText || '').toLowerCase();
+                if (!t) {
+                    return 'Welcome. Please describe your concern so we can assist you right away.';
+                }
+
+                // Pricing / plans
+                if (t.includes('plan') || t.includes('pricing') || t.includes('cost') || t.includes('monthly') || t.includes('price')) {
+                    return 'You can review our available plans above. If you tell me your typical usage (streaming, gaming, work, or number of users), I will recommend the best option.';
+                }
+
+                // Apply / sign up
+                if (t.includes('apply') || t.includes('signup') || t.includes('sign up') || t.includes('start') || t.includes('registration') || t.includes('enroll')) {
+                    return 'To apply, please click “Apply Now” on your preferred plan, complete the application form, and submit it. After review, we will notify you once it is approved.';
+                }
+
+                // Installation
+                if (t.includes('installation') || t.includes('install') || t.includes('how long') || t.includes('多久') || t.includes('time') || t.includes('when')) {
+                    return 'Installation timelines depend on your area and availability. In most cases, setup is completed within a few days after approval. If you share your location/area, I will guide you on what to expect.';
+                }
+
+                // Support / troubleshooting
+                if (t.includes('support') || t.includes('help') || t.includes('problem') || t.includes('issue') || t.includes('internet') || t.includes('down') || t.includes('not working')) {
+                    return 'I’m sorry you’re experiencing difficulties. Please describe what is happening (e.g., no connection, slow speed, Wi‑Fi not working). If you know your plan name, include it as well so we can escalate faster.';
+                }
+
+                // Fallback: structured help
+                return 'Thank you for reaching out. To help you faster, please share: (1) what you need, (2) your plan name (if you have one), and (3) your area/location.';
+            }
+
+
+            function setOpen(open){
+                if (open) {
+                    panel.classList.add('open');
+                    fab.setAttribute('aria-expanded','true');
+                    setTimeout(()=> input && input.focus(), 0);
+                } else {
+                    panel.classList.remove('open');
+                    fab.setAttribute('aria-expanded','false');
+                }
+            }
+
+            fab?.addEventListener('click', ()=> setOpen(true));
+            closeBtn?.addEventListener('click', ()=> setOpen(false));
+            document.addEventListener('keydown', (e)=> { if (e.key === 'Escape') setOpen(false); });
+
+            quick?.addEventListener('click', (e)=>{
+                const chip = e.target.closest('.chat-chip');
+                if (!chip) return;
+                const text = chip.getAttribute('data-chat') || chip.textContent;
+                addMsg(text, 'user');
+                addMsg(botReply(text), 'bot');
+            });
+
+            function send(){
+                if (!input) return;
+                const text = input.value.trim();
+                if (!text) return;
+                input.value = '';
+                addMsg(text, 'user');
+                const reply = botReply(text);
+                addMsg(reply, 'bot');
+            }
+
+            sendBtn?.addEventListener('click', send);
+            input?.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') send(); });
+
+            // Expose minimal hooks for contact form (no-op)
+            window.__chatWidget = {
+                _handleContactSent: function(){
+                    // Optional: show a confirmation hint in chat.
+                    addMsg('Got it—our team will reach out soon. How else can we help?', 'bot');
+                    setOpen(true);
+                }
+            };
+        })();
+
         /* ===================== LETTER POP — split headings into spans ===================== */
+
         document.querySelectorAll('.letter-pop').forEach(el => {
             // Don't split if it has child elements (scramble span etc)
             if (el.children.length) return;
@@ -2356,7 +2678,7 @@
                 this.style.transform = `translate(${dx}px, ${dy}px) translateY(-3px)`;
             });
             btn.addEventListener('mouseleave', function() {
-                this.style.transform = '';
+                    this.style.transform = '';
             });
         });
 
@@ -2621,6 +2943,7 @@ function handleSubscribe(plan) {
             const name    = form.querySelector('input[type="text"]').value.trim();
             const email   = form.querySelector('input[type="email"]').value.trim();
             const message = form.querySelector('textarea').value.trim();
+
 
             btn.textContent = '✓ Sending…';
             btn.style.opacity = '.7';

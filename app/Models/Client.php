@@ -23,6 +23,7 @@ class Client extends Model
         'email',
         'phone_number',
         'pppoe_name',
+        'pppoe_password',
         'barangay',
         'nap_box',
         'start_date',

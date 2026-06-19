@@ -45,9 +45,17 @@
         .btn-start { padding: 8px 18px; border-radius: 14px; font-size: 12px; font-weight: 700; background: linear-gradient(105deg, #dc2626, #b91c1c); color: white; border: none; cursor: pointer; }
         .btn-details { padding: 8px 18px; border-radius: 14px; font-size: 12px; font-weight: 700; background: #f2efed; color: #3f2e2a; border: 1px solid #f0dbd6; cursor: pointer; }
         /* Map modal */
-        #nav-map { height: 380px; width: 100%; border-radius: 14px; overflow: hidden; }
+        #nav-map { height: 300px; width: 100%; border-radius: 14px; overflow: hidden; }
         .tech-dot { width: 18px; height: 18px; background: #2563eb; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 4px rgba(37,99,235,.35); animation: techPulse 1.8s ease-in-out infinite; }
         @keyframes techPulse { 0%,100%{box-shadow:0 0 0 4px rgba(37,99,235,.35);} 50%{box-shadow:0 0 0 10px rgba(37,99,235,.08);} }
+        .route-info { display:flex; gap:10px; padding:0 16px 10px; flex-shrink:0; }
+        .route-pill { flex:1; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:8px 12px; text-align:center; }
+        .route-pill .rval { font-size:15px; font-weight:800; color:#0f172a; font-family:'Syne',sans-serif; }
+        .route-pill .rlbl { font-size:10px; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
+        .loc-badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; display:inline-block; }
+        .loc-ok { background:#dcfce7; color:#166534; }
+        .loc-err { background:#fee2e2; color:#991b1b; }
+        .loc-wait { background:#fef9c3; color:#854d0e; }
     </style>
 </head>
 <body>
@@ -75,6 +83,7 @@
             My Tasks <span style="margin-left:auto;background:#dc2626;color:white;font-size:9px;padding:2px 8px;border-radius:30px;">{{ $stats['pendingJobs'] }}</span>
         </a>
         <a href="{{ route('technician.history') }}" class="nav-link"><div class="nav-icon"><svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>History</a>
+        <a href="{{ route('technician.tickets.index') }}" class="nav-link"><div class="nav-icon"><svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m-4 0v2m4-11a2 2 0 00-2-2h-2a2 2 0 00-2 2m12 0a9 9 0 11-18 0 9 9 0 0118 0zm-5 4a4 4 0 11-8 0 4 4 0 018 0z"/></svg></div>Support Tickets</a>
     </nav>
 
     <div class="sidebar-footer p-4 border-t border-red-900/30">
@@ -253,12 +262,18 @@
                 <svg style="width:16px;height:16px;color:#64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
+        <!-- Route info pills -->
+        <div class="route-info" id="route-info">
+            <div class="route-pill"><div class="rval" id="route-dist">—</div><div class="rlbl">Distance</div></div>
+            <div class="route-pill"><div class="rval" id="route-eta">—</div><div class="rlbl">Est. Travel</div></div>
+            <div class="route-pill" style="flex:0 0 auto;"><div class="rval"><span class="loc-badge loc-wait" id="loc-status-badge">Locating…</span></div><div class="rlbl">GPS</div></div>
+        </div>
         <!-- Map -->
-        <div style="padding:16px;flex:1;overflow:hidden;">
-            <div id="nav-map" style="height:340px;width:100%;border-radius:14px;"></div>
+        <div style="padding:0 16px;flex:1;overflow:hidden;">
+            <div id="nav-map" style="height:300px;width:100%;border-radius:14px;"></div>
         </div>
         <!-- Footer buttons -->
-        <div style="padding:0 16px 16px;display:flex;gap:10px;flex-shrink:0;">
+        <div style="padding:12px 16px 14px;display:flex;gap:10px;flex-shrink:0;">
             <a id="google-directions-btn" href="#" target="_blank"
                style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:white;border-radius:14px;font-size:13px;font-weight:700;text-decoration:none;">
                 🧭 Open Google Maps Navigation
@@ -272,147 +287,138 @@
 </div>
 
 <script>
-    let navMap = null;
-    let currentStartFormId = null;
-    let watchId = null;
-    let techMarker = null;
+    let navMap = null, currentJobId = null, watchId = null, techMarker = null, routeLine = null, routeTimer = null;
 
-    function startJobWithMap(jobId, clientLat, clientLng, clientName, barangay) {
-        currentStartFormId = 'start-form-' + jobId;
-        openNavMap(clientLat, clientLng, clientName, barangay, jobId);
+    const _clientIcon = L.divIcon({
+        html: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="42" viewBox="0 0 32 42"><path d="M16 0C7.163 0 0 7.163 0 16c0 10.667 16 26 16 26S32 26.667 32 16C32 7.163 24.837 0 16 0z" fill="#dc2626"/><circle cx="16" cy="16" r="7" fill="white"/><circle cx="16" cy="16" r="4" fill="#dc2626"/></svg>',
+        className: '', iconSize: [32, 42], iconAnchor: [16, 42], popupAnchor: [0, -44]
+    });
+    const _techIcon = L.divIcon({
+        html: '<div class="tech-dot"></div>',
+        className: '', iconSize: [18, 18], iconAnchor: [9, 9]
+    });
+
+    function startJobWithMap(jobId, cLat, cLng, name, barangay) {
+        currentJobId = jobId;
+        openNavMap(cLat, cLng, name, barangay, jobId);
     }
 
-    function openNavMap(clientLat, clientLng, clientName, barangay, jobId) {
-        if (jobId) currentStartFormId = 'start-form-' + jobId;
+    function openNavMap(cLat, cLng, name, barangay, jobId) {
+        if (jobId) currentJobId = jobId;
         document.getElementById('nav-map-modal').style.display = 'flex';
-        document.getElementById('nav-map-title').textContent = clientName;
+        document.getElementById('nav-map-title').textContent = name;
         document.getElementById('nav-map-subtitle').textContent = barangay + ' — Locating you...';
-
-        // Show/hide start button
         document.getElementById('confirm-start-btn').style.display = jobId ? 'block' : 'none';
-
-        setTimeout(() => initNavMap(clientLat, clientLng, clientName, barangay), 80);
+        document.getElementById('route-dist').textContent = '—';
+        document.getElementById('route-eta').textContent = '—';
+        setLocBadge('wait');
+        setTimeout(() => initNavMap(cLat, cLng, name, barangay), 80);
     }
 
-    function initNavMap(clientLat, clientLng, clientName, barangay) {
+    function setLocBadge(state) {
+        const el = document.getElementById('loc-status-badge');
+        const map = { ok: ['GPS Active ✓','loc-badge loc-ok'], err: ['No GPS ✗','loc-badge loc-err'], wait: ['Locating…','loc-badge loc-wait'] };
+        el.textContent = map[state][0];
+        el.className = map[state][1];
+    }
+
+    function initNavMap(cLat, cLng, name, barangay) {
         if (navMap) { navMap.remove(); navMap = null; }
         if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+        techMarker = null; routeLine = null;
 
-        const hasClient = clientLat && clientLng;
-        const center = hasClient ? [clientLat, clientLng] : [12.8797, 121.7740];
-
-        navMap = L.map('nav-map').setView(center, hasClient ? 15 : 7);
+        const hasClient = !!(cLat && cLng);
+        navMap = L.map('nav-map').setView(hasClient ? [cLat, cLng] : [12.8797, 121.7740], hasClient ? 15 : 7);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19
         }).addTo(navMap);
 
-        // Client pin
         if (hasClient) {
-            const clientIcon = L.divIcon({
-                html: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="42" viewBox="0 0 32 42">
-                    <path d="M16 0C7.163 0 0 7.163 0 16c0 10.667 16 26 16 26S32 26.667 32 16C32 7.163 24.837 0 16 0z" fill="#dc2626"/>
-                    <circle cx="16" cy="16" r="7" fill="white"/>
-                    <circle cx="16" cy="16" r="4" fill="#dc2626"/>
-                </svg>`,
-                className: '', iconSize: [32, 42], iconAnchor: [16, 42], popupAnchor: [0, -44]
-            });
-
-            const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${clientLat},${clientLng}&travelmode=driving`;
-            document.getElementById('google-directions-btn').href = directionsUrl;
-
-            L.marker([clientLat, clientLng], { icon: clientIcon })
+            L.marker([cLat, cLng], { icon: _clientIcon })
                 .addTo(navMap)
-                .bindPopup(`<b style="font-size:13px;">${clientName}</b><br><span style="color:#64748b;font-size:12px;">📍 ${barangay}</span>`)
+                .bindPopup('<b style="font-size:13px;">📍 ' + name + '</b><br><span style="color:#64748b;font-size:12px;">' + barangay + '</span>')
                 .openPopup();
+            document.getElementById('google-directions-btn').href =
+                'https://www.google.com/maps/dir/?api=1&destination=' + cLat + ',' + cLng + '&travelmode=driving';
         } else {
             document.getElementById('google-directions-btn').href = '#';
-            document.getElementById('nav-map-subtitle').textContent = barangay + ' — No coordinates saved';
+            document.getElementById('nav-map-subtitle').textContent = barangay + ' — No GPS coordinates saved';
+            setLocBadge('err');
         }
 
-        // Technician live position
-        if (navigator.geolocation) {
-            const techIcon = L.divIcon({
-                html: `<div class="tech-dot"></div>`,
-                className: '', iconSize: [18, 18], iconAnchor: [9, 9]
-            });
+        if (!navigator.geolocation) { setLocBadge('err'); return; }
 
-            watchId = navigator.geolocation.watchPosition(pos => {
-                const tLat = pos.coords.latitude;
-                const tLng = pos.coords.longitude;
+        watchId = navigator.geolocation.watchPosition(function(pos) {
+            const tLat = pos.coords.latitude, tLng = pos.coords.longitude;
 
-                if (techMarker) {
-                    techMarker.setLatLng([tLat, tLng]);
-                } else {
-                    techMarker = L.marker([tLat, tLng], { icon: techIcon })
-                        .addTo(navMap)
-                        .bindPopup('<b style="font-size:12px;">📍 You are here</b>');
-                }
+            if (techMarker) {
+                techMarker.setLatLng([tLat, tLng]);
+            } else {
+                techMarker = L.marker([tLat, tLng], { icon: _techIcon, zIndexOffset: 1000 })
+                    .addTo(navMap)
+                    .bindPopup('<b style="font-size:12px;">🔵 You are here</b>');
+            }
 
-                document.getElementById('nav-map-subtitle').textContent = barangay + ' — Your location found';
+            setLocBadge('ok');
+            document.getElementById('nav-map-subtitle').textContent = barangay + ' — GPS active';
 
-                // Update directions URL to include origin
-                if (hasClient) {
-                    const url = `https://www.google.com/maps/dir/?api=1&origin=${tLat},${tLng}&destination=${clientLat},${clientLng}&travelmode=driving`;
-                    document.getElementById('google-directions-btn').href = url;
-                }
+            if (hasClient) {
+                document.getElementById('google-directions-btn').href =
+                    'https://www.google.com/maps/dir/?api=1&origin=' + tLat + ',' + tLng +
+                    '&destination=' + cLat + ',' + cLng + '&travelmode=driving';
 
-                // Fit both markers
-                if (hasClient) {
-                    navMap.fitBounds([[tLat, tLng], [clientLat, clientLng]], { padding: [40, 40] });
-                }
-            }, null, { enableHighAccuracy: true, maximumAge: 5000 });
-        }
+                navMap.fitBounds([[tLat, tLng], [cLat, cLng]], { padding: [50, 50] });
+                drawRoute(tLat, tLng, cLat, cLng);
+            }
+        }, function() { setLocBadge('err'); }, { enableHighAccuracy: true, maximumAge: 5000 });
+    }
+
+    function drawRoute(tLat, tLng, cLat, cLng) {
+        if (routeTimer) return; // debounce: fetch at most every 12s
+        routeTimer = setTimeout(function() { routeTimer = null; }, 12000);
+
+        fetch('https://router.project-osrm.org/route/v1/driving/' + tLng + ',' + tLat + ';' + cLng + ',' + cLat + '?overview=full&geometries=geojson')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (!navMap || !data.routes || !data.routes[0]) return;
+                var route = data.routes[0];
+                var km = (route.distance / 1000).toFixed(1);
+                var mins = Math.ceil(route.duration / 60);
+                document.getElementById('route-dist').textContent = km + ' km';
+                document.getElementById('route-eta').textContent = mins < 60 ? mins + ' min' : (mins / 60).toFixed(1) + ' hr';
+                if (routeLine) navMap.removeLayer(routeLine);
+                var coords = route.geometry.coordinates.map(function(c) { return [c[1], c[0]]; });
+                routeLine = L.polyline(coords, { color: '#2563eb', weight: 5, opacity: 0.75, lineJoin: 'round' }).addTo(navMap);
+            })
+            .catch(function() {});
     }
 
     function closeNavMap() {
         document.getElementById('nav-map-modal').style.display = 'none';
         if (navMap) { navMap.remove(); navMap = null; }
         if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
-        techMarker = null;
-        currentStartFormId = null;
+        techMarker = null; routeLine = null; currentJobId = null;
     }
 
     function confirmStartJob() {
-        if (!currentStartFormId) return;
-        const jobId = currentStartFormId.replace('start-form-', '');
+        if (!currentJobId) return;
+        var jobId = currentJobId;
         closeNavMap();
-
-        const actionDiv  = document.getElementById('action-' + jobId);
-        const badgeSpan  = document.getElementById('status-badge-' + jobId);
-
-        // Optimistic UI — swap immediately
-        if (actionDiv) {
-            actionDiv.innerHTML = `<button onclick="openCompleteModal(${jobId})" class="btn-start" style="background:linear-gradient(105deg,#059669,#047857);">Complete</button>`;
-        }
-        if (badgeSpan) {
-            badgeSpan.className = 'badge badge-progress';
-            badgeSpan.querySelector('.badge-label').textContent = 'In Progress';
-        }
-
-        // AJAX POST to start the job
+        var actionDiv = document.getElementById('action-' + jobId);
+        var badgeSpan = document.getElementById('status-badge-' + jobId);
+        if (actionDiv) actionDiv.innerHTML = '<button onclick="openCompleteModal(' + jobId + ')" class="btn-start" style="background:linear-gradient(105deg,#059669,#047857);">Complete</button>';
+        if (badgeSpan) { badgeSpan.className = 'badge badge-progress'; badgeSpan.querySelector('.badge-label').textContent = 'In Progress'; }
         fetch('/technician/jobs/' + jobId + '/start', {
             method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json',
-            }
-        }).catch(() => {
-            // On failure revert
-            if (actionDiv) {
-                actionDiv.innerHTML = `<button type="button" class="btn-start" onclick="startJobWithMap(${jobId},null,null,'','');">Start</button>`;
-            }
-            if (badgeSpan) {
-                badgeSpan.className = 'badge badge-pending';
-                badgeSpan.querySelector('.badge-label').textContent = 'Assigned';
-            }
+            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' }
+        }).catch(function() {
+            if (actionDiv) actionDiv.innerHTML = '<button type="button" class="btn-start" onclick="startJobWithMap(' + jobId + ',null,null,\'\',\'\');">Start</button>';
+            if (badgeSpan) { badgeSpan.className = 'badge badge-pending'; badgeSpan.querySelector('.badge-label').textContent = 'Assigned'; }
         });
     }
 
-    document.getElementById('nav-map-modal').addEventListener('click', function(e) {
-        if (e.target === this) closeNavMap();
-    });
-
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNavMap(); });
+    document.getElementById('nav-map-modal').addEventListener('click', function(e) { if (e.target === this) closeNavMap(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeNavMap(); });
 </script>
 
 <script>

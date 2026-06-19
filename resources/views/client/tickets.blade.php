@@ -15,25 +15,27 @@
             <div style="padding:48px;text-align:center;"><p style="font-size:14px;color:#94a3b8;">No tickets submitted yet.</p></div>
         @else
             <div style="display:flex;flex-direction:column;gap:0;">
-                @foreach($tickets as $ticket)
+@foreach($tickets as $ticket)
                 <div style="padding:18px 24px;border-bottom:1px solid #f8fafc;">
-                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px;">
-                        <div>
-                            <p style="font-size:14px;font-weight:700;color:#0f172a;">{{ $ticket->subject }}</p>
-                            <p style="font-size:12px;color:#64748b;margin-top:2px;">{{ $ticket->created_at->format('M d, Y h:i A') }}</p>
+                    <a href="{{ route('portal.tickets.show', $ticket) }}" style="text-decoration:none;display:block;">
+                        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px;">
+                            <div>
+                                <p style="font-size:14px;font-weight:700;color:#0f172a;">{{ $ticket->subject }}</p>
+                                <p style="font-size:12px;color:#64748b;margin-top:2px;">{{ $ticket->created_at->format('M d, Y h:i A') }}</p>
+                            </div>
+                            <div style="display:flex;gap:6px;flex-shrink:0;">
+                                <span class="{{ $ticket->status_color }}" style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid;display:inline-block;">{{ ucfirst(str_replace('_',' ',$ticket->status)) }}</span>
+                                <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#f1f5f9;color:#475569;display:inline-block;">{{ ucfirst($ticket->priority) }}</span>
+                            </div>
                         </div>
-                        <div style="display:flex;gap:6px;flex-shrink:0;">
-                            <span class="{{ $ticket->status_color }}" style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid;display:inline-block;">{{ ucfirst(str_replace('_',' ',$ticket->status)) }}</span>
-                            <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#f1f5f9;color:#475569;display:inline-block;">{{ ucfirst($ticket->priority) }}</span>
+                        <p style="font-size:13px;color:#475569;line-height:1.6;">{{ Str::limit($ticket->message, 120) }}</p>
+                        @if($ticket->admin_reply)
+                        <div style="margin-top:10px;padding:12px 14px;background:#f0fdf4;border-radius:10px;border-left:3px solid #059669;">
+                            <p style="font-size:11px;font-weight:700;color:#059669;margin-bottom:4px;">Admin Reply · {{ $ticket->replied_at?->format('M d, Y') }}</p>
+                            <p style="font-size:13px;color:#065f46;">{{ $ticket->admin_reply }}</p>
                         </div>
-                    </div>
-                    <p style="font-size:13px;color:#475569;line-height:1.6;">{{ Str::limit($ticket->message, 120) }}</p>
-                    @if($ticket->admin_reply)
-                    <div style="margin-top:10px;padding:12px 14px;background:#f0fdf4;border-radius:10px;border-left:3px solid #059669;">
-                        <p style="font-size:11px;font-weight:700;color:#059669;margin-bottom:4px;">Admin Reply · {{ $ticket->replied_at?->format('M d, Y') }}</p>
-                        <p style="font-size:13px;color:#065f46;">{{ $ticket->admin_reply }}</p>
-                    </div>
-                    @endif
+                        @endif
+                    </a>
                 </div>
                 @endforeach
             </div>

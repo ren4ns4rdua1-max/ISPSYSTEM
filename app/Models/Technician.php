@@ -21,19 +21,35 @@ class Technician extends Model
         'notes',
         'user_id',
         'photo',
+        'email_verified_at',
+        'email_verification_token',
     ];
 
     protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'created_at'        => 'datetime',
+        'updated_at'        => 'datetime',
+        'email_verified_at' => 'datetime',
     ];
 
+    public function isEmailVerified(): bool
+    {
+        return $this->email_verified_at !== null;
+    }
+
     /**
-     * Get the installation jobs for this technician.
+     * Get installation jobs for this technician.
      */
     public function jobs(): HasMany
     {
         return $this->hasMany(InstallationJob::class)->latest();
+    }
+
+    /**
+     * Get support tickets assigned to this technician.
+     */
+    public function supportTickets(): HasMany
+    {
+        return $this->hasMany(SupportTicket::class)->latest();
     }
 
     /**

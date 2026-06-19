@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+
 use App\Models\Client;
 use App\Models\Billing;
+use App\Models\AdminNotification;
+use App\Mail\PaymentApprovedMail;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 
 class PaymentController extends Controller
 {
@@ -17,43 +22,94 @@ class PaymentController extends Controller
      */
     public function index(Request $request): View
     {
-        $search = $request->get('search', '');
+        $search        = $request->get('search', '');
         $paymentMethod = $request->get('payment_method', '');
-        $dateFrom = $request->get('date_from', '');
-        $dateTo = $request->get('date_to', '');
+        $dateFrom      = $request->get('date_from', '');
+        $dateTo        = $request->get('date_to', '');
 
-        $payments = Payment::with(['client', 'billing', 'user'])
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('receipt_number', 'like', "%{$search}%")
-                        ->orWhereHas('client', function ($clientQuery) use ($search) {
-                            $clientQuery->where('name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%");
-                        })
-                        ->orWhere('payment_reference', 'like', "%{$search}%");
-                });
-            })
-            ->when($paymentMethod, function ($query) use ($paymentMethod) {
-                $query->where('payment_method', $paymentMethod);
-            })
-            ->when($dateFrom, function ($query) use ($dateFrom) {
-                $query->whereDate('payment_date', '>=', $dateFrom);
-            })
-            ->when($dateTo, function ($query) use ($dateTo) {
-                $query->whereDate('payment_date', '<=', $dateTo);
-            })
-            ->latest()
-            ->paginate(10);
+        $query = Payment::with(['client', 'billing'])
+            ->when($search, fn($q) => $q->whereHas('client', fn($c) => $c->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"))->orWhere('receipt_number', 'like', "%{$search}%"))
+            ->when($paymentMethod, fn($q) => $q->where('payment_method', $paymentMethod))
+            ->when($dateFrom,      fn($q) => $q->whereDate('payment_date', '>=', $dateFrom))
+            ->when($dateTo,        fn($q) => $q->whereDate('payment_date', '<=', $dateTo));
 
-        // Calculate summary stats
+        $hasApprovalColumn = Schema::hasColumn('payments', 'approval_status');
+
+        // Group by client: one row per client
+        $clientSummaries = $query->get()
+            ->groupBy('client_id')
+            ->map(function ($rows) use ($hasApprovalColumn) {
+                $latest = $rows->sortByDesc('created_at')->first();
+
+                return (object) [
+                    'client'                => $latest->client,
+                    'client_id'             => $latest->client_id,
+                    'total_payments'        => $rows->count(),
+                    'total_paid'            => $rows->sum('amount'),
+                    'latest_method'         => $latest->payment_method,
+                    'latest_method_label'   => $latest->payment_method_label,
+                    'latest_date'           => $latest->payment_date,
+                    'pending_count'         => $hasApprovalColumn
+                        ? $rows->where('approval_status', 'pending')->count()
+                        : 0,
+                    'latest_approval'       => $hasApprovalColumn ? $latest->approval_status : null,
+                    'latest_id'             => $latest->id,
+                ];
+            })
+            ->values();
+
+        $page     = $request->get('page', 1);
+        $perPage  = 10;
+        $payments = new \Illuminate\Pagination\LengthAwarePaginator(
+            $clientSummaries->forPage($page, $perPage),
+            $clientSummaries->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         $stats = [
-            'total_collected' => Payment::sum('amount'),
-            'today_collection' => Payment::whereDate('payment_date', today())->sum('amount'),
-            'this_month' => Payment::whereMonth('payment_date', now()->month)->whereYear('payment_date', now()->year)->sum('amount'),
-            'transactions_count' => Payment::count(),
+            'total_collected'   => $hasApprovalColumn
+                ? Payment::where('approval_status', 'approved')->sum('amount')
+                : Payment::sum('amount'),
+            'today_collection'  => $hasApprovalColumn
+                ? Payment::where('approval_status', 'approved')->whereDate('payment_date', today())->sum('amount')
+                : Payment::whereDate('payment_date', today())->sum('amount'),
+            'this_month'        => $hasApprovalColumn
+                ? Payment::where('approval_status', 'approved')->whereMonth('payment_date', now()->month)->whereYear('payment_date', now()->year)->sum('amount')
+                : Payment::whereMonth('payment_date', now()->month)->whereYear('payment_date', now()->year)->sum('amount'),
+            'transactions_count'=> Payment::count(),
         ];
 
-        return view('payments.index', compact('payments', 'search', 'paymentMethod', 'dateFrom', 'dateTo', 'stats'));
+        $pendingApprovalCount = $hasApprovalColumn
+            ? Payment::where('approval_status', 'pending')->count()
+            : 0;
+
+        return view('payments.index', compact(
+            'payments', 'search', 'paymentMethod', 'dateFrom', 'dateTo', 'stats', 'pendingApprovalCount'
+        ));
+    }
+
+    /**
+     * Return all payments for a client as JSON (for history modal).
+     */
+    public function clientHistory(Client $client): \Illuminate\Http\JsonResponse
+    {
+        $history = Payment::where('client_id', $client->id)
+            ->with('billing')
+            ->latest()
+            ->get()
+            ->map(fn($p) => [
+                'receipt_number'   => $p->receipt_number,
+                'invoice_number'   => $p->billing?->invoice_number ?? '-',
+                'amount'           => number_format($p->amount, 2),
+                'payment_method'   => $p->payment_method_label,
+                'payment_date'     => \Carbon\Carbon::parse($p->payment_date)->format('M d, Y'),
+                'approval_status'  => $p->approval_status,
+                'id'               => $p->id,
+            ]);
+
+        return response()->json(['client' => $client->name, 'email' => $client->email, 'history' => $history]);
     }
 
     /**
@@ -209,6 +265,56 @@ class PaymentController extends Controller
         } else {
             $billing->update(['status' => 'pending', 'paid_date' => null]);
         }
+    }
+
+    /**
+     * Approve a client-submitted payment proof.
+     */
+    public function approvePayment(Payment $payment): RedirectResponse
+    {
+        if ($payment->approval_status !== 'pending') {
+            return back()->with('error', 'This payment has already been processed.');
+        }
+
+        $payment->update([
+            'approval_status' => 'approved',
+            'approved_at'     => now(),
+        ]);
+
+        // Only mark billing as paid AFTER admin approves
+        if ($payment->billing_id) {
+            $totalApproved = Payment::where('billing_id', $payment->billing_id)
+                ->where('approval_status', 'approved')
+                ->sum('amount');
+            $billing = $payment->billing;
+            if ($totalApproved >= $billing->total_amount) {
+                $billing->update(['status' => 'paid', 'paid_date' => $payment->payment_date]);
+            } else {
+                $billing->update(['status' => 'partial']);
+            }
+        }
+
+        // Send Gmail confirmation to client
+        Mail::to($payment->client->email)->send(new PaymentApprovedMail($payment));
+
+        return back()->with('success', "Payment from {$payment->client->name} has been approved and confirmation sent via email.");
+    }
+
+    /**
+     * Reject a client-submitted payment proof.
+     */
+    public function rejectPayment(Request $request, Payment $payment): RedirectResponse
+    {
+        if ($payment->approval_status !== 'pending') {
+            return back()->with('error', 'This payment has already been processed.');
+        }
+
+        $payment->update([
+            'approval_status'  => 'rejected',
+            'rejection_reason' => $request->get('reason', 'Payment proof could not be verified.'),
+        ]);
+
+        return back()->with('success', "Payment from {$payment->client->name} has been rejected.");
     }
 
     /**

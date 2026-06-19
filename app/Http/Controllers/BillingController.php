@@ -6,10 +6,12 @@ use App\Models\Billing;
 use App\Models\Client;
 use App\Models\SubscriptionRate;
 use App\Models\Payment;
+use App\Mail\BillingDueNoticeMail;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class BillingController extends Controller
 {
@@ -18,47 +20,81 @@ class BillingController extends Controller
      */
     public function index(Request $request): View
     {
-        $search = $request->get('search', '');
-        $status = $request->get('status', '');
+        $search      = $request->get('search', '');
+        $status      = $request->get('status', '');
         $billingType = $request->get('billing_type', '');
-        $dateFrom = $request->get('date_from', '');
-        $dateTo = $request->get('date_to', '');
+        $dateFrom    = $request->get('date_from', '');
+        $dateTo      = $request->get('date_to', '');
 
-        $billings = Billing::with(['client', 'subscriptionRate', 'creator'])
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('invoice_number', 'like', "%{$search}%")
-                        ->orWhereHas('client', function ($clientQuery) use ($search) {
-                            $clientQuery->where('name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%");
-                        });
-                });
-            })
-            ->when($status, function ($query) use ($status) {
-                $query->where('status', $status);
-            })
-            ->when($billingType, function ($query) use ($billingType) {
-                $query->where('billing_type', $billingType);
-            })
-            ->when($dateFrom, function ($query) use ($dateFrom) {
-                $query->whereDate('billing_date', '>=', $dateFrom);
-            })
-            ->when($dateTo, function ($query) use ($dateTo) {
-                $query->whereDate('billing_date', '<=', $dateTo);
-            })
-            ->latest()
-            ->paginate(10);
+        // Build base query filtered
+        $query = Billing::with(['client', 'subscriptionRate'])
+            ->when($search, fn($q) => $q->whereHas('client', fn($c) => $c->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"))->orWhere('invoice_number', 'like', "%{$search}%"))
+            ->when($status,      fn($q) => $q->where('status', $status))
+            ->when($billingType, fn($q) => $q->where('billing_type', $billingType))
+            ->when($dateFrom,    fn($q) => $q->whereDate('billing_date', '>=', $dateFrom))
+            ->when($dateTo,      fn($q) => $q->whereDate('billing_date', '<=', $dateTo));
 
-        // Calculate summary stats
+        // Group by client: one row per client with aggregated summary
+        $clientSummaries = $query->get()
+            ->groupBy('client_id')
+            ->map(function ($rows) {
+                $latest = $rows->sortByDesc('created_at')->first();
+                return (object)[
+                    'client'         => $latest->client,
+                    'total_invoices' => $rows->count(),
+                    'total_amount'   => $rows->sum('total_amount'),
+                    'paid_amount'    => $rows->where('status', 'paid')->sum('total_amount'),
+                    'unpaid_amount'  => $rows->whereIn('status', ['pending','overdue','partial'])->sum('total_amount'),
+                    'has_overdue'    => $rows->where('status', 'overdue')->count() > 0,
+                    'has_pending'    => $rows->whereIn('status', ['pending','overdue','partial'])->count() > 0,
+                    'latest_due'     => $rows->sortByDesc('due_date')->first()->due_date,
+                    'latest_status'  => $latest->status,
+                    'client_id'      => $latest->client_id,
+                ];
+            })->values();
+
+        // Paginate manually
+        $page     = $request->get('page', 1);
+        $perPage  = 10;
+        $billings = new \Illuminate\Pagination\LengthAwarePaginator(
+            $clientSummaries->forPage($page, $perPage),
+            $clientSummaries->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         $stats = [
-            'total_revenue' => Billing::where('status', 'paid')->sum('total_amount'),
+            'total_revenue'  => Billing::where('status', 'paid')->sum('total_amount'),
             'pending_amount' => Billing::where('status', 'pending')->sum('total_amount'),
             'overdue_amount' => Billing::where('status', 'overdue')->sum('total_amount'),
-            'pending_count' => Billing::where('status', 'pending')->count(),
-            'overdue_count' => Billing::where('status', 'overdue')->count(),
+            'pending_count'  => Billing::where('status', 'pending')->count(),
+            'overdue_count'  => Billing::where('status', 'overdue')->count(),
         ];
 
         return view('billings.index', compact('billings', 'search', 'status', 'billingType', 'dateFrom', 'dateTo', 'stats'));
+    }
+
+    /**
+     * Return all billings for a client as JSON (for history modal).
+     */
+    public function clientHistory(Client $client): \Illuminate\Http\JsonResponse
+    {
+        $history = Billing::where('client_id', $client->id)
+            ->with('subscriptionRate')
+            ->latest()
+            ->get()
+            ->map(fn($b) => [
+                'invoice_number' => $b->invoice_number,
+                'billing_type'   => ucfirst($b->billing_type),
+                'total_amount'   => number_format($b->total_amount, 2),
+                'billing_date'   => $b->billing_date->format('M d, Y'),
+                'due_date'       => $b->due_date->format('M d, Y'),
+                'status'         => $b->status,
+                'id'             => $b->id,
+            ]);
+
+        return response()->json(['client' => $client->name, 'email' => $client->email, 'history' => $history]);
     }
 
     /**
@@ -214,6 +250,35 @@ class BillingController extends Controller
         ]);
 
         return redirect()->route('payments.show', $payment->id)->with('success', 'Billing marked as paid. Payment record created.');
+    }
+
+    /**
+     * Send a due/overdue notice email to the client.
+     */
+    public function sendDueNotice(Billing $billing): RedirectResponse
+    {
+        if (!in_array($billing->status, ['pending', 'overdue', 'partial'])) {
+            return back()->with('error', 'Notice can only be sent for pending or overdue invoices.');
+        }
+
+        Mail::to($billing->client->email)->send(new BillingDueNoticeMail($billing));
+
+        return back()->with('success', "Due notice sent to {$billing->client->name} ({$billing->client->email}).");
+    }
+
+    /**
+     * Suspend the client account for non-payment.
+     */
+    public function suspendClient(Billing $billing): RedirectResponse
+    {
+        if (!in_array($billing->status, ['pending', 'overdue', 'partial'])) {
+            return back()->with('error', 'Client can only be suspended for unpaid invoices.');
+        }
+
+        $billing->client->update(['status' => 'suspended']);
+        $billing->update(['status' => 'overdue']);
+
+        return back()->with('success', "{$billing->client->name}'s account has been suspended due to non-payment.");
     }
 
     /**

@@ -85,6 +85,10 @@
                 <span class="info-value">{{ $client->pppoe_name }}</span>
             </div>
             <div class="info-row">
+                <span class="info-label">PPPoE Password</span>
+                <span class="info-value" style="font-family:monospace;background:#f1f5f9;padding:2px 8px;border-radius:6px;">{{ $client->pppoe_password }}</span>
+            </div>
+            <div class="info-row">
                 <span class="info-label">Barangay</span>
                 <span class="info-value">{{ $client->barangay }}</span>
             </div>

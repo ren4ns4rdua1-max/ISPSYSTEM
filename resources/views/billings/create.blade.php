@@ -431,18 +431,21 @@
                                         <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                         </svg>
-                                        <input type="date" name="billing_date" value="{{ old('billing_date', date('Y-m-d')) }}" required class="form-input">
+                                        <input type="date" name="billing_date" id="billing_date" value="{{ old('billing_date', date('Y-m-d')) }}" required class="form-input">
                                     </div>
                                     @error('billing_date')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Due Date <span class="text-red-500">*</span></label>
+                                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">
+                                        Due Date <span class="text-red-500">*</span>
+                                        <span class="ml-1 text-gray-400 font-normal normal-case tracking-normal">(auto: 1 month from billing date)</span>
+                                    </label>
                                     <div class="input-wrapper">
                                         <svg class="input-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                         </svg>
-                                        <input type="date" name="due_date" value="{{ old('due_date', date('Y-m-d', strtotime('+30 days'))) }}" required class="form-input">
+                                        <input type="date" name="due_date" id="due_date" value="{{ old('due_date', date('Y-m-d', strtotime('+1 month'))) }}" required class="form-input">
                                     </div>
                                     @error('due_date')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                                 </div>

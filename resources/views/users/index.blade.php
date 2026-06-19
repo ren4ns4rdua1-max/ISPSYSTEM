@@ -379,6 +379,17 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                             </svg>
                                             <span class="text-sm text-gray-600">{{ $user->email }}</span>
+                                            @if($user->role === 'technician' && is_null($user->email_verified_at))
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200">
+                                                    <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                                                    Pending
+                                                </span>
+                                            @elseif($user->role === 'technician')
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                                                    <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                                    Verified
+                                                </span>
+                                            @endif
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -443,7 +454,15 @@
                             </div>
                             <div class="grid grid-cols-2 gap-2 text-xs mb-3">
                                 <div><p class="text-gray-400">Joined</p><p class="text-gray-700 font-medium">{{ $user->created_at->format('M d, Y') }}</p></div>
-                                <div><p class="text-gray-400">Status</p><p class="text-gray-700 font-medium">Active</p></div>
+                                <div><p class="text-gray-400">Status</p>
+                                    @if($user->role === 'technician' && is_null($user->email_verified_at))
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">Pending</span>
+                                    @elseif($user->role === 'technician')
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Verified</span>
+                                    @else
+                                        <p class="text-gray-700 font-medium">Active</p>
+                                    @endif
+                                </div>
                             </div>
                             <div class="flex items-center gap-2 pt-3 border-t border-gray-50">
                                 <a href="{{ route('users.edit', $user->id) }}" class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-[11px] font-semibold rounded-lg" style="color:#2563eb;background:#eff6ff;border:1px solid #bfdbfe;">

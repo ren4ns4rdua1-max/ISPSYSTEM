@@ -167,6 +167,43 @@
         /* Animation for fade in */
         @keyframes fadeIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
         .animate-fadeIn { animation: fadeIn 0.3s ease forwards; }
+
+        /* =================== PRINT STYLES =================== */
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+            body { overflow: visible !important; height: auto !important; background: white !important; }
+
+            /* Hide everything except printable content */
+            #sidebar, .mobile-menu-btn, #mobile-overlay,
+            .topbar, .no-print { display: none !important; }
+
+            #main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+
+            main.main-scroll {
+                overflow: visible !important;
+                padding: 0 !important;
+            }
+
+            /* Print header injected by JS */
+            #print-header { display: block !important; }
+
+            /* Page layout */
+            .bg-white { box-shadow: none !important; border: 1px solid #e5e7eb !important; }
+            .stat-card { break-inside: avoid; }
+            .grid { break-inside: avoid; }
+
+            /* Section page breaks */
+            .print-break { page-break-before: always; }
+
+            /* Colors — force backgrounds to print */
+            .bg-gradient-to-br { background: inherit !important; }
+        }
     </style>
 </head>
 <body class="bg-slate-100">
@@ -216,19 +253,28 @@
                     Filter
                 </button>
             </form>
-            <a href="{{ route('reports.export') }}" class="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-colors" title="Export Reports">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
+            <!-- Export CSV -->
+            <a href="{{ route('reports.export', ['start_date' => $startDate, 'end_date' => $endDate]) }}"
+               class="no-print inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-all">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Export CSV
             </a>
-            <a href="{{ route('profile.edit') }}" class="w-9 h-9 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md transition-all hover:scale-105">
+            <!-- Print / Save as PDF -->
+            <button onclick="printReport()"
+               class="no-print inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-all">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                Print / PDF
+            </button>
+            <a href="{{ route('profile.edit') }}" class="no-print w-9 h-9 rounded-xl avatar-grad flex items-center justify-center text-white font-bold text-sm shadow-md transition-all hover:scale-105">
                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </a>
-        </div>
-    </header>
+        </div>    </header>
 
     <!-- PAGE BODY (Scrollable) -->
     <main class="flex-1 main-scroll p-6 space-y-6">
+        <!-- Print Header (hidden on screen, shown when printing) -->
+        <div id="print-header" style="display:none;"></div>
+
         <!-- Client Overview -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <div class="flex items-center gap-3 mb-5">
@@ -275,6 +321,16 @@
     </main>
 </div>
 
+
+<script>
+function printReport() {
+    var title = document.title;
+    var date  = new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
+    var hdr   = document.getElementById('print-header');
+    if (hdr) { hdr.innerHTML = '<h1 style="font-size:20px;font-weight:800;margin:0;">Business Reports</h1><p style="font-size:12px;color:#64748b;margin:4px 0 0;">Generated: ' + date + ' &nbsp;|&nbsp; Period: {{ $startDate }} to {{ $endDate }}</p><hr style="margin:12px 0;border-color:#e2e8f0;">'; }
+    window.print();
+}
+</script>
 
 @include('partials.sidebar-js')
 

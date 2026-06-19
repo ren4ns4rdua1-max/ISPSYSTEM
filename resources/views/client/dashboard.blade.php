@@ -128,4 +128,174 @@
         🎫 Support Ticket
     </a>
 </div>
+
+{{-- Pin My Location Card --}}
+<div style="margin-top:20px;background:white;border-radius:18px;padding:22px;border:1px solid #f1f5f9;box-shadow:0 2px 8px rgba(0,0,0,.03);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg style="width:20px;height:20px;color:white;" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <div>
+                <p style="font-size:15px;font-weight:700;color:#0f172a;">📍 My Location Pin</p>
+                @if($client->latitude && $client->longitude)
+                    <p style="font-size:11px;color:#059669;font-weight:600;">✓ Location saved — technician can navigate to you</p>
+                @else
+                    <p style="font-size:11px;color:#f59e0b;font-weight:600;">⚠ No location pinned yet — helps technician find you faster</p>
+                @endif
+            </div>
+        </div>
+        <button onclick="openPinModal()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;">
+            {{ $client->latitude ? '📌 Update Pin' : '📌 Pin My Location' }}
+        </button>
+    </div>
+
+    {{-- Mini map preview if coords exist --}}
+    @if($client->latitude && $client->longitude)
+    <div id="mini-map" style="height:180px;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;"></div>
+    @endif
+</div>
+
+{{-- Location Pin Modal --}}
+<div id="pin-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:24px;width:92%;max-width:680px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(0,0,0,.4);overflow:hidden;">
+        <div style="padding:18px 22px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+            <div>
+                <p style="font-weight:700;font-size:15px;color:#0f172a;">📌 Pin Your Location</p>
+                <p style="font-size:12px;color:#64748b;margin-top:2px;">Drag the pin or click on the map to set your exact location</p>
+            </div>
+            <button onclick="closePinModal()" style="width:32px;height:32px;border-radius:10px;background:#f1f5f9;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <div style="padding:16px;flex:1;overflow:hidden;">
+            <div id="pin-map" style="height:340px;border-radius:14px;"></div>
+        </div>
+
+        <div style="padding:0 16px 16px;flex-shrink:0;">
+            <div id="coords-display" style="text-align:center;font-size:12px;color:#64748b;font-weight:600;margin-bottom:12px;min-height:18px;"></div>
+            <div style="display:flex;gap:10px;">
+                <button onclick="closePinModal()" style="flex:1;padding:12px;background:#f1f5f9;border:none;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;color:#475569;">Cancel</button>
+                <button id="save-pin-btn" onclick="savePin()" style="flex:1;padding:12px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;">💾 Save Pin</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Leaflet + Pin JS --}}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    var pinMap = null, pinMarker = null;
+    var savedLat = {{ $client->latitude ?? 'null' }};
+    var savedLng = {{ $client->longitude ?? 'null' }};
+
+    @if($client->latitude && $client->longitude)
+    document.addEventListener('DOMContentLoaded', function() {
+        var mm = L.map('mini-map', { zoomControl:false, dragging:false, scrollWheelZoom:false, attributionControl:false })
+                  .setView([{{ $client->latitude }}, {{ $client->longitude }}], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mm);
+        var icon = L.divIcon({
+            html: '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="38" viewBox="0 0 32 42"><path d="M16 0C7.163 0 0 7.163 0 16c0 10.667 16 26 16 26S32 26.667 32 16C32 7.163 24.837 0 16 0z" fill="#2563eb"/><circle cx="16" cy="16" r="7" fill="white"/><circle cx="16" cy="16" r="4" fill="#2563eb"/></svg>',
+            className:'', iconSize:[28,38], iconAnchor:[14,38]
+        });
+        L.marker([{{ $client->latitude }}, {{ $client->longitude }}], {icon:icon}).addTo(mm);
+    });
+    @endif
+
+    function openPinModal() {
+        document.getElementById('pin-modal').style.display = 'flex';
+        setTimeout(initPinMap, 80);
+    }
+
+    function closePinModal() {
+        document.getElementById('pin-modal').style.display = 'none';
+        if (pinMap) { pinMap.remove(); pinMap = null; pinMarker = null; }
+    }
+
+    function initPinMap() {
+        if (pinMap) { pinMap.remove(); pinMap = null; pinMarker = null; }
+
+        var center = savedLat && savedLng ? [savedLat, savedLng] : [12.8797, 121.7740];
+        var zoom   = savedLat && savedLng ? 16 : 7;
+
+        pinMap = L.map('pin-map').setView(center, zoom);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(pinMap);
+
+        var pinIcon = L.divIcon({
+            html: '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="48" viewBox="0 0 32 42"><path d="M16 0C7.163 0 0 7.163 0 16c0 10.667 16 26 16 26S32 26.667 32 16C32 7.163 24.837 0 16 0z" fill="#2563eb"/><circle cx="16" cy="16" r="7" fill="white"/><circle cx="16" cy="16" r="4" fill="#2563eb"/></svg>',
+            className:'', iconSize:[36,48], iconAnchor:[18,48]
+        });
+
+        var lat = savedLat || center[0];
+        var lng = savedLng || center[1];
+
+        pinMarker = L.marker([lat, lng], { icon: pinIcon, draggable: true }).addTo(pinMap);
+        updateCoordsDisplay(lat, lng);
+
+        pinMarker.on('dragend', function(e) {
+            var pos = e.target.getLatLng();
+            updateCoordsDisplay(pos.lat, pos.lng);
+        });
+
+        pinMap.on('click', function(e) {
+            pinMarker.setLatLng(e.latlng);
+            updateCoordsDisplay(e.latlng.lat, e.latlng.lng);
+        });
+
+        // Try GPS auto-center if no saved pin
+        if (!savedLat && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                var gLat = pos.coords.latitude;
+                var gLng = pos.coords.longitude;
+                pinMap.setView([gLat, gLng], 17);
+                pinMarker.setLatLng([gLat, gLng]);
+                updateCoordsDisplay(gLat, gLng);
+            });
+        }
+    }
+
+    function updateCoordsDisplay(lat, lng) {
+        document.getElementById('coords-display').textContent =
+            '📍 ' + parseFloat(lat).toFixed(6) + ', ' + parseFloat(lng).toFixed(6);
+    }
+
+    function savePin() {
+        if (!pinMarker) return;
+        var pos = pinMarker.getLatLng();
+        var btn = document.getElementById('save-pin-btn');
+        btn.textContent = 'Saving...';
+        btn.disabled = true;
+
+        fetch('{{ route('portal.location.save') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ latitude: pos.lat, longitude: pos.lng })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                savedLat = pos.lat;
+                savedLng = pos.lng;
+                closePinModal();
+                location.reload();
+            }
+        })
+        .catch(() => {
+            btn.textContent = '💾 Save Pin';
+            btn.disabled = false;
+        });
+    }
+
+    document.getElementById('pin-modal').addEventListener('click', function(e) {
+        if (e.target === this) closePinModal();
+    });
+</script>
 @endsection

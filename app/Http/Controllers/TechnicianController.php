@@ -5,13 +5,58 @@ namespace App\Http\Controllers;
 use App\Models\Technician;
 use App\Models\InstallationJob;
 use App\Models\Client;
+use App\Mail\TechnicianVerifyEmailMail;
+use App\Mail\TechnicianJobAssignedMail;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use App\Models\User;
 
 class TechnicianController extends Controller
 {
+    /**
+     * Verify technician email via token link.
+     */
+    public function verifyEmail(string $token)
+    {
+        $technician = Technician::where('email_verification_token', $token)->first();
+
+        if (!$technician) {
+            return view('technicians.verify-email-result', [
+                'success' => false,
+                'message' => 'Invalid or expired verification link.',
+            ]);
+        }
+
+        if ($technician->email_verified_at) {
+            return view('technicians.verify-email-result', [
+                'success' => true,
+                'message' => 'Your email is already verified. You will receive job notifications at this address.',
+            ]);
+        }
+
+        $technician->update([
+            'email_verified_at'        => now(),
+            'email_verification_token' => null,
+        ]);
+
+        // Also verify the linked user account so they can log in
+        if ($technician->user_id) {
+            \App\Models\User::where('id', $technician->user_id)
+                ->whereNull('email_verified_at')
+                ->update(['email_verified_at' => now()]);
+        }
+
+        return view('technicians.verify-email-result', [
+            'success' => true,
+            'message' => 'Your email has been verified! You will now receive notifications whenever a new job is assigned to you.',
+        ]);
+    }
+
     /**
      * Display a listing of technicians.
      */
@@ -81,15 +126,30 @@ class TechnicianController extends Controller
 
         // Create user account first
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
             'password' => Hash::make($tempPassword),
-            'role' => 'technician',
+            'role'     => 'technician',
         ]);
 
-        $technician = Technician::create(array_merge($validated, ['user_id' => $user->id, 'photo' => $photo]));
+        // Generate email verification token
+        $verificationToken = Str::random(64);
 
-        return redirect()->route('technicians.index')->with('success', "Technician '{$validated['name']}' created successfully. Temp password: {$tempPassword}. Share with technician to login.");
+        $technician = Technician::create(array_merge($validated, [
+            'user_id'                   => $user->id,
+            'photo'                     => $photo,
+            'email_verification_token'  => $verificationToken,
+            'email_verified_at'         => null,
+        ]));
+
+        // Send verification email
+        try {
+            Mail::to($technician->email)->send(new TechnicianVerifyEmailMail($technician));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send technician verification email: ' . $e->getMessage());
+        }
+
+        return redirect()->route('technicians.index')->with('success', "Technician '{$validated['name']}' created. Temp password: {$tempPassword}. A verification email has been sent to {$validated['email']}.");
     }
 
     /**
@@ -218,21 +278,34 @@ class TechnicianController extends Controller
         ]);
 
         $job = InstallationJob::create([
-            'client_id' => $validated['client_id'],
-            'technician_id' => $validated['technician_id'],
-            'job_type' => $validated['job_type'],
-            'status' => $validated['technician_id'] ? 'assigned' : 'pending',
+            'client_id'      => $validated['client_id'],
+            'technician_id'  => $validated['technician_id'],
+            'job_type'       => $validated['job_type'],
+            'status'         => $validated['technician_id'] ? 'assigned' : 'pending',
             'scheduled_date' => $validated['scheduled_date'],
-            'assigned_by' => Auth::id(),
-            'notes' => $validated['notes'],
+            'assigned_by'    => Auth::id(),
+            'notes'          => $validated['notes'],
         ]);
 
         // Update client installation status
         $client = Client::find($validated['client_id']);
         $client->update([
             'installation_status' => $validated['technician_id'] ? 'scheduled' : 'pending',
-            'technician_id' => $validated['technician_id'],
+            'technician_id'       => $validated['technician_id'],
         ]);
+
+        // Notify technician by email if assigned and verified
+        if ($validated['technician_id']) {
+            $technician = Technician::find($validated['technician_id']);
+            if ($technician && $technician->isEmailVerified()) {
+                try {
+                    $job->load('client');
+                    Mail::to($technician->email)->send(new TechnicianJobAssignedMail($technician, $job));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send job assignment email to technician: ' . $e->getMessage());
+                }
+            }
+        }
 
         return redirect()->route('technicians.jobs')->with('success', 'Installation job created successfully.');
     }
@@ -259,6 +332,17 @@ class TechnicianController extends Controller
             'technician_id' => $validated['technician_id'],
             'installation_status' => 'scheduled',
         ]);
+
+        // Notify technician by email if verified
+        $technician = Technician::find($validated['technician_id']);
+        if ($technician && $technician->isEmailVerified()) {
+            try {
+                $job->load('client');
+                Mail::to($technician->email)->send(new TechnicianJobAssignedMail($technician, $job));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send job assignment email to technician: ' . $e->getMessage());
+            }
+        }
 
         return redirect()->back()->with('success', 'Job assigned successfully.');
     }

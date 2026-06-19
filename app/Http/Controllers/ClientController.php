@@ -10,6 +10,7 @@ use App\Models\Billing;
 use App\Models\AdminNotification;
 use App\Mail\ClientApprovedMail;
 use App\Mail\ClientVerifyEmailMail;
+use App\Mail\TechnicianJobAssignedMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -83,8 +84,8 @@ class ClientController extends Controller
             'longitude'    => ['nullable', 'numeric', 'between:-180,180'],
         ]);
 
-        $pppoeBase = strtolower(explode('@', $validated['email'])[0]);
-        $validated['pppoe_name']      = $pppoeBase . '_' . rand(100, 999);
+        $validated['pppoe_name']     = $this->generatePppoeUsername($validated['name']);
+        $validated['pppoe_password']  = Str::random(10);
         $validated['nap_box']         = 'TBD';
         $validated['start_date']      = now()->addDays(7);
         $validated['due_date_time']   = now()->addDays(7)->setTime(12, 0);
@@ -125,7 +126,6 @@ class ClientController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:clients,email'],
             'phone_number' => ['required', 'string', 'max:20'],
-            'pppoe_name' => ['required', 'string', 'max:255', 'unique:clients,pppoe_name'],
             'barangay' => ['required', 'string', 'max:255'],
             'nap_box' => ['required', 'string', 'max:255'],
             'start_date' => ['required', 'date'],
@@ -142,6 +142,8 @@ class ClientController extends Controller
 
         $validated['user_id'] = auth()->id();
         $validated['status'] = 'pending_approval';
+        $validated['pppoe_name'] = $this->generatePppoeUsername($validated['name']);
+        $validated['pppoe_password'] = Str::random(10);
 
         if ($request->hasFile('photo')) {
             $validated['photo'] = $request->file('photo')->store('clients', 'public');
@@ -293,6 +295,16 @@ class ClientController extends Controller
             \Log::error('Failed to send approval+assign email to ' . $sendTo . ': ' . $e->getMessage());
         }
 
+        // Notify technician by email if verified
+        if ($technician->isEmailVerified()) {
+            try {
+                Mail::to($technician->email)->send(new TechnicianJobAssignedMail($technician, $job));
+                \Log::info('Job assignment notification sent to technician: ' . $technician->email);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send job notification to technician: ' . $e->getMessage());
+            }
+        }
+
         return redirect()->route('clients.index')->with('success', "Client '{$client->name}' assigned to {$technician->name}. Waiting for technician to complete the job.");
     }
 
@@ -388,6 +400,19 @@ class ClientController extends Controller
     }
 
     /**
+     * Generate a unique PPPoE username from the client's name.
+     */
+    private function generatePppoeUsername(string $name): string
+    {
+        $base = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', str_replace(' ', '', $name)));
+        $base = substr($base, 0, 12);
+        do {
+            $username = $base . rand(100, 999);
+        } while (\App\Models\Client::where('pppoe_name', $username)->exists());
+        return $username;
+    }
+
+    /**
      * Get list of available technicians (AJAX).
      */
     public function getTechnicians(): \Illuminate\Http\JsonResponse
@@ -456,7 +481,6 @@ class ClientController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:clients,email,' . $client->id],
             'phone_number' => ['required', 'string', 'max:20'],
-            'pppoe_name' => ['required', 'string', 'max:255', 'unique:clients,pppoe_name,' . $client->id],
             'barangay' => ['required', 'string', 'max:255'],
             'nap_box' => ['required', 'string', 'max:255'],
             'start_date' => ['required', 'date'],

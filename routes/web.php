@@ -34,6 +34,9 @@ Route::get('/', function () {
 
 // Guest client registration route (from welcome page "Apply" button)
 Route::post('/clients/guest', [ClientController::class, 'storeGuest'])->name('clients.storeGuest');
+
+// Technician email verification (public — no auth needed)
+Route::get('/technicians/verify-email/{token}', [\App\Http\Controllers\TechnicianController::class, 'verifyEmail'])->name('technicians.verifyEmail');
 Route::get('/clients/verify-email/{token}', [ClientController::class, 'verifyEmail'])->name('clients.verifyEmail');
 Route::get('/portal/magic-login/{token}', [\App\Http\Controllers\ClientPortalController::class, 'magicLogin'])->name('portal.magicLogin');
 
@@ -91,12 +94,27 @@ Route::middleware('auth')->group(function () {
     // Billing Routes
     Route::resource('billings', BillingController::class);
     Route::post('billings/{billing}/mark-paid', [BillingController::class, 'markAsPaid'])->name('billings.markAsPaid');
+    Route::post('billings/{billing}/send-due-notice', [BillingController::class, 'sendDueNotice'])->name('billings.sendDueNotice');
+    Route::post('billings/{billing}/suspend-client', [BillingController::class, 'suspendClient'])->name('billings.suspendClient');
+    Route::get('billings/client/{client}/history', [BillingController::class, 'clientHistory'])->name('billings.clientHistory');
     Route::get('billings/client/{client}', [BillingController::class, 'getClientDetails'])->name('billings.client-details');
     
     // Payment Routes
     Route::resource('payments', PaymentController::class);
+    Route::post('payments/{payment}/approve', [PaymentController::class, 'approvePayment'])->name('payments.approve');
+    Route::post('payments/{payment}/reject', [PaymentController::class, 'rejectPayment'])->name('payments.reject');
+    Route::get('payments/client/{client}/history', [PaymentController::class, 'clientHistory'])->name('payments.clientHistory');
     Route::get('payments/client/{client}/bills', [PaymentController::class, 'getClientBills'])->name('payments.client-bills');
     
+    // Support Tickets Routes (Admin)
+    Route::prefix('admin/support-tickets')->name('admin.support-tickets.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\SupportTicketController::class, 'index'])->name('index');
+        Route::get('/{ticket}', [\App\Http\Controllers\Admin\SupportTicketController::class, 'show'])->name('show');
+        Route::post('/{ticket}/assign', [\App\Http\Controllers\Admin\SupportTicketController::class, 'assignTechnician'])->name('assignTechnician');
+        Route::post('/{ticket}/update-status', [\App\Http\Controllers\Admin\SupportTicketController::class, 'updateStatus'])->name('updateStatus');
+        Route::get('/report/generate', [\App\Http\Controllers\Admin\SupportTicketController::class, 'report'])->name('report');
+    });
+
     // Technician Routes
     Route::resource('technicians', TechnicianController::class);
     Route::get('technicians/jobs', [TechnicianController::class, 'jobs'])->name('technicians.jobs');
@@ -126,12 +144,31 @@ Route::middleware(['auth', 'client'])->prefix('portal')->name('portal.')->group(
     Route::get('/billing',        [ClientPortalController::class, 'billing'])->name('billing');
     Route::get('/payments',       [ClientPortalController::class, 'payments'])->name('payments');
     Route::post('/payments/proof',[ClientPortalController::class, 'submitPaymentProof'])->name('payments.proof');
+
     Route::get('/tickets',        [ClientPortalController::class, 'tickets'])->name('tickets');
     Route::post('/tickets',       [ClientPortalController::class, 'storeTicket'])->name('tickets.store');
+    Route::get('/tickets/{ticket}', [ClientPortalController::class, 'ticketShow'])->name('tickets.show');
+    Route::post('/tickets/{ticket}/confirm-resolution', [ClientPortalController::class, 'confirmResolution'])->name('tickets.confirmResolution');
+
     Route::get('/profile',        [ClientPortalController::class, 'profile'])->name('profile');
     Route::post('/profile',       [ClientPortalController::class, 'updateProfile'])->name('profile.update');
     Route::post('/password',      [ClientPortalController::class, 'changePassword'])->name('password.update');
+    Route::post('/location',       [ClientPortalController::class, 'saveLocation'])->name('location.save');
 });
+
+// ── Technician Support Tickets ─────────────────────────────────────────────
+Route::middleware(['auth'])->group(function () {
+        Route::middleware(['technician'])->prefix('technician/tickets')->name('technician.tickets.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\TechnicianSupportTicketController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\TechnicianSupportTicketController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\TechnicianSupportTicketController::class, 'store'])->name('store');
+        Route::get('/{ticket}', [\App\Http\Controllers\TechnicianSupportTicketController::class, 'show'])->name('show');
+        Route::post('/{ticket}/update-status', [\App\Http\Controllers\TechnicianSupportTicketController::class, 'updateStatus'])->name('updateStatus');
+        Route::post('/{ticket}/add-solution', [\App\Http\Controllers\TechnicianSupportTicketController::class, 'addSolution'])->name('addSolution');
+        Route::post('/{ticket}/add-reply', [\App\Http\Controllers\TechnicianSupportTicketController::class, 'addReply'])->name('addReply');
+    });
+});
+
 
 
 
